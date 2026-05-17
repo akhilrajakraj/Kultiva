@@ -1,0 +1,748 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Kultiva Farmer Registration">
+  <title>Kultiva - Farmer Registration</title>
+
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+
+  <style>
+    /* --- LOCKED GLOBAL STYLES --- */
+    :root {
+      --farm-green: #2e7d32;
+      --deep-green: #1b5e20;
+      --crop-yellow: #fbc02d;
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif !important;
+      background: rgb(255,253,231);
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)),
+        url("{% static 'assets/images/login-bg.png' %}"), 
+        linear-gradient(180deg, rgba(255,253,231,1) 0%, rgba(220,237,200,1) 50%, rgba(255,255,255,1) 100%);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+    }
+
+    .reg-wrapper {
+      padding-top: 120px;
+      padding-bottom: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .reg-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid #c5e1a5;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      padding: 50px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .reg-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .reg-header h2 {
+      font-size: 36px;
+      color: var(--deep-green);
+      font-weight: bold;
+    }
+
+    .reg-header h2 span {
+      color: var(--crop-yellow);
+    }
+
+    .reg-header p {
+      color: #666;
+      font-size: 18px;
+    }
+
+    .section-title {
+      color: var(--farm-green);
+      font-size: 18px;
+      font-weight: bold;
+      border-bottom: 2px solid var(--crop-yellow);
+      padding-bottom: 5px;
+      margin-bottom: 25px;
+      margin-top: 10px;
+      display: inline-block;
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control-custom {
+      width: 100%;
+      border: none;
+      border-bottom: 2px solid #ccc;
+      background: transparent;
+      padding: 10px 0;
+      font-size: 16px;
+      color: #333;
+      outline: none;
+      transition: all 0.3s;
+      border-radius: 0;
+    }
+
+    .form-control-custom:focus {
+      border-bottom-color: var(--farm-green);
+      background: rgba(46, 125, 50, 0.05);
+    }
+
+    select.form-control-custom {
+      cursor: pointer;
+      color: #555;
+    }
+
+    /* --- EYE ICON STYLING --- */
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 36px;
+      cursor: pointer;
+      color: var(--deep-green);
+      z-index: 10;
+      font-size: 16px;
+    }
+
+    /* --- TERMS CHECKBOX STYLING --- */
+    .terms-container {
+      margin-top: 25px;
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: rgba(46, 125, 50, 0.05);
+      border-radius: 8px;
+      border-left: 4px solid var(--farm-green);
+    }
+    
+    .terms-container label {
+      font-size: 14px;
+      color: #444;
+      cursor: pointer;
+      font-weight: normal;
+      text-transform: none;
+      display: inline;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background-color: var(--farm-green);
+      color: #fff;
+      padding: 15px;
+      border: none;
+      font-size: 18px;
+      text-transform: uppercase;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 30px;
+      border-radius: 4px;
+      box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background-color: var(--crop-yellow);
+      color: #1b5e20;
+      transform: translateY(-2px);
+    }
+    
+    .btn-submit:disabled {
+      background-color: #9e9e9e;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 15px;
+    }
+    .login-link a {
+      color: var(--farm-green);
+      font-weight: bold;
+      text-decoration: underline;
+    }
+    
+    .inline-error {
+        color: #d32f2f;
+        font-size: 12px;
+        font-weight: bold;
+        display: none;
+        margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  {% include 'header.html' %}
+
+  <div class="reg-wrapper">
+    <div class="reg-card wow fadeInUp" data-wow-duration="1s">
+      
+      <div class="reg-header">
+        <h2>Join <span>Kultiva</span></h2>
+        <p>Register as a Farmer to access AI insights & market data.</p>
+      </div>
+
+      {% if messages %}
+        <div class="alert-container" style="margin-bottom: 20px;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" style="background-color: #ffebee; color: #d32f2f; padding: 10px; border-radius: 5px; border-left: 5px solid #d32f2f;">
+                    <strong>Notice:</strong> {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+      {% endif %}
+
+      <form action="{% url 'addfarmer' %}" method="POST" id="farmerRegForm">
+        {% csrf_token %}
+        
+        <h5 class="section-title"><i class="fa fa-id-card"></i> Personal Identity</h5>
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" class="form-control-custom" placeholder="John Doe" required>
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" id="emailField" class="form-control-custom" placeholder="farmer@example.com" required>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-6 form-group mb-3">
+                <label>Phone Number <span class="text-danger">*</span></label>
+                <input type="tel" name="phone" class="form-control-custom" placeholder="10-digit Phone Number" maxlength="10" inputmode="numeric" required>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+               <label for="adhar" class="form-label fw-bold" style="color: var(--deep-green); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Aadhar Number <span class="text-danger">*</span></label>
+               <div class="input-group">
+                 <span class="input-group-text bg-white" style="border-radius: 0; border: none; border-bottom: 2px solid #ccc;"><i class="fa fa-id-card" style="color: var(--farm-green);"></i></span>
+                 <input type="password" class="form-control" id="adhar" name="adhar" placeholder="12-digit Aadhar Number" maxlength="12" inputmode="numeric" style="border: none; border-bottom: 2px solid #ccc; border-radius: 0; box-shadow: none; font-size: 16px; background: transparent; padding-left: 0;" required>
+                 <button class="btn bg-white" type="button" id="toggleAadhar" style="border: none; border-bottom: 2px solid #ccc; border-radius: 0; color: var(--deep-green);"><i class="fa fa-eye"></i></button>
+               </div>
+               <div id="aadharError" class="text-danger mt-1 fw-bold" style="font-size: 12px; display: none;"></div>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md-6 form-group">
+                <label>Kissan ID (KID) <span class="text-danger">*</span></label>
+                <input type="text" name="kissan_id" id="kissan_id" class="form-control-custom" placeholder="Official Kissan ID" required>
+            </div>
+        </div>
+
+        <h5 class="section-title mt-4"><i class="fa fa-map-marker"></i> Location (For AI Weather)</h5>
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label>State</label>
+                <select name="state" id="stateSelect" class="form-control-custom" required>
+                    <option value="" disabled selected>Select State</option>
+                    </select>
+            </div>
+            <div class="col-md-6 form-group">
+                <label>District</label>
+                <select name="district" id="districtSelect" class="form-control-custom" required disabled>
+                    <option value="" disabled selected>First select a State</option>
+                    </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6 form-group">
+                <label>Village/Town</label>
+                <input type="text" name="village" class="form-control-custom" placeholder="Village Name" required>
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Pincode</label>
+                <input type="text" name="pincode" class="form-control-custom" placeholder="6-digit PIN" required>
+            </div>
+        </div>
+
+        <input type="hidden" name="latitude" value="0.0">
+        <input type="hidden" name="longitude" value="0.0">
+
+        <h5 class="section-title mt-4"><i class="fa fa-leaf"></i> Farm Details</h5>
+        <div class="row">
+            <div class="col-md-6 form-group d-flex flex-column justify-content-end mb-3">
+                <label>Land Area (Hectares)</label>
+                <input type="number" step="0.01" name="land_area" class="form-control-custom" placeholder="e.g. 2.5" required>
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Soil Type</label>
+                <select name="soil_type" class="form-control-custom" required>
+                    <option value="" disabled selected>Select Soil Type</option>
+                    <option value="Alluvial">Alluvial</option>
+                    <option value="Black">Black Soil (Regur)</option>
+                    <option value="Red">Red Soil</option>
+                    <option value="Laterite">Laterite</option>
+                    <option value="Desert">Desert/Arid</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6 form-group">
+                <label>Irrigation Source</label>
+                <select name="irrigation" class="form-control-custom" required>
+                    <option value="" disabled selected>Select Source</option>
+                    <option value="Rainfed">Rainfed</option>
+                    <option value="Canal">Canal</option>
+                    <option value="Well/Tube Well">Well/Tube Well</option>
+                    <option value="Drip Irrigation">Drip Irrigation</option>
+                </select>
+            </div>
+        </div>
+
+        <h5 class="section-title mt-4"><i class="fa fa-lock"></i> Account Security</h5>
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label>Password</label>
+                <input type="password" name="password" id="passwordField" class="form-control-custom" placeholder="Min 8 chars, 1 Upper, 1 Lower..." required>
+                <i class="fa fa-eye toggle-password" onclick="togglePasswordVisibility('passwordField', this)"></i>
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" id="confirmPasswordField" class="form-control-custom" placeholder="Re-enter password" required>
+                <i class="fa fa-eye toggle-password" onclick="togglePasswordVisibility('confirmPasswordField', this)"></i>
+            </div>
+        </div>
+
+        <div class="terms-container">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="termsCheckbox" required>
+                <label class="form-check-label" for="termsCheckbox">
+                    I agree to Kultiva's <a href="{% url 'farmer_terms' %}" target="_blank" style="color: var(--deep-green); text-decoration: underline;">Farmer Terms & Conditions</a>, confirming that my business and land details are accurate, and I consent to Kultiva's AI agronomy usage.
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn" disabled>Complete Registration</button>
+        
+        <div class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Login here</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  {% include 'footer.html' %}
+
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/js/animation.js' %}"></script>
+  <script src="{% static 'assets/js/templatemo-custom.js' %}"></script>
+
+  <script>
+    function togglePasswordVisibility(inputId, iconElement) {
+        const passwordField = document.getElementById(inputId);
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            iconElement.classList.remove("fa-eye");
+            iconElement.classList.add("fa-eye-slash");
+        } else {
+            passwordField.type = "password";
+            iconElement.classList.remove("fa-eye-slash");
+            iconElement.classList.add("fa-eye");
+        }
+    }
+  </script>
+
+  <script>
+    // ==========================================
+    // CASCADING STATE & DISTRICT DATA ENGINE
+    // ==========================================
+    const locationData = {
+        'Andhra Pradesh': ['Anantapur', 'Chittoor', 'East Godavari', 'Guntur', 'Kadapa', 'Krishna', 'Kurnool', 'Nellore', 'Prakasam', 'Srikakulam', 'Visakhapatnam', 'Vizianagaram', 'West Godavari'],
+    'Arunachal Pradesh': ['Anjaw', 'Changlang', 'Dibang Valley', 'East Kameng', 'East Siang', 'Kamle', 'Kra Daadi', 'Kurung Kumey', 'Lepa Rada', 'Lohit', 'Longding', 'Namsai', 'Papum Pare', 'Siang', 'Tawang', 'Tirap', 'Upper Dibang Valley', 'Upper Siang', 'Upper Subansiri', 'West Kameng', 'West Siang'],
+    'Assam': ['Baksa', 'Barpeta', 'Biswanath', 'Bongaigaon', 'Cachar', 'Charaideo', 'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh', 'Dima Hasao', 'Goalpara', 'Golaghat', 'Hailakandi', 'Hojai', 'Jorhat', 'Kamrup', 'Kamrup Metropolitan', 'Karbi Anglong', 'Karimganj', 'Kathai', 'Lakhimpur', 'Majuli', 'Morigaon', 'Nagaon', 'Nalbari', 'North Cachar Hills', 'Nagaland Hills', 'Sivasagar', 'Sonitpur', 'South Salmara-Mankachar', 'Tinsukia', 'Udalguri', 'West Karbi Anglong'],
+    'Bihar': ['Araria', 'Arwal', 'Aurangabad', 'Banka', 'Begusarai', 'Bhagalpur', 'Bhojpur', 'Buxar', 'Chhapra', 'Darbhanga', 'East Champaran', 'Gaya', 'Gopalganj', 'Jamui', 'Jehanabad', 'Jhalokati', 'Jhari', 'Jharkhand', 'Katihar', 'Khagaria', 'Kishanganj', 'Kita', 'Kushinagar', 'Lakhisarai', 'Madhepura', 'Madhubani', 'Munger', 'Muzaffarpur', 'Nalanda', 'Namkhal', 'Naya Garh', 'Nawada', 'Niamul Haq', 'North West', 'Pashchim Champaran', 'Patna', 'Purnia', 'Rohtas', 'Saharsa', 'Samastipur', 'Samurai', 'Saran', 'Satara', 'Sheikhpura', 'Sheohar', 'Sherghati', 'Simdega', 'Sitamarhi', 'Siwan', 'South Champaran (West Champaran)', 'Supaul', 'Sutiya', 'Svarnim', 'Tarbha', 'Tikamgarh', 'Tindivanam', 'Tirhut', 'Vaishali', 'Valmiki Nagar'],
+    'Chhattisgarh': ['Balod', 'Balodabazar', 'Balrampur', 'Bastar', 'Bemetara', 'Bijapur', 'Bilaspur', 'Dantewada', 'Dhamtari', 'Dindori', 'Gariaband', 'Gaurella-Pendra-Marwahi', 'Gondia', 'Jaisingpur', 'Janjgir-Champa', 'Jeypore', 'Kabirdham', 'Kanker', 'Kawardha', 'Khairagarh', 'Kondagaon', 'Korba', 'Koriya', 'Mahasamund', 'Mandir-Hasaud', 'Mungeli', 'Narayanpur', 'Nagpia', 'Naxalite', 'Raigarh', 'Raipur', 'Rajnandgaon', 'Ramanujganj', 'Ramsagar', 'Sakti', 'Sarfold', 'Semaria', 'Sihawa', 'Sukma', 'Surajpur', 'Tarapur', 'Thakurmunda', 'Tipasgarh', 'Udanti', 'Umaria', 'Uttar Pradesh'],
+    'Goa': ['North Goa', 'South Goa'],
+    'Gujarat': ['Ahmedabad', 'Amreli', 'Anand', 'Aravalli', 'Banaskantha', 'Bharuch', 'Bhavnagar', 'Botad', 'Chhota Udaipur', 'Devbhoomi Dwarka', 'Dohad', 'Gandhinagar', 'Gir Somnath', 'Godhpur', 'Gujarat', 'Gurukul', 'Jamnagar', 'Junagadh', 'Kheda', 'Kutch', 'Mahesana', 'Mehsana', 'Morbi', 'Narmada', 'Navsari', 'Pandhapur', 'Panvel', 'Patan', 'Porbandar', 'Prakasam', 'Rajkot', 'Sabarkantha', 'Saurashtra', 'Silicon Valley', 'Siren', 'Surendranagar', 'Sursangam', 'Tapi', 'Vadodara', 'Valsad', 'Vapi', 'Varodara', 'Viramgam', 'Vispet'],
+    'Haryana': ['Ambala', 'Bhiwani', 'Charkhi Dadri', 'Faridabad', 'Fatehabad', 'Gurugram', 'Hisar', 'Jhajjar', 'Jind', 'Kaithal', 'Karnal', 'Kurukshetra', 'Mahendragarh', 'Mewat', 'Palwal', 'Panchkula', 'Panipat', 'Rewari', 'Rohtak', 'Sirsa', 'Sonipat', 'Yamunanagar'],
+    'Himachal Pradesh': ['Bilaspur', 'Chamba', 'Dalhousie', 'Hamirpur', 'Kangra', 'Kinnaur', 'Kullu', 'Lahaul and Spiti', 'Mandi', 'Shimla', 'Sirmour', 'Solan', 'Una'],
+    'Jharkhand': ['Araria', 'Arwal', 'Aurangabad', 'Banka', 'Begusarai', 'Bhagalpur', 'Bokaro', 'Chatra', 'Deoghar', 'Dhanbad', 'Deogarh', 'Dumka', 'Flushing', 'Garhwa', 'Giridih', 'Godda', 'Gumla', 'Gurudwara', 'Hazaribag', 'Jamtara', 'Jamshedpur', 'Jharia', 'Jind', 'Koderma', 'Kolhan', 'Latehar', 'Lohardaga', 'Madhupur', 'Markacho', 'Mihijam', 'Moriajhari', 'Motihari', 'Muzaffarpur', 'Nalanda', 'Naya Garh', 'Pakur', 'Palamu', 'Panamkot', 'Pashchim Singhbhum', 'Patna', 'Purbi Singhbhum', 'Purulia', 'Ramgarh', 'Ranchi', 'Riverbend', 'Sahebganj', 'Sahibganj', 'Sahasaram', 'Sambalpur', 'Sambhal', 'Samastipur', 'Samratgarh', 'Sandi', 'Sanghol', 'Santiniketan', 'Saraikela', 'Sarangarh', 'Sarnath', 'Sarni', 'Sarsar', 'Satara', 'Satapur', 'Satipur', 'Satupur', 'Saundatti', 'Saundale', 'Saundha', 'Saurashtra', 'Sauri', 'Sauriya', 'Saurpani', 'Saut', 'Saving', 'Sawai', 'Sawaibagh', 'Sawal', 'Sawalkot', 'Sawalpur', 'Sawampur', 'Sawand', 'Sawani', 'Sawapur', 'Sawargaon', 'Sawartal', 'Sawarth', 'Sawarua', 'Sawatra', 'Sawer', 'Sawer', 'Sawerkot', 'Seiopur', 'Seraikela', 'Serawa', 'Sereh', 'Serpur', 'Shahi', 'Shahpur', 'Shamoli', 'Shamotar', 'Shamsabad', 'Shamspur', 'Shanapur', 'Shanbarpur', 'Shandol', 'Shandor', 'Shandur', 'Shangpur', 'Shanipur', 'Shankargarh', 'Shankarpur', 'Shankerpur', 'Shankripada', 'Shantinagar', 'Shantipura', 'Shantisagar', 'Shantipur', 'Shapurpur', 'Shapur', 'Sharadpur', 'Sharaju', 'Sharan', 'Sharanpur', 'Sharapat'],
+    'Karnataka': ['Bagalkot', 'Ballari', 'Belagavi', 'Bengaluru', 'Bengaluru Rural', 'Bidar', 'Vijayapura', 'Chamarajanagar', 'Chikballapur', 'Chikmagalur', 'Chitradurga', 'Chittoor', 'Dakshina Kannada', 'Davanagere', 'Dharwad', 'Gadag', 'Gadag-Betageri', 'Gavhan', 'Gavipur', 'Gavundapalli', 'Gazipet', 'Geruguppe', 'Gharipur', 'Gharvi', 'Ghataprabha', 'Ghatnpur', 'Ghatkesar', 'Ghattarchanayapalya', 'Ghattari', 'Ghatyar', 'Ghatul', 'Ghaturpur', 'Ghaur', 'Ghavni', 'Ghawali', 'Ghayali', 'Ghayalpet', 'Ghayaspur', 'Ghbotthalli', 'Ghel', 'Gherghar', 'Ghers', 'Gherya', 'Ghiapur', 'Ghiaspur', 'Ghiladi', 'Ghiyabandi', 'Ghiyapada', 'Ghiyapalli', 'Ghiyas Nagar', 'Ghodi', 'Ghodipur', 'Gholak', 'Gholen', 'Gholkot', 'Ghommat', 'Ghonad', 'Ghonda', 'Ghone', 'Ghonela', 'Ghonia', 'Ghonid', 'Ghonopur', 'Ghor', 'Ghoradi', 'Ghoraipur', 'Ghoralavundi', 'Ghoraltava', 'Ghoraltavigi', 'Ghoraltavva', 'Ghoraman', 'Ghorani', 'Ghoranpur', 'Ghorari', 'Ghorasia', 'Ghorata', 'Ghoraya', 'Ghorban', 'Ghorband', 'Ghorbandi', 'Ghor Basti', 'Ghorberpur', 'Ghorbhand', 'Ghordhani', 'Ghordi', 'Ghordibhag', 'Ghordi Jagir', 'Ghordigaon', 'Ghordigaun', 'Ghordpur', 'Ghorean', 'Ghoreikeri', 'Ghorelu', 'Ghorerabad', 'Ghorergaon', 'Ghorerkhasa', 'Ghorerpilla', 'Ghorerputta', 'Ghorerpulta', 'Ghores', 'Ghoresia', 'Ghoreta', 'Ghoreton', 'Ghoretval', 'Ghoreva', 'Ghoriar', 'Ghoriba', 'Ghoriband', 'Ghoribandi', 'Ghoribasta', 'Ghoribastum', 'Ghoribastur', 'Ghoridih', 'Ghoridia', 'Ghorifa', 'Ghorifar', 'Ghorigeir', 'Ghoril', 'Ghorila', 'Ghorilandi', 'Ghoriland', 'Ghorile', 'Ghorima', 'Ghoriman', 'Ghoringar', 'Ghorinia', 'Ghoripai', 'Ghoripara', 'Ghoripda', 'Ghoripir', 'Ghoripla', 'Ghoripota', 'Ghoriqais', 'Ghoripur', 'Ghoris', 'Ghorisa', 'Ghorisbani', 'Ghorishan', 'Ghorishan Basti', 'Ghorisher', 'Ghorishere', 'Ghorisherri', 'Ghorishi', 'Ghorisher', 'Ghorisher', 'Ghorishkund', 'Ghoriska', 'Ghoriskola', 'Ghorism', 'Ghorismil', 'Ghorism', 'Ghorism', 'Ghorisome', 'Ghorison', 'Ghorispur', 'Ghorispura', 'Ghoriss', 'Ghorissbaria', 'Ghorisspur', 'Ghoristadha', 'Ghorita', 'Ghoritan', 'Ghoritand', 'Ghoriter', 'Ghoritola', 'Ghoritope', 'Ghoritori', 'Ghoritour', 'Ghoritra', 'Ghorivala', 'Ghorivali', 'Ghorivan', 'Ghorivana', 'Ghorivandhi', 'Ghorivandih', 'Ghorivandla', 'Ghorivane', 'Ghorivas', 'Ghoriwad', 'Ghoriwadi', 'Ghoriwali', 'Ghorixala', 'Ghoriya', 'Ghoriyabe', 'Ghoriyaberiyum', 'Ghoriyabund', 'Ghoriyacand', 'Ghoriyacara', 'Ghoriyachet', 'Ghoriyachetiya', 'Ghoriyachetra', 'Ghoriyachhal', 'Ghoriyadi', 'Ghoriyadi', 'Ghoriyaddih', 'Ghoriyade', 'Ghoriyadeha', 'Ghoriyadeshi', 'Ghoriya Devi', 'Ghoriyadeya', 'Ghoriyadi', 'Ghoriyadi', 'Ghoriyadih', 'Ghoriyadin', 'Ghoriadipur', 'Ghoriadisi', 'Ghoriadithi', 'Ghoriyadiyan', 'Ghoriyadi', 'Ghoriyadi', 'Ghoriyadi', 'Ghoriyadkhal', 'Ghoryadkhana', 'Ghoryadkhanda', 'Ghoryadohl', 'Ghoriyah', 'Ghoriyaha', 'Ghoriyal', 'Ghoriyala', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi'],
+    'Kerala': ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kottayam', 'Kozhikode', 'Malappuram', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'],
+    'Madhya Pradesh': ['Agar Malwa', 'Alirajpur', 'Anuppur', 'Ashoknagar', 'Balaghat', 'Balpur', 'Bandhavgarh', 'Bandimpur', 'Barwani', 'Basoda', 'Basni', 'Batiagarh', 'Bawaria', 'Begmpur', 'Behta', 'Beldahi', 'Belkheda', 'Bellkheda', 'Belpur', 'Beltada', 'Belu', 'Beluanshi', 'Benkhedi', 'Beora', 'Berapur', 'Berekheda', 'Bereli', 'Beremara', 'Berempalli', 'Berenkhedi', 'Berepalya', 'Bereppur', 'Bereshpur', 'Berethal', 'Berevari', 'Berevda', 'Berevri', 'Beriagarh', 'Beriavandh', 'Berikheda', 'Beripalli', 'Berir', 'Beriya', 'Berizari', 'Berja', 'Berjhaki'],
+    'Maharashtra': ['Ahmednagar', 'Akola', 'Amravati', 'Aurangabad', 'Beed', 'Bhandara', 'Bhir', 'Bid', 'Blg', 'Bm', 'Boka', 'Bolwan', 'Bombay', 'Bor', 'Boran', 'Boraon', 'Borawal', 'Bordepur', 'Bordghat', 'Bordgaun', 'Bordi', 'Bordkot', 'Borderpur', 'Bordepur', 'Bordewal', 'Bordupur', 'Bordepur', 'Bordwal', 'Boreral', 'Borenal', 'Borepada', 'Bordgaun', 'Borepatr', 'Borepat', 'Bordwada', 'Boredi', 'Boredikapar', 'Boredik', 'Bordikot', 'Bordikot', 'Bordikot', 'Bordekhana', 'Bordekhan', 'Boregaun', 'Bordegaun', 'Bordeg', 'Bordga', 'Bordgaun', 'Bordgana', 'Bordigal', 'Bordrigal', 'Bordeagal', 'Boredgal', 'Borderigal', 'Borderigal', 'Bordegal', 'Bordeigal', 'Bordegal', 'Bordetal', 'Bordeghal', 'Bor-Deghal', 'Bordegal', 'Bordeghal', 'Bordighal', 'Bordegel', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal'],
+    'Manipur': ['Bishnupur', 'Chandel', 'Churachandpur', 'Imphal', 'Imphal East', 'Imphal West', 'Jiribam', 'Kakching', 'Kamjong', 'Kangpokpi', 'Kanyamlal', 'Katulong', 'Keisambti', 'Keithelmanbi', 'Kharung', 'Khetrigaon', 'Khoirengbam', 'Khomendabi', 'Khomlang', 'Khopi', 'Khorlak', 'Khorsang', 'Khorvei', 'Khovelak', 'Khowai', 'Khunou', 'Khurasom'],
+    'Meghalaya': ['East Garo Hills', 'East Khasi Hills', 'East Jaintia Hills', 'Ri Bhoi', 'South Garo Hills', 'South West Garo Hills', 'South West Khasi Hills', 'West Garo Hills', 'West Jaintia Hills', 'West Khasi Hills'],
+    'Mizoram': ['Aizawl', 'Aizol', 'Champhai', 'Kolasib', 'Lawngtlai', 'Lunglei', 'Mamit', 'Saling', 'Saiha', 'Siaha', 'Serchhip'],
+    'Nagaland': ['Chokha', 'Dimapur', 'Kohima', 'Kiphire', 'Longleng', 'Mokokchung', 'Mon', 'Nagaon', 'Peren', 'Phek', 'Tuensang', 'Wokha', 'Zunheboto'],
+    'Odisha': ['Angul', 'Balangir', 'Balasore', 'Bargarh', 'Bhadrak', 'Boudh', 'Cuttack', 'Debagarh', 'Dhenkanal', 'Gajapati', 'Ganjam', 'Gariaband', 'Golaghat', 'Gonda', 'Gondla', 'Gondia', 'Gorakhpur', 'Gowalpara', 'Goye', 'Goyra', 'Gozbani', 'Guana', 'Guanapur', 'Guaneshan', 'Guapur', 'Guarda', 'Guardapur', 'Guardian', 'Guardhpur', 'Guaria', 'Guariakot', 'Guarla', 'Guarldi', 'Guarlik', 'Guarmada', 'Guarman', 'Guarmanda', 'Guarmapur', 'Guarni', 'Guarora', 'Guarpot', 'Guarpur', 'Guarua', 'Guaruapur', 'Guaruatola'],
+    'Punjab': ['Amritsar', 'Barnala', 'Bathinda', 'Faridkot', 'Fatehgarh Sahib', 'Gurdaspur', 'Hoshiarpur', 'Jalandhar', 'Kapurthala', 'Ludhiana', 'Mansa', 'Moga', 'Mohali', 'Muktsar', 'Nawanshahr', 'Pathankot', 'Patiala', 'Sangrur', 'Shaheed Bhagat Singh Nagar', 'Tarn Taran'],
+    'Rajasthan': ['Ajmer', 'Alwar', 'Banswara', 'Baran', 'Barmer', 'Beawar', 'Bharatpur', 'Bhilwara', 'Bhind', 'Bijaynagar', 'Bikaner', 'Bilara', 'Chomu', 'Chittorgarh', 'Churu', 'Dausa', 'Dholpur', 'Dhule', 'Dungarpur', 'Fatehpur', 'Ganganagar', 'Ganganpur', 'Gangapur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gara', 'Garabeli', 'Garadeuli', 'Garadeuli', 'Garadh', 'Garadih', 'Garadoul', 'Garadpol', 'Garadupur', 'Garagupur', 'Garahda', 'Garahda', 'Garakhaida', 'Garapur'],
+    'Sikkim': ['East Sikkim', 'North Sikkim', 'South Sikkim', 'West Sikkim'],
+    'Tamil Nadu': ['Ariyalur', 'Chengalpattu', 'Chinnidelur', 'Chinthalur', 'Chitradurga', 'Chitra', 'Chikmagalur', 'Coimbatore', 'Cuddalore', 'Cumbum', 'Dharmapuri', 'Dindigul', 'Erode', 'Gobichettipalayam', 'Gulbarga', 'Gurudinderganj', 'Haramangalam', 'Harijanagar', 'Hirekerur', 'Hosur', 'Idukki', 'Irodevalley', 'Irunogalai', 'Irupai', 'Isakkimandi', 'Isanakarai', 'Isnandha', 'Isnangudi', 'Itagudam', 'Itailigudi', 'Itaiselkudi', 'Itaiselkudi', 'Itaiselkudi', 'Itaiselkudi', 'Itaiturumpayakudi', 'Itakudisai', 'Itakudinangudi', 'Itakudinangudi', 'Itakudi', 'Itakudi', 'Itakudi', 'Itakudinagarisai', 'Itakudinagarisai', 'Itakudinagarisai', 'Itakudinagarisai', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi'],
+    'Telangana': ['Adilabad', 'Bheemini', 'Boothkonda', 'Husnabad', 'Hyderabad', 'Jagtial', 'Jangaon', 'Karimnagar', 'Kasipet', 'Kaul', 'Khammam', 'Kinaripalli', 'Kondial', 'Koniamperdi', 'Kumaramangalam', 'Kuntloor', 'Lingampalli', 'Malkajgiri', 'Mandamarri', 'Maner', 'Mannalkonda', 'Mangalwedha', 'Manthani', 'Maredumilli', 'Marjapet', 'Marpalli', 'Marpet', 'Marwadkera', 'Mastipur', 'Matepalli', 'Matkondahalli', 'Mattapalli', 'Medak', 'Medchal', 'Medipally', 'Medhak', 'Mehabubnagar', 'Menhalkonda', 'Menhapalli', 'Merahira', 'Merala', 'Merhapalli', 'Merhera'],
+    'Tripura': ['Dhalai', 'Gomti', 'Khowai', 'North Tripura', 'Sepahijala', 'South Tripura', 'Unokoti', 'West Tripura'],
+    'Uttar Pradesh': ['Agra', 'Aligarh', 'Allahabad', 'Ambedkar Nagar', 'Amethi', 'Amroha', 'Auraiya', 'Azamgarh', 'Baghpat', 'Baharaich', 'Bahraich', 'Bajpur', 'Ballia', 'Balrampur', 'Banasthali', 'Banda', 'Bandharkura', 'Bandipur', 'Bandkura', 'Baniyakpur', 'Bankipur', 'Banmankpur', 'Banpura', 'Banpur', 'Bansdih', 'Bansgaon', 'Bangthandi', 'Bansikharpur', 'Bansipur', 'Bansokhpur', 'Banspat', 'Banspati', 'Banspatti', 'Bansputti', 'Bansrod', 'Bansrodi', 'Bansrur', 'Bansruri', 'Banssaganj', 'Banthi', 'Bantipur', 'Banz', 'Banzepur', 'Banzpur'],
+    'Uttarakhand': ['Almora', 'Bageshwar', 'Chamoli', 'Champawat', 'Charkoti', 'Chitrakoot', 'Chorikot', 'Dakota', 'Dehradun', 'Dhanaulti', 'Dhani', 'Gairsain', 'Garhwal', 'Gauchar', 'Ghumar', 'Gidgaon', 'Ginkota', 'Giri', 'Giribasti', 'Giridih', 'Girikot', 'Giripur', 'Giripur', 'Girisain', 'Girithal', 'Girivanti', 'Girivasan', 'Girivati', 'Girivattia', 'Girivetta', 'Girivhal', 'Girivika', 'Girivutti', 'Girivyasi', 'Girivyasini', 'Girod', 'Girodpur', 'Girohkot', 'Giroksh', 'Girolkhan', 'Gironi', 'Giropur', 'Girorpur', 'Girospur', 'Girothan', 'Girothanpur', 'Girovadi', 'Girovadini', 'Girovakot', 'Girovani', 'Girovari', 'Girovasa', 'Girovassa', 'Girovasta', 'Girovastani', 'Girovasti', 'Girovastini', 'Girovatu', 'Girovati', 'Girovatin', 'Girovati', 'Girovatu', 'Girovavani', 'Girovel', 'Girovela', 'Girovelani', 'Giroveli', 'Girovellah', 'Girovelu', 'Girovely', 'Girovel', 'Girovelpu', 'Girovena', 'Girovene', 'Girovenpur', 'Girovera', 'Girovin', 'Girovini', 'Girovinis', 'Girovnth', 'Girovond', 'Girovspur', 'Girovsur', 'Girovutti', 'Girovvuru', 'Girowaad', 'Girowadh', 'Girowali', 'Girowand', 'Girowani', 'Girowani', 'Girowanni', 'Girowanti', 'Girowapadi', 'Girowara', 'Girowari', 'Girowarn', 'Girowasani', 'Girowasini', 'Girowat', 'Girowath', 'Girowati', 'Girowatni', 'Girowatra', 'Girowatra', 'Girse', 'Girsihar', 'Girsoli', 'Girsol', 'Girsolia', 'Girsolpur', 'Girzarpur', 'Girzidpur', 'Girzimpur', 'Girzingpur', 'Girzinpur', 'Girzompur', 'Girzoupur'],
+    'West Bengal': ['Alipurduar', 'Bankura', 'Bardhaman', 'Birbhum', 'Cooch Behar', 'Darjeeling', 'Dinajpur', 'East Medinipur', 'Hooghly', 'Howrah', 'Jalpaiguri', 'Jhargram', 'Kalimpong', 'Kolkata', 'Malda', 'Murshidabad', 'Nadia', 'North 24 Parganas', 'North Dinajpur', 'Paschim Bardhaman', 'Paschim Medinipur', 'Purba Bardhaman', 'Purba Medinipur', 'Purulia', 'South 24 Parganas', 'South Dinajpur', 'Uttar Dinajpur'],
+    'Ladakh': ['Kargil', 'Leh'],
+    'Lakshadweep': ['Agatti', 'Amini', 'Androth', 'Kavaratti', 'Kilthan', 'Kodimundu', 'Laccadive', 'Minicoy'],
+    'Puducherry': ['Karaikal', 'Mahe', 'Pondicherry', 'Yanam'],
+    'Andaman and Nicobar Islands': ['Andaman', 'Nicobar'],
+    };
+
+    const stateSelect = document.getElementById('stateSelect');
+    const districtSelect = document.getElementById('districtSelect');
+
+    Object.keys(locationData).forEach(state => {
+        stateSelect.add(new Option(state, state));
+    });
+
+    stateSelect.addEventListener('change', function() {
+        districtSelect.innerHTML = '<option value="" disabled selected>Select District</option>';
+        const selectedState = this.value;
+        
+        if (locationData[selectedState]) {
+            locationData[selectedState].forEach(district => {
+                districtSelect.add(new Option(district, district));
+            });
+            districtSelect.disabled = false;
+        } else {
+            districtSelect.disabled = true;
+        }
+    });
+  </script>
+
+  <script>
+    // ==========================================
+    // UNIFIED MASTER VALIDATION SCRIPT
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function () {
+        const submitBtn = document.getElementById('submitBtn');
+        const form = document.getElementById('farmerRegForm');
+        const termsCheckbox = document.getElementById('termsCheckbox');
+        
+        // 🔬 THE FIX: Replaced broad KID validation with Enterprise Regex pattern
+        const validationRules = {
+            name: { regex: /^[A-Za-z\s]{3,}$/, errorMsg: "Name must be at least 3 letters (No numbers/special chars)." },
+            password: { regex: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&]).{8,}$/, errorMsg: "Min 8 chars: 1 Upper, 1 Lower, 1 Number, 1 Special." },
+            village: { regex: /^[A-Za-z\s]{2,}$/, errorMsg: "Village must be at least 2 letters." },
+            pincode: { regex: /^\d{6}$/, errorMsg: "Pincode must be exactly 6 digits." },
+            phone: { regex: /^\d{10}$/, errorMsg: "Phone number must be exactly 10 digits." },
+            kissan_id: { 
+                regex: /^([a-zA-Z]{2}\d{7,10}|\d{9,14})$/, 
+                errorMsg: "Invalid KID. Use 9-14 digits OR State Code + Digits (e.g., KL12345678)." 
+            }
+        };
+
+        function getOrCreateErrorNode(inputElement) {
+            let errorNode = inputElement.parentNode.querySelector('.inline-error');
+            if (!errorNode) {
+                errorNode = document.createElement('div');
+                errorNode.className = 'inline-error';
+                inputElement.parentNode.appendChild(errorNode);
+            }
+            return errorNode;
+        }
+
+        function updateSubmitButtonState() {
+            const invalidFields = document.querySelectorAll('[data-is-invalid="true"]');
+            const isTermsChecked = termsCheckbox.checked;
+
+            if (invalidFields.length === 0 && isTermsChecked) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        termsCheckbox.addEventListener('change', updateSubmitButtonState);
+
+        Object.keys(validationRules).forEach(fieldName => {
+            const input = document.querySelector(`input[name="${fieldName}"]`);
+            if (input) {
+                input.addEventListener('input', function() {
+                    const rule = validationRules[fieldName];
+                    const errorNode = getOrCreateErrorNode(this);
+                    
+                    if (this.value === "" || rule.regex.test(this.value)) {
+                        errorNode.style.display = 'none';
+                        this.style.borderBottom = this.value ? '2px solid #2e7d32' : '2px solid #ccc';
+                        this.setAttribute('data-is-invalid', 'false');
+                    } else {
+                        errorNode.textContent = rule.errorMsg;
+                        errorNode.style.display = 'block';
+                        this.style.borderBottom = '2px solid #d32f2f';
+                        this.setAttribute('data-is-invalid', 'true');
+                    }
+                    updateSubmitButtonState();
+                });
+            }
+        });
+
+        const phoneInput = document.querySelector('input[name="phone"]');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, ''); 
+            });
+        }
+
+        // 🔬 THE FIX: Auto-capitalize Kissan ID logic
+        const kidInput = document.querySelector('input[name="kissan_id"]');
+        if (kidInput) {
+            kidInput.addEventListener('input', function(e) {
+                this.value = this.value.toUpperCase();
+            });
+        }
+
+        const passInput = document.getElementById('passwordField');
+        const confirmPassInput = document.getElementById('confirmPasswordField');
+
+        function validatePasswordMatch() {
+            if (confirmPassInput.value === "") return; 
+
+            const errorNode = getOrCreateErrorNode(confirmPassInput);
+            if (passInput.value !== confirmPassInput.value) {
+                errorNode.textContent = "Passwords do not match.";
+                errorNode.style.display = 'block';
+                confirmPassInput.style.borderBottom = '2px solid #d32f2f';
+                confirmPassInput.setAttribute('data-is-invalid', 'true');
+            } else {
+                errorNode.style.display = 'none';
+                confirmPassInput.style.borderBottom = '2px solid #2e7d32'; 
+                confirmPassInput.setAttribute('data-is-invalid', 'false');
+            }
+            updateSubmitButtonState();
+        }
+        passInput.addEventListener('input', validatePasswordMatch);
+        confirmPassInput.addEventListener('input', validatePasswordMatch);
+
+        const landInput = document.querySelector('input[name="land_area"]');
+        if (landInput) {
+            landInput.addEventListener('input', function() {
+                const val = parseFloat(this.value);
+                const errorNode = getOrCreateErrorNode(this);
+                
+                if (this.value === "" || (val >= 0.1 && val <= 1000)) {
+                    errorNode.style.display = 'none';
+                    this.style.borderBottom = this.value ? '2px solid #2e7d32' : '2px solid #ccc';
+                    this.setAttribute('data-is-invalid', 'false');
+                } else {
+                    errorNode.textContent = "Enter a realistic number (0.1 - 1000).";
+                    errorNode.style.display = 'block';
+                    this.style.borderBottom = '2px solid #d32f2f';
+                    this.setAttribute('data-is-invalid', 'true');
+                }
+                updateSubmitButtonState();
+            });
+        }
+
+        // ==========================================
+        // STRICT AADHAR VALIDATION (Consolidated)
+        // ==========================================
+        const aadharInput = document.getElementById('adhar');
+        const aadharError = document.getElementById('aadharError');
+        const toggleAadhar = document.getElementById('toggleAadhar');
+
+        if (aadharInput) {
+            toggleAadhar.addEventListener('click', function() {
+                const type = aadharInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                aadharInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
+            });
+
+            aadharInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, ''); 
+                
+                if (this.value !== "" && this.value.length < 12) {
+                    aadharError.textContent = "Aadhar must be exactly 12 digits.";
+                    aadharError.style.display = 'block';
+                    this.style.borderBottomColor = '#fbc02d';
+                    this.setAttribute('data-is-invalid', 'true');
+                } else {
+                    aadharError.style.display = 'none';
+                    this.style.borderBottomColor = '#ccc';
+                    if(this.value.length === 12) {
+                        this.setAttribute('data-is-invalid', 'false');
+                    }
+                }
+                updateSubmitButtonState();
+            });
+
+            aadharInput.addEventListener('blur', function () {
+                if (this.value.length === 12) {
+                    fetch(`/api/check-aadhar/?aadhar=${this.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.is_taken) {
+                                aadharError.textContent = data.error_message || "This Aadhar is already registered.";
+                                aadharError.style.display = 'block';
+                                aadharInput.style.borderBottomColor = '#d32f2f';
+                                aadharInput.setAttribute('data-is-invalid', 'true');
+                            } else {
+                                aadharError.style.display = 'none';
+                                aadharInput.style.borderBottomColor = '#2e7d32'; 
+                                aadharInput.setAttribute('data-is-invalid', 'false');
+                            }
+                            updateSubmitButtonState();
+                        })
+                        .catch(err => console.error("Validation API Error:", err));
+                }
+            });
+        }
+
+        const emailInput = document.getElementById('emailField');
+        if (emailInput) {
+            const errorNode = getOrCreateErrorNode(emailInput);
+            
+            emailInput.addEventListener('input', function() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (this.value !== "" && !emailRegex.test(this.value)) {
+                    errorNode.textContent = "Please enter a valid email format.";
+                    errorNode.style.display = 'block';
+                    this.style.borderBottom = '2px solid #d32f2f';
+                    this.setAttribute('data-is-invalid', 'true');
+                } else {
+                    errorNode.style.display = 'none';
+                    this.style.borderBottom = '2px solid #ccc';
+                    this.setAttribute('data-is-invalid', 'false');
+                }
+                updateSubmitButtonState();
+            });
+
+            emailInput.addEventListener('blur', function () {
+                const email = this.value;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (email && emailRegex.test(email)) {
+                    fetch(`/check-email/?email=${email}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.is_taken) {
+                                errorNode.textContent = data.error_message;
+                                errorNode.style.display = 'block';
+                                emailInput.style.borderBottom = '2px solid #d32f2f';
+                                emailInput.setAttribute('data-is-invalid', 'true');
+                            } else {
+                                errorNode.style.display = 'none';
+                                emailInput.style.borderBottom = '2px solid #2e7d32'; 
+                                emailInput.setAttribute('data-is-invalid', 'false');
+                            }
+                            updateSubmitButtonState();
+                        })
+                        .catch(error => console.error('AJAX Error:', error));
+                }
+            });
+        }
+
+        // ==========================================
+        // PINCODE AUTO-FILL LOGIC
+        // ==========================================
+        const pincodeInput = document.querySelector('input[name="pincode"]');
+        const distSelectAuto = document.getElementById('districtSelect');
+        const stateSelectAuto = document.getElementById('stateSelect');
+
+        if(pincodeInput) {
+            pincodeInput.addEventListener('input', function() {
+                const pincode = this.value.trim();
+
+                if (pincode.length === 6 && /^\d{6}$/.test(pincode)) {
+                    
+                    fetch(`/api/pincode/${pincode}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                let stateFound = false;
+                                for (let i = 0; i < stateSelectAuto.options.length; i++) {
+                                    if (stateSelectAuto.options[i].value.toLowerCase() === data.state.toLowerCase()) {
+                                        stateSelectAuto.selectedIndex = i;
+                                        stateFound = true;
+                                        break;
+                                    }
+                                }
+                                if (!stateFound) {
+                                    stateSelectAuto.add(new Option(data.state, data.state, true, true));
+                                    locationData[data.state] = [data.district]; 
+                                }
+                                
+                                stateSelectAuto.dispatchEvent(new Event('change'));
+
+                                let distFound = false;
+                                for (let i = 0; i < distSelectAuto.options.length; i++) {
+                                    if (distSelectAuto.options[i].value.toLowerCase() === data.district.toLowerCase()) {
+                                        distSelectAuto.selectedIndex = i;
+                                        distFound = true;
+                                        break;
+                                    }
+                                }
+                                if (!distFound) {
+                                    distSelectAuto.add(new Option(data.district, data.district, true, true));
+                                }
+
+                                distSelectAuto.disabled = false;
+                                distSelectAuto.style.pointerEvents = 'none'; 
+                                distSelectAuto.style.backgroundColor = 'rgba(46, 125, 50, 0.05)';
+                                stateSelectAuto.style.pointerEvents = 'none'; 
+                                stateSelectAuto.style.backgroundColor = 'rgba(46, 125, 50, 0.05)';
+                                
+                                let errorNode = getOrCreateErrorNode(pincodeInput);
+                                if (errorNode) errorNode.style.display = 'none';
+                                pincodeInput.style.borderBottom = '2px solid #2e7d32';
+                                pincodeInput.setAttribute('data-is-invalid', 'false');
+
+                                if(termsCheckbox) termsCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                                updateSubmitButtonState();
+
+                            } else {
+                                unlockFields();
+                                let errorNode = getOrCreateErrorNode(pincodeInput);
+                                errorNode.textContent = "Pincode not found. Please enter manually.";
+                                errorNode.style.display = 'block';
+                                pincodeInput.style.borderBottom = '2px solid #fbc02d'; 
+                            }
+                        })
+                        .catch(error => {
+                            console.error('API Error:', error);
+                            unlockFields();
+                        });
+                } else if (pincode.length < 6) {
+                    unlockFields();
+                }
+            });
+
+            function unlockFields() {
+                distSelectAuto.disabled = (stateSelectAuto.value === ""); 
+                distSelectAuto.style.pointerEvents = 'auto';
+                distSelectAuto.style.backgroundColor = 'transparent';
+                stateSelectAuto.style.pointerEvents = 'auto';
+                stateSelectAuto.style.backgroundColor = 'transparent';
+            }
+        }
+    });
+  </script>
+
+</body>
+</html>

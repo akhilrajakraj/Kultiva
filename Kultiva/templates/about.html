@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Kultiva - About Us</title>
+
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+
+  <style>
+    /* --- LOCKED GLOBAL STYLES --- */
+    :root {
+      --farm-green: #2e7d32;
+      --deep-green: #1b5e20;
+      --crop-yellow: #fbc02d;
+      --light-green: #e8f5e9;
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif !important;
+      background: rgb(255,253,231);
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)),
+        url("{% static 'assets/images/login-bg.png' %}"), 
+        linear-gradient(180deg, rgba(255,253,231,1) 0%, rgba(220,237,200,1) 40%, rgba(255,255,255,1) 100%);
+      background-size: cover;
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    /* --- PAGE LAYOUT & GLASSMORPHISM --- */
+    .about-wrapper {
+      padding-top: 140px;
+      padding-bottom: 80px;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(197, 225, 165, 0.5);
+      border-radius: 25px;
+      padding: 60px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+      margin-bottom: 40px;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    .section-title h2 {
+      font-size: 46px;
+      color: var(--deep-green);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .section-title h2 span {
+      color: var(--crop-yellow);
+    }
+    .section-title p {
+      font-size: 18px;
+      color: #555;
+      max-width: 700px;
+      margin: 15px auto 0;
+      line-height: 1.6;
+    }
+
+    .content-heading {
+      color: var(--deep-green);
+      font-weight: bold;
+      font-size: 28px;
+      margin-bottom: 20px;
+      border-bottom: 3px solid var(--crop-yellow);
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+
+    .about-text {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #444;
+      margin-bottom: 25px;
+    }
+
+    /* --- FEATURE CARDS --- */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+    
+    .feature-card {
+      background: #fff;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+      border-bottom: 4px solid var(--farm-green);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+      border-bottom-color: var(--crop-yellow);
+    }
+    
+    .feature-icon {
+      font-size: 45px;
+      color: var(--farm-green);
+      margin-bottom: 20px;
+    }
+    
+    .feature-card h4 {
+      color: var(--deep-green);
+      font-weight: bold;
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+    
+    .feature-card p {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* --- TEAM SECTION --- */
+    .team-section {
+      background: rgba(46, 125, 50, 0.05);
+      border-radius: 20px;
+      padding: 40px;
+      margin-top: 40px;
+      text-align: center;
+      border-left: 5px solid var(--farm-green);
+    }
+    .team-section h3 {
+      color: var(--deep-green);
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .team-names {
+      font-size: 18px;
+      color: #333;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  {% include 'header.html' %}
+
+  <div class="container about-wrapper">
+    
+    <div class="glass-panel wow fadeInUp" data-wow-duration="1s">
+      <div class="section-title">
+        <h2>About <span>Kultiva</span></h2>
+        <p>Bridging the gap between traditional manual farming methods and modern digital commerce through Artificial Intelligence.</p>
+      </div>
+
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h3 class="content-heading">The Problem We Solve</h3>
+          <p class="about-text">
+            For generations, the agricultural trade ecosystem has suffered from a lack of data-driven planning. Farmers have been forced to rely on intuition and static market hearsay, leading to a dangerous cycle of <strong>"blind farming."</strong> 
+          </p>
+          <p class="about-text">
+            Without an integrated way to analyze soil suitability, dynamic weather patterns, and real-time market demand, farmers face poor yield profitability, while relying heavily on exploitative middlemen. Kultiva was built to break this cycle.
+          </p>
+        </div>
+        <div class="col-lg-6 text-center">
+          <i class="fa fa-globe" style="font-size: 180px; color: var(--light-green); text-shadow: 2px 2px 10px rgba(0,0,0,0.1);"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel wow fadeInUp" data-wow-duration="1s" data-wow-delay="0.2s">
+      <div class="text-center">
+        <h3 class="content-heading">Our Core Pillars</h3>
+      </div>
+      
+      <div class="feature-grid">
+        <div class="feature-card">
+          <i class="fa fa-brain feature-icon"></i>
+          <h4>AI-Driven Advisory</h4>
+          <p>We analyze historical yield, live weather forecasts, and strict soil profiles to generate highly personalized crop profitability recommendations.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fa fa-shopping-basket feature-icon"></i>
+          <h4>Smart Marketplace</h4>
+          <p>A unified B2B and B2C ecosystem allowing advanced procurement based on crop variety, quality grade, and geographic origin without intermediaries.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fa fa-qrcode feature-icon"></i>
+          <h4>Digital Trust Escrow</h4>
+          <p>We implement a highly secure, QR Code-based "Digital Handshake" to verify identity and ensure funds are only released upon safe delivery.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel wow fadeInUp" data-wow-duration="1s" data-wow-delay="0.4s">
+      <h3 class="content-heading">Our Story</h3>
+      <p class="about-text">
+        Kultiva is more than just a software platform; it is an enterprise-grade agricultural ecosystem designed to empower farmers with absolute financial security. By integrating Python, Django, and advanced Machine Learning models, we have transformed raw agricultural data into actionable financial insights.
+      </p>
+      
+      <div class="team-section">
+        <h3><i class="fa fa-graduation-cap"></i> The Innovators Behind Kultiva</h3>
+        <p style="margin-bottom: 15px; color: #555;">Developed at the Department of Computer Science, MICAS Mavelikara.</p>
+        <p class="team-names">
+          Akhil Raj &nbsp;&bull;&nbsp; Arya Jayan &nbsp;&bull;&nbsp; Ivin Shibu Philip<br>
+          Nayana M 
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  {% include 'footer.html' %}
+
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/js/animation.js' %}"></script>
+  <script src="{% static 'assets/js/templatemo-custom.js' %}"></script>
+
+</body>
+</html>

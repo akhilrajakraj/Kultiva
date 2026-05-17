@@ -1,0 +1,300 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kultiva - Manage Inventory</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+
+    <style>
+        body { padding-top: 110px; }
+        .inventory-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid #2e7d32;
+        }
+        .table-custom th { color: #1b5e20; text-transform: uppercase; font-size: 13px; }
+        .table-custom td { vertical-align: middle; color: #555; font-weight: 500;}
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .modal-input { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px 15px; outline: none; transition: 0.3s; }
+        .modal-input:focus { border-color: #2e7d32; }
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="inventory-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 style="color: #1b5e20; font-weight: bold;"><i class="fa fa-archive"></i> My Harvest Inventory</h3>
+                <a href="{% url 'add_farmer_listing' %}" class="btn btn-success rounded-pill fw-bold" style="background: #1b5e20;">+ List New Crop</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-custom">
+                    <thead style="background: #f1f8e9;">
+                        <tr>
+                            <th>Crop / Title</th>
+                            <th>Category</th>
+                            <th>Stock Available</th>
+                            <th>Price</th>
+                            <th>Market Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in listings %}
+                        <tr>
+                            <td><strong>{{ item.title }}</strong><br><small class="text-muted">Listed: {{ item.created_at|date:"M d, Y" }}</small></td>
+                            <td>{{ item.get_category_display }}</td>
+                            <td>
+                                {{ item.available_stock }} {{ item.unit_of_measure }}
+                                {% if item.available_stock > 0 and item.unreserved_stock < item.available_stock %}
+                                    <br><small class="text-warning fw-bold"><i class="fa fa-lock"></i> {{ item.available_stock|add:"-"|add:item.unreserved_stock }} reserved in offers</small>
+                                {% endif %}
+                            </td>
+                            <td><strong style="color: #1b5e20;">₹{{ item.price }}</strong></td>
+                            <td>
+                                {% if item.available_stock > 0 and item.unreserved_stock <= 0 %}
+                                    <span class="badge-status text-dark" style="background: #ffe082; border: 1px solid #ffca28;"><i class="fa fa-lock"></i> Fully Reserved</span>
+                                {% elif item.status == 'ACTIVE' %}
+                                    <span class="badge-status bg-success text-white"><i class="fa fa-globe"></i> Public</span>
+                                {% elif item.status == 'HIDDEN' %}
+                                    <span class="badge-status bg-secondary text-white"><i class="fa fa-eye-slash"></i> Hidden / Exclusive</span>
+                                {% elif item.status == 'SOLD' or item.status == 'OUT_OF_STOCK' %}
+                                    <span class="badge-status bg-danger text-white"><i class="fa fa-ban"></i> Sold Out</span>
+                                {% else %}
+                                    <span class="badge-status bg-danger text-white">{{ item.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if item.available_stock <= 0 or item.status == 'SOLD' or item.status == 'OUT_OF_STOCK' %}
+                                    <span class="badge bg-danger rounded-pill px-3 py-2"><i class="fa fa-ban"></i> Out of Stock</span>
+                                {% elif item.status == 'BANNED' %}
+                                    <span class="badge bg-secondary rounded-pill px-3 py-2"><i class="fa fa-eye-slash"></i> Banned</span>
+                                {% else %}
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        <a href="{% url 'edit_farmer_listing' item.id %}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fa fa-edit"></i></a>
+                                        
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                onclick="openDeleteModal('{% url 'delete_farmer_listing' item.id %}', '{{ item.title|escapejs }}', {% if item.has_active_contracts %}true{% else %}false{% endif %})" 
+                                                title="Remove Listing">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                        
+                                        {% if item.unreserved_stock > 0 %}
+                                            <button class="btn btn-sm btn-warning text-dark fw-bold ms-1" onclick="openProposalModal('{{ item.id }}', '{{ item.title|escapejs }}', '{{ item.price }}', '{{ item.unreserved_stock }}')" title="Send to Buyer"><i class="fa fa-paper-plane"></i> Direct Offer</button>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-secondary text-white fw-bold ms-1" disabled title="All available stock is currently locked in pending offers"><i class="fa fa-lock"></i> Stock Reserved</button>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa fa-inbox fa-3x mb-3" style="color: #ccc;"></i><br>
+                                You haven't listed any crops yet.<br>
+                                <a href="{% url 'add_farmer_listing' %}" style="color: #2e7d32; font-weight: bold;">Create your first listing</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="proposalModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border-top: 5px solid #fbc02d;">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fa fa-handshake-o text-warning"></i> Send Direct Offer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{% url 'send_trade_proposal' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" name="listing_id" id="prop_listing_id">
+                        <p class="text-muted mb-3">Proposing Sale For: <strong id="prop_title" class="text-dark"></strong></p>
+                        
+                        <div class="mb-3">
+                            <label class="fw-bold" style="font-size: 12px;">Select Verified Buyer/Exporter <span class="text-danger">*</span></label>
+                            <select name="buyer_id" class="modal-input" required>
+                                <option value="" disabled selected>-- Choose a Buyer --</option>
+                                {% for buyer in buyers %}
+                                    <option value="{{ buyer.user_id }}">{{ buyer.username }} ({{ buyer.addresses.first.district|default:"Verified Buyer" }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="fw-bold" style="font-size: 12px;">Offer Quantity <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" name="proposed_qty" id="prop_qty" class="modal-input" required>
+                                <small class="text-muted" style="font-size: 10px;">Max Unreserved: <span id="prop_max_stock"></span></small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="fw-bold" style="font-size: 12px;">Fixed Price (₹)</label>
+                                <input type="number" id="prop_price" class="modal-input" style="background-color: #e9ecef; cursor: not-allowed;" readonly>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 p-3" style="background: #f1f8e9; border-radius: 8px; border-left: 4px solid #1b5e20;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold" style="color: #2e7d32; font-size: 14px;">Total Deal Value:</span>
+                                <span class="fw-bold" style="color: #1b5e20; font-size: 20px;">₹<span id="prop_live_total">0.00</span></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 p-3" style="background: #fff8e1; border-radius: 8px; border: 1px solid #ffecb3;">
+                            <label class="fw-bold mb-2" style="font-size: 12px; color: #f57f17;"><i class="fa fa-eye"></i> Market Visibility Strategy</label>
+                            
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="visibility_action" id="visKeep" value="KEEP" checked style="margin-left: 0;">
+                                <label class="form-check-label" for="visKeep" style="font-size: 13px; margin-left: 25px;">
+                                    <strong>Keep Public:</strong> Other buyers can still see and bid on this item.
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="visibility_action" id="visHide" value="HIDE" style="margin-left: 0;">
+                                <label class="form-check-label" for="visHide" style="font-size: 13px; margin-left: 25px;">
+                                    <strong>Make Exclusive:</strong> Hide this listing from the public market while negotiating.
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold" style="font-size: 12px;">Message to Buyer (Optional)</label>
+                            <textarea name="message" class="modal-input" rows="2" placeholder="e.g. Offering a 5% discount if picked up today."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning rounded-pill fw-bold text-dark"><i class="fa fa-paper-plane"></i> Send Offer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border-top: 5px solid #d32f2f;">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color: #d32f2f;"><i class="fa fa-trash"></i> Remove Listing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="deleteForm" action="" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p class="text-muted mb-3">You are about to remove: <strong id="del_title" class="text-dark"></strong></p>
+
+                        <div id="del_locked_warning" class="mb-3 p-3" style="background: #ffebee; border-radius: 8px; border-left: 4px solid #d32f2f; display: none;">
+                            <strong class="text-danger" style="font-size: 14px;"><i class="fa fa-ban"></i> Action Blocked</strong>
+                            <p class="mb-0 mt-1" style="font-size: 13px; color: #555;">
+                                You cannot remove '<strong class="text-dark" id="del_locked_title"></strong>' because it is currently involved in active negotiations or an escrow lock. Please cancel those contracts first.
+                            </p>
+                        </div>
+
+                        <div id="del_reason_container">
+                            <label class="fw-bold" style="font-size: 12px;">Reason for Removal <span class="text-danger">*</span></label>
+                            <textarea name="delete_reason" id="delete_reason" class="modal-input" rows="3" placeholder="e.g. Crop damaged by weather, Sold locally, Made a mistake in listing, etc." required></textarea>
+                            <small class="text-muted mt-1 d-block" style="font-size: 11px;"><i class="fa fa-info-circle"></i> This reason will be logged and sent to the administration team.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="del_submit_btn" class="btn btn-danger rounded-pill fw-bold"><i class="fa fa-trash"></i> Confirm Removal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        // Existing Proposal Modal JS
+        function openProposalModal(id, title, price, unreserved_stock) {
+            document.getElementById('prop_listing_id').value = id;
+            document.getElementById('prop_title').innerText = title;
+            document.getElementById('prop_price').value = price;
+            document.getElementById('prop_max_stock').innerText = unreserved_stock;
+            
+            const qtyInput = document.getElementById('prop_qty');
+            qtyInput.max = unreserved_stock;
+            qtyInput.value = unreserved_stock;
+            
+            updateFarmerLiveTotal();
+            var modal = new bootstrap.Modal(document.getElementById('proposalModal'));
+            modal.show();
+        }
+
+        function updateFarmerLiveTotal() {
+            const qtyInput = document.getElementById('prop_qty');
+            const priceInput = document.getElementById('prop_price');
+            const totalDisplay = document.getElementById('prop_live_total');
+
+            const qty = parseFloat(qtyInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            
+            const total = qty * price;
+            totalDisplay.innerText = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        document.getElementById('prop_qty').addEventListener('input', updateFarmerLiveTotal);
+
+        // Smart Deletion Modal JS (Updated to inject Title into the error message)
+        function openDeleteModal(actionUrl, title, isLocked) {
+            document.getElementById('del_title').innerText = title;
+            document.getElementById('deleteForm').action = actionUrl;
+            
+            const warningBox = document.getElementById('del_locked_warning');
+            const reasonBox = document.getElementById('del_reason_container');
+            const submitBtn = document.getElementById('del_submit_btn');
+            const lockedTitleSpan = document.getElementById('del_locked_title');
+            
+            // If the item has active contracts, lock the modal and show the exact warning
+            if (isLocked) {
+                if(lockedTitleSpan) { lockedTitleSpan.innerText = title; }
+                warningBox.style.display = 'block';
+                reasonBox.style.display = 'none';
+                submitBtn.disabled = true;
+                submitBtn.style.cursor = 'not-allowed';
+                document.getElementById('delete_reason').removeAttribute('required');
+            } else {
+                // If it is free to delete, ask for the reason
+                warningBox.style.display = 'none';
+                reasonBox.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.style.cursor = 'pointer';
+                document.getElementById('delete_reason').setAttribute('required', 'required');
+            }
+            
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+</body>
+</html>

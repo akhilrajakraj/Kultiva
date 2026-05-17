@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kultiva - Edit Listing</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        .edit-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid #2e7d32;
+        }
+        .form-label { font-weight: bold; color: #555; font-size: 13px; text-transform: uppercase; }
+        .form-control { border-radius: 8px; padding: 12px; border: 1px solid #ccc; transition: 0.3s; }
+        .form-control:focus { border-color: #2e7d32; box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25); }
+        .image-preview-container {
+            width: 100%;
+            height: 250px;
+            border: 2px dashed #c5e1a5;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f8e9;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .image-preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb" style="font-size: 13px; font-weight: bold;">
+                        <li class="breadcrumb-item"><a href="{% url 'farmer_manage_crops' %}" style="color: #2e7d32; text-decoration: none;">My Inventory</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" style="color: #888;">Edit {{ listing.title }}</li>
+                    </ol>
+                </nav>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="edit-card">
+                    <h3 style="color: #1b5e20; font-weight: bold; margin-bottom: 30px;"><i class="fa fa-edit"></i> Edit Crop Listing</h3>
+                    
+                    <form action="{% url 'edit_farmer_listing' listing.id %}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-12 mb-4 text-center">
+                                <label class="form-label">Crop Image (Current or New)</label>
+                                <div class="image-preview-container">
+                                    {% if listing.image %}
+                                        <img id="imagePreview" src="{{ listing.image.url }}" alt="Preview">
+                                    {% else %}
+                                        <img id="imagePreview" src="" alt="No Image Uploaded" style="display: none;">
+                                        <div id="placeholderText" style="color: #888; font-weight: bold;"><i class="fa fa-camera fa-2x"></i><br>Image Preview</div>
+                                    {% endif %}
+                                </div>
+                                <input type="file" name="image" id="imageInput" class="form-control" accept="image/jpeg, image/png, image/webp" onchange="previewImage(this)">
+                                <div class="invalid-feedback">Please select a valid image format (JPG, PNG).</div>
+                                <small class="text-muted mt-2 d-block">Upload a new image to replace the current one. Leave empty to keep existing.</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Title / Crop Name <span class="text-danger">*</span></label>
+                                <input type="text" name="title" class="form-control" value="{{ listing.title }}" minlength="3" maxlength="100" required>
+                                <div class="invalid-feedback">Please provide a valid crop title (3-100 characters).</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Variety or Brand</label>
+                                <input type="text" name="variety_or_brand" class="form-control" value="{{ listing.variety_or_brand|default:'' }}" maxlength="100">
+                                <div class="invalid-feedback">Keep variety under 100 characters.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price (₹) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0.01" name="price" class="form-control" value="{{ listing.price }}" required>
+                                <div class="invalid-feedback">Price must be greater than 0.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Unit of Measure <span class="text-danger">*</span></label>
+                                <select name="unit_of_measure" class="form-control" required>
+                                    <option value="KG" {% if listing.unit_of_measure == 'KG' %}selected{% endif %}>Kilograms (KG)</option>
+                                    <option value="TON" {% if listing.unit_of_measure == 'TON' %}selected{% endif %}>Tons</option>
+                                    <option value="QUINTAL" {% if listing.unit_of_measure == 'QUINTAL' %}selected{% endif %}>Quintals</option>
+                                    <option value="BOX" {% if listing.unit_of_measure == 'BOX' %}selected{% endif %}>Boxes</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a unit of measure.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Available Stock <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" min="0.1" name="available_stock" id="available_stock" class="form-control" value="{{ listing.available_stock }}" required>
+                                <div class="invalid-feedback">Stock must be greater than 0.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Minimum Order Qty</label>
+                                <input type="number" step="0.1" min="0.1" name="min_order_quantity" id="min_order_quantity" class="form-control" value="{{ listing.min_order_quantity|default:'1' }}">
+                                <div class="invalid-feedback">MOQ cannot exceed available stock or be zero.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Quality Grade</label>
+                                <select name="grade" class="form-control">
+                                    <option value="A" {% if listing.grade == 'A' %}selected{% endif %}>Grade A (Premium)</option>
+                                    <option value="B" {% if listing.grade == 'B' %}selected{% endif %}>Grade B (Standard)</option>
+                                    <option value="C" {% if listing.grade == 'C' %}selected{% endif %}>Grade C (Processing)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Harvest Date</label>
+                                <input type="date" name="harvest_date" id="harvest_date" class="form-control" value="{{ listing.harvest_date|date:'Y-m-d' }}">
+                                <div class="invalid-feedback">Harvest date cannot be in the future.</div>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <div class="form-check" style="background: #f1f8e9; padding: 15px 15px 15px 40px; border-radius: 8px; border: 1px solid #c5e1a5;">
+                                    <input class="form-check-input" type="checkbox" name="is_organic" id="is_organic" {% if listing.is_organic %}checked{% endif %}>
+                                    <label class="form-check-label fw-bold" for="is_organic" style="color: #2e7d32;">
+                                        <i class="fa fa-leaf"></i> This crop is Certified Organic
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="4" maxlength="1000">{{ listing.description }}</textarea>
+                                <div class="invalid-feedback">Description cannot exceed 1000 characters.</div>
+                            </div>
+
+                            <div class="col-12 mt-2">
+                                <hr>
+                                <h5 style="color: #1b5e20; font-weight: bold; margin-bottom: 20px;">Technical Specifications (Optional)</h5>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Moisture Content (%)</label>
+                                <input type="number" step="0.1" min="0" max="100" name="moisture_content" class="form-control" value="{{ specs.moisture|default:'' }}">
+                                <div class="invalid-feedback">Must be between 0 and 100%.</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Shelf Life (Days)</label>
+                                <input type="number" min="1" max="3650" name="shelf_life" class="form-control" value="{{ specs.shelf_life|default:'' }}">
+                                <div class="invalid-feedback">Must be at least 1 day.</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Broken Ratio (%)</label>
+                                <input type="number" step="0.1" min="0" max="100" name="broken_ratio" class="form-control" value="{{ specs.broken_ratio|default:'' }}">
+                                <div class="invalid-feedback">Must be between 0 and 100%.</div>
+                            </div>
+
+                        </div>
+
+                        <div class="text-end mt-4 pt-3 border-top">
+                            <a href="{% url 'farmer_manage_crops' %}" class="btn btn-secondary rounded-pill px-4 fw-bold me-2">Cancel</a>
+                            <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm" style="background: #1b5e20;">Update Listing</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        // --- 1. AJAX Image Preview Engine ---
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('placeholderText');
+            
+            // Simple File Size Validation (Max 5MB)
+            if (input.files && input.files[0]) {
+                if (input.files[0].size > 5 * 1024 * 1024) {
+                    alert("Image is too large. Please upload an image smaller than 5MB.");
+                    input.value = "";
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    if (placeholder) placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- 2. Bootstrap Client-Side Validation ---
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+
+        // --- 3. Dynamic Date & Logic Locks ---
+        document.addEventListener("DOMContentLoaded", function() {
+            // Prevent future dates in Harvest Date
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById("harvest_date").setAttribute('max', today);
+
+            // Ensure MOQ cannot be greater than Available Stock
+            var stockInput = document.getElementById('available_stock');
+            var moqInput = document.getElementById('min_order_quantity');
+
+            function syncMOQ() {
+                var stockVal = parseFloat(stockInput.value) || 0;
+                var moqVal = parseFloat(moqInput.value) || 0;
+                
+                moqInput.setAttribute('max', stockVal);
+                if (moqVal > stockVal) {
+                    moqInput.value = stockVal;
+                }
+            }
+
+            stockInput.addEventListener('input', syncMOQ);
+            moqInput.addEventListener('input', syncMOQ);
+        });
+    </script>
+</body>
+</html>

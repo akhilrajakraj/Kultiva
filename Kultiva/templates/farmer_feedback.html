@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva - Buyer Feedback</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body {
+            padding-top: 110px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            border-top: 5px solid #10b981;
+        }
+
+        .feedback-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .feedback-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(34, 197, 94, 0.1);
+            border-color: #6ee7b7;
+        }
+
+        .star-rating i { color: #e2e8f0; font-size: 18px; }
+        .star-rating i.active { color: #fbbf24; text-shadow: 0 2px 4px rgba(251, 191, 36, 0.4); }
+        
+        .buyer-badge {
+            background: #fef3c7;
+            color: #d97706;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .reply-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+        }
+        .reply-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .modal-content { border-radius: 16px; border: none; overflow: hidden; }
+        .modal-header-custom {
+            background: linear-gradient(135deg, #14532d, #15803d);
+            color: white;
+            padding: 25px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container pb-5 wow fadeInUp">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="fw-bold mb-1" style="color: #064e3b; letter-spacing: -0.5px;">Corporate Buyer Feedback</h2>
+                <p class="text-muted mb-0 fw-bold">Manage reviews from your B2B harvest contracts.</p>
+            </div>
+            <a href="{% url 'farmer_home' %}" class="btn btn-light shadow-sm border fw-bold" style="border-radius: 8px; color: #475569;">
+                <i class="fa fa-arrow-left me-2"></i> Dashboard
+            </a>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} shadow-sm fw-bold border-0" style="border-radius: 10px;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="dashboard-card">
+            {% if feedbacks %}
+                <div class="row">
+                    {% for item in feedbacks %}
+                    <div class="col-12">
+                        <div class="feedback-item">
+                            <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-3">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <h5 class="fw-bold m-0" style="color: #0f172a;">{{ item.reviewer.username }}</h5>
+                                        <span class="buyer-badge"><i class="fa fa-building me-1"></i> B2B Buyer</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">
+                                        <i class="fa fa-file-contract text-success me-1"></i> Contract: {{ item.b2b_trade.listing.title|default:"Corporate Harvest" }}
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="star-rating mb-1">
+                                        <i class="fa fa-star {% if item.rating >= 1 %}active{% endif %}"></i>
+                                        <i class="fa fa-star {% if item.rating >= 2 %}active{% endif %}"></i>
+                                        <i class="fa fa-star {% if item.rating >= 3 %}active{% endif %}"></i>
+                                        <i class="fa fa-star {% if item.rating >= 4 %}active{% endif %}"></i>
+                                        <i class="fa fa-star {% if item.rating >= 5 %}active{% endif %}"></i>
+                                    </div>
+                                    <div style="font-size: 11px; color: #94a3b8; font-weight: bold;">{{ item.created_at|date:"d M Y, h:i A" }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 mb-3" style="background: #f8fafc; border-radius: 8px; border-left: 3px solid #38bdf8;">
+                                <p class="m-0" style="color: #334155; font-size: 15px; line-height: 1.6;">"{{ item.comment }}"</p>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button class="reply-btn" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#replyModal"
+                                    data-review-id="{{ item.id }}"
+                                    data-buyer-name="{{ item.reviewer.username }}"
+                                    data-contract="{{ item.b2b_trade.listing.title|default:'Corporate Harvest' }}">
+                                    <i class="fa fa-reply me-2"></i> Send Email Reply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fa fa-comments-o text-muted mb-3" style="font-size: 50px; opacity: 0.3;"></i>
+                    <h5 class="fw-bold" style="color: #475569;">No Feedback Yet</h5>
+                    <p style="color: #64748b;">Once buyers receive your harvests, their ratings will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header-custom d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title fw-bold m-0"><i class="fa fa-paper-plane me-2" style="color: #fbbf24;"></i> Reply to Buyer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'farmer_reply_feedback' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body p-4 bg-light">
+                        <input type="hidden" name="review_id" id="modalReviewId">
+                        
+                        <div class="mb-3 p-3 bg-white border shadow-sm" style="border-radius: 8px;">
+                            <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 5px;">Replying To</div>
+                            <div class="fw-bold" style="color: #0f172a; font-size: 15px;" id="modalBuyerName">Buyer Name</div>
+                            <div class="text-success fw-bold mt-1" style="font-size: 12px;" id="modalContract">Contract Details</div>
+                        </div>
+
+                        <div>
+                            <label class="form-label fw-bold text-muted" style="font-size: 12px; text-transform: uppercase;">Your Message:</label>
+                            <textarea class="form-control p-3 border-0 shadow-sm" name="reply_text" rows="5" required placeholder="Type your professional response here..." style="border-radius: 8px;"></textarea>
+                            <small class="text-muted mt-2 d-block fw-bold"><i class="fa fa-envelope text-warning me-1"></i> This will be sent as a direct HTML email to the buyer.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 bg-white">
+                        <button type="button" class="btn btn-light fw-bold px-4 border" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="reply-btn px-4 shadow-sm">Send Email <i class="fa fa-check ms-1"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const replyBtns = document.querySelectorAll('.reply-btn[data-bs-toggle="modal"]');
+            const modalReviewId = document.getElementById('modalReviewId');
+            const modalBuyerName = document.getElementById('modalBuyerName');
+            const modalContract = document.getElementById('modalContract');
+
+            replyBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Inject the specific feedback data directly into the modal form
+                    modalReviewId.value = this.getAttribute('data-review-id');
+                    modalBuyerName.innerHTML = '<i class="fa fa-building text-warning me-2"></i>' + this.getAttribute('data-buyer-name');
+                    modalContract.textContent = this.getAttribute('data-contract');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

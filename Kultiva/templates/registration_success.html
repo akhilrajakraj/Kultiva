@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Kultiva - Registration Successful</title>
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+
+  <style>
+    /* Match the Login/Register Background */
+    body {
+      font-family: 'Times New Roman', serif;
+      background: rgb(255,253,231);
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)),
+        url("{% static 'assets/images/login-bg.png' %}"), 
+        linear-gradient(180deg, rgba(255,253,231,1) 0%, rgba(220,237,200,1) 50%, rgba(255,255,255,1) 100%);
+      background-size: cover;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success-card {
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid #2e7d32;
+      border-radius: 20px;
+      padding: 50px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .icon-circle {
+      width: 100px;
+      height: 100px;
+      background: #e8f5e9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px auto;
+      border: 3px solid #2e7d32;
+    }
+
+    .icon-circle i {
+      color: #2e7d32;
+      font-size: 50px;
+    }
+
+    h2 {
+      color: #1b5e20;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    .btn-login {
+      background-color: #2e7d32;
+      color: white;
+      padding: 12px 40px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      transition: 0.3s;
+      display: inline-block;
+    }
+
+    .btn-login:hover {
+      background-color: #fbc02d; /* Yellow Crop Color */
+      color: #1b5e20;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="success-card wow bounceInUp">
+    <div class="icon-circle">
+      <i class="fa fa-check"></i>
+    </div>
+    <h2>Registration Successful!</h2>
+    <p>
+      Welcome to Kultiva. We have sent a confirmation email to your inbox.<br><br>
+      <small style="color: #888;">Your account is pending Admin approval.</small>
+    </p>
+    
+    <a href="{% url 'login' %}" class="btn-login">Go to Login</a>
+  </div>
+
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'assets/js/animation.js' %}"></script>
+  <script src="{% static 'assets/js/templatemo-custom.js' %}"></script>
+
+</body>
+</html>

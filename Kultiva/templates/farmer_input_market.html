@@ -1,0 +1,357 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva - Input Marketplace</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* Enterprise Glass Widget */
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        /* Product Card Enhancements */
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            border-color: #2e7d32;
+        }
+
+        .assured-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #1b5e20;
+            color: #fbc02d;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 6px 12px;
+            border-bottom-left-radius: 12px;
+            z-index: 10;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .product-img-wrapper {
+            position: relative;
+            height: 200px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .product-img-wrapper img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            mix-blend-mode: multiply; /* Removes white backgrounds from product images */
+            transition: transform 0.4s ease;
+        }
+
+        .product-card:hover .product-img-wrapper img {
+            transform: scale(1.08);
+        }
+
+        .category-tag {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #1b5e20;
+            border: 1px solid #c5e1a5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            font-size: 18px;
+            color: #1e293b;
+            line-height: 1.3;
+        }
+
+        .magic-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .magic-list li {
+            margin-bottom: 4px;
+        }
+
+        /* Filter Controls */
+        .filter-title {
+            font-weight: bold;
+            color: #1b5e20;
+            border-bottom: 2px solid #fbc02d;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .custom-check .form-check-input:checked {
+            background-color: #2e7d32;
+            border-color: #2e7d32;
+        }
+
+        .price-input {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .price-input:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 5px rgba(46,125,50,0.2);
+        }
+
+        .btn-procure {
+            background-color: #fbc02d;
+            color: #1b5e20;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        .btn-procure:hover {
+            background-color: #1b5e20;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container pb-5 wow fadeInDown" data-wow-duration="1s">
+        
+        <form method="GET" action="{% url 'farmer_input_market' %}" id="marketForm">
+            
+            <div class="glass-widget p-3 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <div class="d-flex align-items-center mb-3 mb-md-0">
+                    <h4 style="color: #1b5e20; font-weight: 800; margin: 0;">
+                        <i class="fa fa-shopping-basket text-warning"></i> Input Marketplace
+                    </h4>
+                </div>
+                
+                <div class="d-flex flex-grow-1 mx-md-4 mb-3 mb-md-0 position-relative">
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control rounded-pill pl-4" placeholder="Search seeds, fertilizers, tractors..." style="border: 2px solid #c5e1a5;">
+                    <button type="submit" class="btn position-absolute" style="right: 5px; top: 2px; color: #1b5e20;">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <span class="text-muted fw-bold me-2" style="font-size: 14px; white-space: nowrap;">Sort by:</span>
+                    <select name="sort" class="form-select rounded-pill" style="min-width: 160px; font-size: 14px; cursor: pointer;" onchange="document.getElementById('marketForm').submit();">
+                        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest Arrivals</option>
+                        <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <aside class="col-lg-3 mb-4">
+                    <div class="glass-widget p-4 sticky-top" style="top: 110px;">
+                        
+                        <h5 class="filter-title"><i class="fa fa-filter"></i> Categories</h5>
+                        <div class="mb-4">
+                            <div class="form-check custom-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="category" value="SEEDS" id="catSeeds" {% if 'SEEDS' in selected_categories %}checked{% endif %}>
+                                <label class="form-check-label text-muted fw-bold" for="catSeeds">Seeds</label>
+                            </div>
+                            <div class="form-check custom-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="category" value="FERTILIZERS" id="catFert" {% if 'FERTILIZERS' in selected_categories %}checked{% endif %}>
+                                <label class="form-check-label text-muted fw-bold" for="catFert">Fertilizers & Nutrients</label>
+                            </div>
+                            <div class="form-check custom-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="category" value="AGROCHEMICALS" id="catAgro" {% if 'AGROCHEMICALS' in selected_categories %}checked{% endif %}>
+                                <label class="form-check-label text-muted fw-bold" for="catAgro">Agrochemicals</label>
+                            </div>
+                            <div class="form-check custom-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="category" value="TOOLS" id="catTools" {% if 'TOOLS' in selected_categories %}checked{% endif %}>
+                                <label class="form-check-label text-muted fw-bold" for="catTools">Farming Tools</label>
+                            </div>
+                            <div class="form-check custom-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="category" value="MACHINERY" id="catMachinery" {% if 'MACHINERY' in selected_categories %}checked{% endif %}>
+                                <label class="form-check-label text-muted fw-bold" for="catMachinery">Heavy Machinery</label>
+                            </div>
+                        </div>
+
+                        <h5 class="filter-title"><i class="fa fa-rupee"></i> Price Range</h5>
+                        <div class="d-flex align-items-center mb-4">
+                            <input type="number" name="min_price" value="{{ min_price }}" class="form-control price-input w-50" placeholder="Min ₹">
+                            <span class="mx-2 text-muted fw-bold">-</span>
+                            <input type="number" name="max_price" value="{{ max_price }}" class="form-control price-input w-50" placeholder="Max ₹">
+                        </div>
+
+                        <button type="submit" class="btn w-100 fw-bold" style="background-color: #1b5e20; color: white; border-radius: 8px;">
+                            Apply Filters
+                        </button>
+                        
+                        <a href="{% url 'farmer_input_market' %}" class="btn w-100 fw-bold mt-2" style="background-color: #f8f9fa; color: #555; border: 1px solid #ccc; border-radius: 8px;">
+                            Clear All
+                        </a>
+                    </div>
+                </aside>
+
+                <main class="col-lg-9">
+                    
+                    <div class="row">
+                        {% for product in products %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="glass-widget product-card p-0">
+                                    
+                                    <div class="assured-badge"><i class="fa fa-shield"></i> Assured</div>
+
+                                    <div class="product-img-wrapper">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                                        {% else %}
+                                            <i class="fa fa-box-open text-muted" style="font-size: 60px;"></i>
+                                        {% endif %}
+                                        
+                                        <div class="category-tag">
+                                            {% if product.category == 'SEEDS' %}<i class="fa fa-leaf text-success"></i>
+                                            {% elif product.category == 'FERTILIZERS' %}<i class="fa fa-flask text-primary"></i>
+                                            {% elif product.category == 'MACHINERY' %}<i class="fa fa-tractor text-secondary"></i>
+                                            {% elif product.category == 'TOOLS' %}<i class="fa fa-wrench text-warning"></i>
+                                            {% else %}<i class="fa fa-shield text-info"></i>{% endif %}
+                                            {{ product.category|title }}
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 d-flex flex-column flex-grow-1">
+                                        
+                                        <div style="font-size: 11px; color: #888; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                                            {{ product.variety_or_brand|default:"Generic Brand" }}
+                                        </div>
+                                        
+                                        <div class="line-clamp-2 mb-2">
+                                            {{ product.title }}
+                                        </div>
+
+                                        <ul class="magic-list">
+                                            {% if product.category == 'SEEDS' and product.specifications.germination_rate %}
+                                                <li><i class="fa fa-check text-success"></i> Germination: {{ product.specifications.germination_rate }}</li>
+                                            {% elif product.category == 'FERTILIZERS' and product.specifications.npk_ratio %}
+                                                <li><i class="fa fa-vial text-primary"></i> NPK Ratio: <span class="badge bg-light text-dark border">{{ product.specifications.npk_ratio }}</span></li>
+                                            {% elif product.category in 'TOOLS,MACHINERY' and product.specifications.power_rating %}
+                                                <li><i class="fa fa-bolt text-warning"></i> Power: {{ product.specifications.power_rating }}</li>
+                                                <li><i class="fa fa-shield text-info"></i> Warranty: {{ product.specifications.warranty_months }} months</li>
+                                            {% endif %}
+                                        </ul>
+
+                                        <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-end">
+                                            <div>
+                                                <span style="font-size: 24px; font-weight: 900; color: #1b5e20;">₹{{ product.price }}</span>
+                                                <span style="font-size: 13px; color: #888; font-weight: bold;">/ {{ product.unit_of_measure }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center mt-2 mb-3">
+                                            {% if product.available_stock > 10 %}
+                                                <span style="font-size: 12px; font-weight: bold; color: #2e7d32;"><i class="fa fa-circle"></i> In Stock</span>
+                                            {% elif product.available_stock > 0 %}
+                                                <span style="font-size: 12px; font-weight: bold; color: #f57f17;"><i class="fa fa-exclamation-circle"></i> Only {{ product.available_stock|floatformat:0 }} left!</span>
+                                            {% else %}
+                                                <span style="font-size: 12px; font-weight: bold; color: #d32f2f;"><i class="fa fa-times-circle"></i> Out of Stock</span>
+                                            {% endif %}
+                                            <span style="font-size: 11px; color: #888;">Min Qty: {{ product.min_order_quantity|floatformat:0 }}</span>
+                                        </div>
+
+                                        <a href="{% url 'farmer_input_detail' product.id %}" class="btn btn-procure mt-auto"><i class="fa fa-shopping-cart"></i> View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12 text-center py-5 glass-widget">
+                                <i class="fa fa-box-open mb-3" style="font-size: 60px; color: #ccc;"></i>
+                                <h3 style="color: #1b5e20; font-family: 'Times New Roman', Times, serif; font-weight: bold;">No Inputs Found</h3>
+                                <p class="text-muted">Try adjusting your filters or search query.</p>
+                                <a href="{% url 'farmer_input_market' %}" class="btn mt-3 text-white fw-bold px-4" style="background-color: #2e7d32; border-radius: 20px;">Clear Filters</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if products.has_other_pages %}
+                        <div class="d-flex justify-content-center mt-4 mb-5">
+                            <ul class="pagination">
+                                {% if products.has_previous %}
+                                    <li class="page-item"><a class="page-link text-success fw-bold" href="?page={{ products.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}">&laquo; Prev</a></li>
+                                {% endif %}
+                                
+                                {% for num in products.paginator.page_range %}
+                                    {% if products.number == num %}
+                                        <li class="page-item active"><span class="page-link" style="background-color: #1b5e20; border-color: #1b5e20;">{{ num }}</span></li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link text-dark" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}">{{ num }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if products.has_next %}
+                                    <li class="page-item"><a class="page-link text-success fw-bold" href="?page={{ products.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}">Next &raquo;</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                </main>
+            </div>
+        </form>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/animation.js' %}"></script>
+</body>
+</html>

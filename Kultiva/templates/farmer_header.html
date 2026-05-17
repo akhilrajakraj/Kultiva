@@ -1,0 +1,296 @@
+{% load static %}
+
+<style>
+  /* 1. Global Background */
+  body {
+      font-family: 'Times New Roman', Times, serif !important;
+      background: rgb(255,253,231);
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)),
+        url("{% static 'assets/images/login-bg.png' %}"), 
+        linear-gradient(180deg, rgba(255,253,231,1) 0%, rgba(220,237,200,1) 50%, rgba(255,255,255,1) 100%);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      min-height: 100vh;
+  }
+
+  /* 2. Header Layout */
+  .header-area {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: 80px;
+      transition: all 0.3s ease;
+  }
+
+  .header-area .main-nav {
+      min-height: 80px;
+      background: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 15px;
+  }
+
+  /* Logo */
+  .header-area .main-nav .logo {
+      line-height: 80px;
+      color: #1b5e20;
+      font-size: 28px;
+      font-weight: 700;
+      text-decoration: none;
+      float: left;
+  }
+  .header-area .main-nav .logo span { color: #fbc02d; }
+
+  /* 3. Navigation Bar */
+  .header-area .main-nav .nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin: 0;
+      padding: 0;
+      height: 80px;
+  }
+
+  .header-area .main-nav .nav li {
+      position: relative; 
+      display: inline-block;
+      padding-left: 5px;
+      padding-right: 5px;
+  }
+
+  .header-area .main-nav .nav li a {
+      display: block;
+      font-weight: 600;
+      font-size: 15px !important; 
+      color: #000000 !important; 
+      text-transform: capitalize;
+      transition: all 0.3s ease;
+      height: 80px;
+      line-height: 80px;
+      padding: 0 15px;
+      cursor: pointer;
+      text-decoration: none;
+      position: relative; 
+  }
+
+  /* Animated Underline */
+  .header-area .main-nav .nav li a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 3px;
+      bottom: 22px; 
+      left: 50%; 
+      background-color: #1b5e20; 
+      transition: all 0.3s ease-in-out;
+      transform: translateX(-50%);
+      border-radius: 2px;
+  }
+
+  /* Expand underline on hover (excluding Logout) */
+  .header-area .main-nav .nav li:not(.logout-item) a:hover::after,
+  .header-area .main-nav .nav li:not(.logout-item) a.active::after {
+      width: 60%; 
+  }
+
+  .header-area .main-nav .nav li a:hover,
+  .header-area .main-nav .nav li a.active {
+      color: #1b5e20 !important; 
+  }
+
+  .fa-angle-down {
+      margin-left: 5px;
+      font-size: 12px;
+      transition: transform 0.3s;
+  }
+
+  /* 4. Dropdown Menus */
+  .dropdown-menu-custom {
+      position: absolute;
+      top: 80px; 
+      left: 0;   
+      width: 200px; 
+      background-color: #fff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border-top: 3px solid #fbc02d;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      z-index: 999;
+      list-style: none;
+      padding: 10px 0;
+      text-align: left;
+  }
+
+  .dropdown-menu-custom.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+  }
+
+  .dropdown-menu-custom li {
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      border-bottom: 1px solid #f5f5f5;
+  }
+  .dropdown-menu-custom li:last-child { border-bottom: none; }
+
+  .dropdown-menu-custom li a {
+      height: auto !important;
+      line-height: 1.5 !important;
+      padding: 12px 20px !important;
+      font-size: 14px !important;
+      color: #444 !important;
+      background: transparent;
+  }
+
+  .dropdown-menu-custom li a::after { display: none; }
+
+  .dropdown-menu-custom li a:hover {
+      color: #1b5e20 !important;
+      background-color: #f1f8e9;
+      padding-left: 25px !important; 
+  }
+
+  /* --- FIXED LOGOUT BUTTON ALIGNMENT --- */
+  
+  /* 1. Ensure the list item wrapper centers the button vertically */
+  .header-area .main-nav .nav li.logout-item {
+      display: flex;
+      align-items: center;
+      height: 80px; /* Matches the header height */
+  }
+
+  /* 2. Button styles with margin removed so it sits perfectly straight */
+  .header-area .main-nav .nav li.logout-item .main-red-button a {
+      background-color: #fbc02d !important; 
+      color: #1b5e20 !important; 
+      padding: 0 20px !important;
+      height: 40px !important;
+      line-height: 40px !important;
+      border-radius: 20px !important;
+      margin-top: 0 !important; /* Removed the 20px margin causing the misalignment */
+      font-weight: bold;
+      border: 2px solid #fbc02d;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+  }
+
+  .header-area .main-nav .nav li.logout-item .main-red-button a:hover {
+      background-color: #1b5e20 !important; 
+      color: #ffffff !important; 
+      border: 2px solid #1b5e20;
+      box-shadow: 0 5px 15px rgba(27, 94, 32, 0.3);
+  }
+</style>
+
+<header class="header-area header-sticky">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <nav class="main-nav">
+          
+          <a href="{% url 'farmer_home' %}" class="logo">
+            Kultiva <span>Farmer</span>
+          </a>
+          
+          <ul class="nav">
+            
+            <li>
+                <a href="javascript:void(0)" class="dropdown-trigger">
+                    Crops <i class="fa fa-angle-down"></i>
+                </a>
+                <ul class="dropdown-menu-custom">
+                    <li><a href="{% url 'add_farmer_listing' %}">Add New Crop</a></li>
+                    <li><a href="{% url 'farmer_manage_crops' %}">My Listings</a></li>
+                </ul>
+            </li>
+            
+            <li>
+                <a href="javascript:void(0)" class="dropdown-trigger">
+                    Market <i class="fa fa-angle-down"></i>
+                </a>
+                <ul class="dropdown-menu-custom">
+                    <li><a href="{% url 'farmer_input_market' %}">Buy Seeds/Tools</a></li>
+                    <li><a href="{% url 'farmer_proposals' %}">Trade Requests</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="javascript:void(0)" class="dropdown-trigger">
+                    Network <i class="fa fa-angle-down"></i>
+                </a>
+                <ul class="dropdown-menu-custom">
+                    <li><a href="{% url 'farmer_seller_list' %}">Top Ranked Sellers</a></li>
+                </ul>
+            </li>
+
+            <li><a href="{% url 'farmer_orders' %}">Orders</a></li>
+            <li><a href="{% url 'farmer_feedback_view' %}">Feedback</a></li>
+            <li><a href="{% url 'farmer_profile' %}">Profile</a></li>
+            
+            <li class="logout-item">
+              <div class="main-red-button">
+                  <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Logout</a>
+              </div>
+            </li> 
+          </ul>        
+          
+          <a class='menu-trigger'><span>Menu</span></a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const triggers = document.querySelectorAll('.dropdown-trigger');
+
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                triggers.forEach(other => {
+                    if (other !== trigger) {
+                        other.nextElementSibling.classList.remove('show');
+                        other.querySelector('.fa-angle-down').style.transform = 'rotate(0deg)';
+                    }
+                });
+
+                const menu = this.nextElementSibling;
+                const arrow = this.querySelector('.fa-angle-down');
+                
+                if (menu.classList.contains('show')) {
+                    menu.classList.remove('show');
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    menu.classList.add('show');
+                    arrow.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        document.addEventListener('click', function() {
+            triggers.forEach(trigger => {
+                trigger.nextElementSibling.classList.remove('show');
+                trigger.querySelector('.fa-angle-down').style.transform = 'rotate(0deg)';
+            });
+        });
+    });
+</script>

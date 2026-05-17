@@ -1,0 +1,258 @@
+/**
+ * Owl Carousel v2.3.4
+ * Enhanced for Kultiva: Smart AI Farming Theme
+ * "Classy & Organic" Edition
+ */
+
+/* -------------------------------------------------------------------------
+   CORE LAYOUT (Performance Optimized)
+   ------------------------------------------------------------------------- */
+.owl-carousel {
+  display: none;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.owl-carousel .owl-stage {
+  position: relative;
+  -ms-touch-action: pan-Y;
+  touch-action: manipulation;
+  -moz-backface-visibility: hidden;
+  /* Optimization for smoother sliding */
+  will-change: transform; 
+}
+
+.owl-carousel .owl-stage:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
+}
+
+.owl-carousel .owl-stage-outer {
+  position: relative;
+  overflow: hidden;
+  /* Hardware acceleration fix */
+  -webkit-transform: translate3d(0px, 0px, 0px);
+  transform: translate3d(0px, 0px, 0px);
+}
+
+.owl-carousel .owl-wrapper,
+.owl-carousel .owl-item {
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  -ms-backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+}
+
+.owl-carousel .owl-item {
+  position: relative;
+  min-height: 1px;
+  float: left;
+  -webkit-backface-visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+.owl-carousel .owl-item img {
+  display: block;
+  width: 100%;
+  /* Fix for image drag flickering */
+  transform-style: preserve-3d; 
+}
+
+.owl-carousel .owl-nav.disabled,
+.owl-carousel .owl-dots.disabled {
+  display: none;
+}
+
+.owl-carousel .owl-nav .owl-prev,
+.owl-carousel .owl-nav .owl-next,
+.owl-carousel .owl-dot {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+
+.owl-carousel .owl-nav button.owl-prev,
+.owl-carousel .owl-nav button.owl-next,
+.owl-carousel button.owl-dot {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0 !important;
+  font: inherit;
+  outline: none;
+}
+
+.owl-carousel.owl-loaded {
+  display: block;
+}
+
+.owl-carousel.owl-loading {
+  opacity: 0;
+  display: block;
+}
+
+.owl-carousel.owl-hidden {
+  opacity: 0;
+}
+
+.owl-carousel.owl-refresh .owl-item {
+  visibility: hidden;
+}
+
+.owl-carousel.owl-drag .owl-item {
+  -ms-touch-action: pan-y;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.owl-carousel.owl-grab {
+  cursor: move;
+  cursor: grab;
+}
+
+.owl-carousel.owl-rtl {
+  direction: rtl;
+}
+
+.owl-carousel.owl-rtl .owl-item {
+  float: right;
+}
+
+/* No Js Fallback */
+.no-js .owl-carousel {
+  display: block;
+}
+
+/* -------------------------------------------------------------------------
+   ANIMATIONS (Classy Fades)
+   ------------------------------------------------------------------------- */
+.owl-carousel .animated {
+  animation-duration: 1000ms;
+  animation-fill-mode: both;
+}
+
+.owl-carousel .owl-animated-in {
+  z-index: 0;
+}
+
+.owl-carousel .owl-animated-out {
+  z-index: 1;
+}
+
+.owl-carousel .fadeOut {
+  animation-name: fadeOut;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* -------------------------------------------------------------------------
+   THEME OVERRIDES: "Kultiva Pro"
+   Using Variables: var(--color-farm-green-600) & var(--color-crop-yellow-400)
+   ------------------------------------------------------------------------- */
+
+/* 1. Navigation Buttons (Arrows) */
+.owl-theme .owl-nav {
+  margin-top: 30px;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* Spacing between arrows */
+}
+
+.owl-theme .owl-nav [class*='owl-'] {
+  color: #FFF;
+  font-size: 18px;
+  background: #2e7d32; /* Fallback Green */
+  background: var(--color-farm-green-600, #2e7d32);
+  
+  /* Circular Shape */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  
+  /* Flexbox to center icon perfectly */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  cursor: pointer;
+  
+  /* Classy Shadow */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy transition */
+}
+
+/* Hover State */
+.owl-theme .owl-nav [class*='owl-']:hover {
+  background: #fbc02d; /* Fallback Yellow */
+  background: var(--color-crop-yellow-400, #fbc02d);
+  color: #1b5e20; /* Deep Green Text */
+  text-decoration: none;
+  transform: scale(1.1) translateY(-2px); /* Pop effect */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+}
+
+.owl-theme .owl-nav .disabled {
+  opacity: 0.3;
+  cursor: default;
+  background: #ccc !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 2. Dots Pagination (The "Growing Seed" Effect) */
+.owl-theme .owl-dots {
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  margin-top: 25px;
+}
+
+.owl-theme .owl-dots .owl-dot {
+  display: inline-block;
+  zoom: 1;
+}
+
+.owl-theme .owl-dots .owl-dot span {
+  width: 12px;
+  height: 12px;
+  margin: 5px 6px;
+  
+  /* Inactive State */
+  background: #cbd5e1; /* Slate 300 */
+  opacity: 0.6;
+  
+  display: block;
+  -webkit-backface-visibility: visible;
+  transition: all 0.3s ease;
+  border-radius: 20px; /* Fully rounded */
+}
+
+/* Hover Dot */
+.owl-theme .owl-dots .owl-dot:hover span {
+  background: var(--color-crop-yellow-400, #fbc02d);
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Active Dot - Expands into a Pill */
+.owl-theme .owl-dots .owl-dot.active span {
+  width: 35px; /* Expands width */
+  background: #2e7d32; /* Fallback */
+  background: var(--color-farm-green-600, #2e7d32);
+  opacity: 1;
+  box-shadow: 0 4px 6px rgba(46, 125, 50, 0.3); /* Green Glow */
+}

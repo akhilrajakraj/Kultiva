@@ -1,0 +1,231 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Case Review: {{ txn.transaction_id }} | Kultiva Admin</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body { padding-top: 110px; background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+
+        .section-title { font-size: 16px; font-weight: 800; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        .info-label { font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .info-value { font-size: 16px; color: #0f172a; font-weight: bold; }
+
+        .action-panel { background: #fff; border: 2px solid #e2e8f0; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        
+        .btn-action-main { padding: 12px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; margin-bottom: 15px; }
+        .btn-action-main:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        .status-badge { padding: 8px 15px; border-radius: 30px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+        .bg-locked { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb fw-bold">
+                <li class="breadcrumb-item"><a href="{% url 'manage_b2b_refunds' %}" style="color: #1b5e20; text-decoration: none;"><i class="fa fa-arrow-left me-1"></i> Back to Disputes</a></li>
+                <li class="breadcrumb-item active" style="color: #64748b;">Case Investigation: {{ txn.transaction_id }}</li>
+            </ol>
+        </nav>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px; font-weight: bold;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="management-card" style="border-top: 5px solid #0288d1;">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h3 style="color: #1e293b; font-weight: 900; margin-bottom: 5px;">{{ txn.transaction_id }}</h3>
+                            <p class="text-muted mb-0"><i class="fa fa-calendar me-2"></i> Escrow Locked On: {{ txn.created_at|date:"F d, Y - h:i A" }}</p>
+                        </div>
+                        <span class="status-badge bg-locked"><i class="fa fa-lock"></i> FUNDS LOCKED</span>
+                    </div>
+
+                    <h4 class="section-title mt-5"><i class="fa fa-users text-primary me-2"></i> Involved Parties</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-box border-start border-primary border-4">
+                                <div class="info-label text-primary"><i class="fa fa-building me-1"></i> Corporate Buyer (Disputer)</div>
+                                <div class="info-value">{{ buyer.username }}</div>
+                                <div style="font-size: 13px; color: #555; margin-top: 5px;"><i class="fa fa-envelope-o me-1"></i> {{ buyer.email }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box border-start border-success border-4">
+                                <div class="info-label text-success"><i class="fa fa-leaf me-1"></i> Farmer (Vendor)</div>
+                                <div class="info-value">{{ vendor.username }}</div>
+                                <div style="font-size: 13px; color: #555; margin-top: 5px;"><i class="fa fa-envelope-o me-1"></i> {{ vendor.email }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="section-title mt-4"><i class="fa fa-file-text-o text-warning me-2"></i> Contract Specifications</h4>
+                    <div class="info-box">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="info-label">Commodity Details</div>
+                                <div class="info-value mb-3" style="font-size: 18px;">{{ listing.title|default:"Custom/Deleted Proposal" }}</div>
+                                
+                                {% if b2b_trade and b2b_trade.specifications %}
+                                    <div style="font-size: 13px; color: #555; background: #fff; padding: 15px; border-radius: 8px; border: 1px dashed #ccc;">
+                                        <strong>Agreed Specs:</strong><br>
+                                        {% for key, value in b2b_trade.specifications.items %}
+                                            <span class="badge bg-light text-dark border mt-2 me-1">{{ key|title }}: {{ value }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted" style="font-size: 13px;">No advanced digital handshake specs found.</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0 border-start">
+                                <div class="info-label">Total Locked Funds</div>
+                                <div style="font-size: 32px; font-weight: 900; color: #d32f2f;">₹{{ txn.amount_paid }}</div>
+                                <span class="badge bg-danger mt-1">Escrow Vault</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="action-panel">
+                    <h5 style="color: #1e293b; font-weight: 800; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                        <i class="fa fa-gavel text-danger me-2"></i> Resolution Actions
+                    </h5>
+
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 25px;">Review the evidence carefully. Financial resolutions are irreversible and automatically execute smart-contract payouts.</p>
+
+                    <button type="button" class="btn btn-outline-primary btn-action-main" data-bs-toggle="modal" data-bs-target="#emailModal" style="background: #f0f9ff;">
+                        <i class="fa fa-envelope"></i> Email Both Parties
+                    </button>
+
+                    <hr style="border-color: #e2e8f0; margin: 25px 0;">
+
+                    <button type="button" onclick="openResolutionModal('refund')" class="btn btn-danger text-white btn-action-main shadow-sm">
+                        <i class="fa fa-undo"></i> Refund Buyer
+                    </button>
+
+                    <button type="button" onclick="openResolutionModal('release')" class="btn btn-success text-white btn-action-main shadow-sm">
+                        <i class="fa fa-check-circle"></i> Force Release to Vendor
+                    </button>
+                    
+                    <div class="alert mt-4 mb-0" style="background: #fff8e1; border: 1px solid #ffecb3; color: #856404; font-size: 11px; text-align: center;">
+                        <i class="fa fa-shield"></i> All financial actions are heavily logged and monitored.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="emailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; overflow: hidden;">
+                <div class="modal-header" style="background: #e0f2fe; color: #0288d1; border-bottom: none; padding: 25px;">
+                    <h5 class="modal-title fw-bold"><i class="fa fa-paper-plane me-2"></i> Request Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'admin_b2b_refund_detail' txn.transaction_id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="send_investigation_email">
+                    <div class="modal-body px-4">
+                        <p style="font-size: 14px; color: #555;">This message will be sent via heavily formatted HTML email to both <strong>{{ buyer.username }}</strong> and <strong>{{ vendor.username }}</strong> simultaneously.</p>
+                        <label class="fw-bold mb-2 text-muted">Admin Investigation Message <span class="text-danger">*</span></label>
+                        <textarea name="custom_message" class="form-control shadow-sm" rows="4" style="border-radius: 10px;" placeholder="E.g., Please provide photos of the delivered goods or shipping receipts within 24 hours..." required></textarea>
+                    </div>
+                    <div class="modal-footer" style="background: #f8f9fa; border-top: 1px solid #eee; padding: 20px;">
+                        <button type="button" class="btn btn-light fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fw-bold rounded-pill px-4 shadow-sm"><i class="fa fa-envelope me-1"></i> Send Official Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="resolutionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; overflow: hidden;">
+                <div class="modal-header" id="resModalHeader" style="border-bottom: none; padding: 25px;">
+                    <h5 class="modal-title fw-bold" id="resModalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form action="{% url 'process_b2b_refund' txn.transaction_id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" id="resModalAction">
+                    <div class="modal-body px-4">
+                        <p id="resModalDesc" style="font-size: 16px; color: #333; line-height: 1.6;"></p>
+                        <div class="alert alert-light border mt-4 mb-0 text-center" style="font-size: 13px; color: #666; font-weight: bold;">
+                            <i class="fa fa-envelope text-primary me-1"></i> An official financial receipt will be emailed to both parties automatically.
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background: #f8f9fa; border-top: 1px solid #eee; padding: 20px;">
+                        <button type="button" class="btn btn-light fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancel Review</button>
+                        <button type="submit" id="resModalBtn" class="btn fw-bold rounded-pill px-4 shadow-sm">Confirm Action</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        // Dynamic Resolution Logic
+        function openResolutionModal(actionType) {
+            document.getElementById('resModalAction').value = actionType;
+            
+            let header = document.getElementById('resModalHeader');
+            let title = document.getElementById('resModalTitle');
+            let desc = document.getElementById('resModalDesc');
+            let btn = document.getElementById('resModalBtn');
+            
+            if (actionType === 'refund') {
+                header.style.backgroundColor = '#ffebee';
+                header.style.color = '#c62828';
+                title.innerHTML = '<i class="fa fa-undo me-2"></i> Authorize Buyer Refund';
+                desc.innerHTML = `You are permanently reversing this escrow. <strong style="color:#d32f2f; font-size: 20px;">₹{{ txn.amount_paid }}</strong> will be returned to <strong>{{ buyer.username }}</strong>. The vendor will forfeit this payment.`;
+                btn.className = 'btn btn-danger fw-bold rounded-pill px-4';
+                btn.innerHTML = 'Yes, Process Refund';
+            } else if (actionType === 'release') {
+                header.style.backgroundColor = '#e8f5e9';
+                header.style.color = '#1b5e20';
+                title.innerHTML = '<i class="fa fa-check-circle me-2"></i> Force Release Funds';
+                desc.innerHTML = `You are overriding the dispute lock. <strong style="color:#1b5e20; font-size: 20px;">₹{{ txn.amount_paid }}</strong> will be forcefully released to the vendor (<strong>{{ vendor.username }}</strong>).`;
+                btn.className = 'btn btn-success fw-bold rounded-pill px-4';
+                btn.innerHTML = 'Yes, Release Funds';
+            }
+            
+            var resModal = new bootstrap.Modal(document.getElementById('resolutionModal'));
+            resModal.show();
+        }
+    </script>
+</body>
+</html>

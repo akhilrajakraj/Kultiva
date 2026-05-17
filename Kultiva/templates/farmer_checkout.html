@@ -1,0 +1,350 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Checkout | Kultiva</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    
+    <style>
+        body {
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        /* Minimal Header */
+        .checkout-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border-bottom: 2px solid #e0e0e0;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #c5e1a5;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .step-header {
+            background: #1b5e20;
+            color: white;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .step-header.inactive {
+            background: #f8f9fa;
+            color: #555;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .step-number {
+            background: white;
+            color: #1b5e20;
+            border-radius: 4px;
+            width: 25px;
+            height: 25px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .step-header.inactive .step-number {
+            background: #ddd;
+            color: #555;
+        }
+
+        /* Custom Payment Accordion */
+        .payment-option {
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .payment-option:hover {
+            background: #f1f8e9;
+        }
+        .payment-option.selected {
+            background: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+        }
+        
+        .payment-details {
+            display: none;
+            padding-left: 35px;
+            margin-top: 15px;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .payment-option input[type="radio"]:checked ~ .payment-details {
+            display: block;
+        }
+
+        .custom-input {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px;
+            width: 100%;
+            outline: none;
+            font-size: 14px;
+        }
+        .custom-input:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 5px rgba(46,125,50,0.2);
+        }
+
+        .btn-amazon-yellow {
+            background-color: #fbc02d;
+            border: 1px solid #f9a825;
+            color: #1a1a1a;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 14px;
+            width: 100%;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+        .btn-amazon-yellow:hover {
+            background-color: #f9a825;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="checkout-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="{% url 'farmer_input_market' %}" style="text-decoration: none;">
+                <h3 style="color: #1b5e20; margin: 0; font-weight: 800;">
+                    <i class="fa fa-leaf text-success"></i> Kultiva
+                </h3>
+            </a>
+            <div style="color: #555; font-weight: bold; font-size: 14px;">
+                <i class="fa fa-lock text-success"></i> 100% Secure Checkout
+            </div>
+        </div>
+    </header>
+
+    <div class="container py-5">
+        <div class="row">
+            
+            <div class="col-lg-8">
+                
+                <div class="glass-card">
+                    <div class="step-header">
+                        <div><span class="step-number">1</span> Delivery Address</div>
+                        <a href="{% url 'farmer_profile' %}" class="btn btn-sm btn-light text-success fw-bold">Change</a>
+                    </div>
+                    <div class="p-4">
+                        <div class="d-flex align-items-start">
+                            <input type="radio" checked class="mt-1 me-3" style="width: 18px; height: 18px; accent-color: #2e7d32;">
+                            <div>
+                                <h5 style="font-weight: bold; margin-bottom: 5px;">{{ request.user.username }} <span class="badge bg-light text-dark border ms-2">FARM</span></h5>
+                                {% if address %}
+                                    <p class="text-muted mb-1" style="font-size: 15px;">{{ address.village }}, {{ address.district }}</p>
+                                    <p class="text-muted mb-2" style="font-size: 15px;">{{ address.state }} - {{ address.pincode }}</p>
+                                {% else %}
+                                    <p class="text-danger fw-bold"><i class="fa fa-exclamation-triangle"></i> No address found. Please update your profile.</p>
+                                {% endif %}
+                                <p class="mb-0 fw-bold" style="font-size: 14px;"><i class="fa fa-envelope text-muted"></i> {{ request.user.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="step-header inactive">
+                        <div><span class="step-number">2</span> Order Summary</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="d-flex gap-4">
+                            <div style="width: 100px; height: 100px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 5px;" class="flex-shrink-0">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="w-100 h-100 object-fit-contain" style="mix-blend-mode: multiply;">
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="fw-bold mb-1">{{ product.title }}</h5>
+                                <div class="text-muted" style="font-size: 12px; text-transform: uppercase; font-weight: bold;">Sold by: <span style="color: #1b5e20;">{{ product.listed_by.seller_profile.shop_name|default:product.listed_by.username }}</span></div>
+                                
+                                <div class="d-flex align-items-center gap-4 mt-3">
+                                    <h4 class="fw-bold mb-0 text-dark">₹{{ product.price }}</h4>
+                                    <div class="border rounded px-3 py-1 bg-light fw-bold text-muted">
+                                        Qty: {{ qty|floatformat:0 }} {{ product.unit_of_measure }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-bold text-success" style="font-size: 13px;"><i class="fa fa-truck"></i> Est. Delivery: 3-5 Days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="step-header">
+                        <div><span class="step-number">3</span> Payment Options</div>
+                    </div>
+                    
+                    <div class="p-0">
+                        <label class="payment-option selected d-block" onclick="selectPayment(this)">
+                            <div class="d-flex align-items-center">
+                                <input type="radio" name="ui_payment" value="UPI" checked class="me-3" style="width: 18px; height: 18px; accent-color: #2e7d32;">
+                                <div style="background: white; border: 1px solid #ddd; border-radius: 4px; padding: 2px 8px; margin-right: 10px;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" height="15" alt="UPI">
+                                </div>
+                                <span class="fw-bold" style="font-size: 16px;">UPI (GPay, PhonePe, Paytm)</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success ms-3" style="font-size: 10px;">RECOMMENDED</span>
+                            </div>
+                            
+                            <div class="payment-details border-start border-2 border-success ms-2">
+                                <p class="text-muted mb-3" style="font-size: 13px;">Pay seamlessly using your preferred UPI app.</p>
+                                <div class="d-flex gap-2 mb-3">
+                                    <div class="border rounded px-3 py-2 bg-white"><i class="fa fa-google text-primary me-2"></i> GPay</div>
+                                    <div class="border rounded px-3 py-2 bg-white"><i class="fa fa-bolt text-info me-2"></i> PhonePe</div>
+                                </div>
+                                <div class="d-flex gap-2" style="max-width: 350px;">
+                                    <input type="text" placeholder="Enter VPA (e.g. 9876543210@ybl)" class="custom-input">
+                                    <button type="button" class="btn btn-outline-success fw-bold">Verify</button>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="payment-option d-block" onclick="selectPayment(this)">
+                            <div class="d-flex align-items-center">
+                                <input type="radio" name="ui_payment" value="CARD" class="me-3" style="width: 18px; height: 18px; accent-color: #2e7d32;">
+                                <i class="fa fa-credit-card fs-4 text-muted me-3"></i>
+                                <span class="fw-bold" style="font-size: 16px;">Credit / Debit / ATM Card</span>
+                            </div>
+                            
+                            <div class="payment-details ms-2">
+                                <div class="row g-3" style="max-width: 400px;">
+                                    <div class="col-12"><input type="text" placeholder="Card Number" class="custom-input"></div>
+                                    <div class="col-6"><input type="text" placeholder="MM/YY" class="custom-input"></div>
+                                    <div class="col-6"><input type="password" placeholder="CVV" maxlength="3" class="custom-input"></div>
+                                </div>
+                                <p class="text-success mt-2 mb-0" style="font-size: 12px;"><i class="fa fa-shield"></i> 128-bit encryption secured.</p>
+                            </div>
+                        </label>
+
+                        <label class="payment-option d-block" onclick="selectPayment(this)">
+                            <div class="d-flex align-items-center">
+                                <input type="radio" name="ui_payment" value="COD" class="me-3" style="width: 18px; height: 18px; accent-color: #2e7d32;">
+                                <i class="fa fa-money fs-4 text-success me-3"></i>
+                                <span class="fw-bold" style="font-size: 16px;">Cash / Pay on Delivery</span>
+                            </div>
+                            
+                            <div class="payment-details ms-2">
+                                <div class="p-3 bg-warning bg-opacity-10 border border-warning rounded text-dark" style="font-size: 13px;">
+                                    <i class="fa fa-info-circle text-warning"></i> Pay at your doorstep with Cash or UPI scanner provided by the delivery agent. 
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="glass-card sticky-top" style="top: 90px;">
+                    <div class="p-3 border-bottom border-secondary border-opacity-25">
+                        <h6 class="fw-bold text-muted text-uppercase mb-0" style="letter-spacing: 1px; font-size: 14px;">Price Details</h6>
+                    </div>
+                    
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between mb-3" style="font-size: 15px;">
+                            <span class="text-muted">Price ({{ qty|floatformat:0 }} item)</span>
+                            <span class="fw-bold text-dark">₹{{ subtotal }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3" style="font-size: 15px;">
+                            <span class="text-muted">Delivery Charges</span>
+                            <span class="fw-bold text-success"><span class="text-decoration-line-through text-muted me-1">₹50</span> FREE</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4" style="font-size: 15px;">
+                            <span class="text-muted">Packaging Fee</span>
+                            <span class="fw-bold text-dark">₹{{ packaging_fee }}</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center border-top border-dashed pt-3 mb-4">
+                            <span class="fw-bold text-dark fs-5">Total Payable</span>
+                            <span class="fw-bold fs-4" style="color: #1b5e20;">₹{{ total }}</span>
+                        </div>
+                        
+                        <div class="text-center text-success bg-success bg-opacity-10 p-2 rounded fw-bold" style="font-size: 12px; margin-bottom: 20px;">
+                            You will save ₹50 on this order
+                        </div>
+
+                        <form method="POST" action="{% url 'dummy_payment_gateway' product.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="{{ qty }}">
+                            <input type="hidden" id="final_payment_mode" name="payment_mode" value="UPI">
+                            
+                            <p class="text-center text-muted mb-3" style="font-size: 11px;">By placing this order, you agree to Kultiva's <a href="#" class="text-primary">Terms of Use</a>.</p>
+                            
+                            <button type="submit" class="btn-amazon-yellow"><i class="fa fa-lock me-2"></i> Place Order & Pay</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center align-items-center gap-4 mt-4 text-muted" style="opacity: 0.6;">
+                    <i class="fa fa-cc-visa fs-1"></i>
+                    <i class="fa fa-cc-mastercard fs-1"></i>
+                    <div class="fw-bold d-flex align-items-center gap-2" style="font-size: 14px;">
+                        <i class="fa fa-shield fs-4"></i> PCI DSS
+                    </div>
+                </div>
+                
+            </div>
+
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        function selectPayment(selectedLabel) {
+            // Remove highlighting from all
+            document.querySelectorAll('.payment-option').forEach(label => {
+                label.classList.remove('selected');
+            });
+
+            // Add highlight to clicked
+            selectedLabel.classList.add('selected');
+
+            // Sync hidden form input so Django knows
+            const radioBtn = selectedLabel.querySelector('input[type="radio"]');
+            document.getElementById('final_payment_mode').value = radioBtn.value;
+        }
+
+        // Initialize on load
+        document.addEventListener("DOMContentLoaded", () => {
+            const defaultSelected = document.querySelector('.payment-option input:checked').closest('label');
+            if (defaultSelected) { selectPayment(defaultSelected); }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard | Kultiva</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .page-title { color: #1b5e20; font-weight: 800; margin-bottom: 0; }
+        .page-subtitle { color: #666; font-size: 14px; font-weight: bold; }
+
+        /* KPI Cards - Clickable & Enhanced */
+        .stat-card-link { text-decoration: none !important; color: inherit; display: block; height: 100%; }
+        .stat-card {
+            padding: 22px;
+            height: 100%;
+            border-top: 4px solid #1b5e20;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            background: #fff;
+        }
+        .stat-card:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(27, 94, 32, 0.1); }
+        
+        .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .stat-title { font-size: 13px; font-weight: 900; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        
+        .icon-blue { background: #e3f2fd; color: #1976d2; }
+        .icon-yellow { background: #fff8e1; color: #f57f17; }
+        .icon-green { background: #e8f5e9; color: #2e7d32; }
+        .icon-purple { background: #f3e5f5; color: #7b1fa2; }
+        
+        .stat-value { font-size: 34px; font-weight: 900; color: #1a1a1a; letter-spacing: -1px; }
+
+        /* Revenue Dropdown */
+        .revenue-select {
+            border: 1px solid #e0e0e0; border-radius: 6px; font-size: 11px; padding: 4px 8px;
+            background: #f8f9fa; color: #555; font-weight: bold; outline: none; cursor: pointer;
+            transition: 0.2s;
+        }
+        .revenue-select:hover { border-color: #7b1fa2; }
+
+        /* Toolbar */
+        .search-container { position: relative; flex-grow: 1; max-width: 450px; }
+        .search-container input { padding-left: 45px; border-radius: 12px; border: 1px solid #ddd; height: 48px; font-size: 15px; }
+        .search-container input:focus { border-color: #1b5e20; box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.1); }
+        .search-container i { position: absolute; left: 18px; top: 16px; color: #888; font-size: 16px; }
+        .filter-select { height: 48px; border-radius: 12px; border: 1px solid #ddd; padding: 0 20px; color: #333; font-weight: bold; outline: none; cursor: pointer; }
+
+        /* Ultra-Aligned Table Styling */
+        .table { margin-bottom: 0; }
+        .table th { 
+            background: rgba(241, 248, 233, 0.9); color: #1b5e20; font-size: 12px; 
+            font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; 
+            border-bottom: 2px solid #c5e1a5; padding: 18px 20px; 
+        }
+        .table td { padding: 18px 20px; vertical-align: middle; border-bottom: 1px solid #f0f0f0; color: #333; font-size: 15px; }
+        .table tbody tr { transition: background 0.2s ease; }
+        .table tbody tr:hover { background: rgba(248, 249, 250, 0.9); }
+
+        .customer-info { display: flex; align-items: center; gap: 14px; }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: #e8f5e9; color: #1b5e20; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; }
+
+        .status-badge { 
+            padding: 8px 16px; border-radius: 30px; font-size: 11px; font-weight: 900; 
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px; 
+            text-transform: uppercase; letter-spacing: 0.5px; width: 120px; 
+        }
+        .status-PENDING { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .status-SHIPPED { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        .status-DELIVERED { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .status-CANCELLED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        .btn-view-details {
+            background-color: #fff; color: #1b5e20; border: 2px solid #1b5e20; border-radius: 8px;
+            font-size: 13px; font-weight: 800; padding: 8px 18px; transition: all 0.3s ease;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-view-details:hover { background-color: #1b5e20; color: #fff; box-shadow: 0 5px 15px rgba(27, 94, 32, 0.2); transform: translateY(-2px); }
+        
+        .ai-tooltip { font-size: 11px; color: #666; font-weight: bold; display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 6px; }
+    </style>
+</head>
+<body>
+
+    {% include 'seller_header.html' %}
+
+    <div class="container pb-5 wow fadeIn" data-wow-duration="1s">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+            <div>
+                <h2 class="page-title"><i class="fa fa-cubes text-warning"></i> Order Fulfillment Hub</h2>
+                <p class="page-subtitle">Manage pending orders, dispatch logistics, and track your enterprise revenue.</p>
+            </div>
+            <div class="text-end">
+                <a href="{% url 'export_seller_orders_csv' %}?{{ request.GET.urlencode }}" class="btn btn-outline-success fw-bold rounded-pill shadow-sm px-4">
+                    <i class="fa fa-download"></i> Export CSV
+                </a>
+                <div class="ai-tooltip"><i class="fa fa-robot text-primary"></i> Data used for AI Financial Trend Prediction</div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <a href="{% url 'seller_orders' %}" class="stat-card-link">
+                    <div class="glass-widget stat-card" style="border-color: #1976d2;">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Orders</span>
+                            <div class="stat-icon icon-blue"><i class="fa fa-shopping-basket"></i></div>
+                        </div>
+                        <div class="stat-value">{{ total_orders }}</div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; font-weight: bold;"><i class="fa fa-filter"></i> View all history</div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <a href="?status=pending" class="stat-card-link">
+                    <div class="glass-widget stat-card" style="border-top-color: #f57f17; {% if current_status == 'pending' %}background: #fff8e1;{% endif %}">
+                        <div class="stat-header">
+                            <span class="stat-title">Pending Action</span>
+                            <div class="stat-icon icon-yellow"><i class="fa fa-hourglass-half"></i></div>
+                        </div>
+                        <div class="stat-value">{{ pending_orders }}</div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; font-weight: bold;"><i class="fa fa-exclamation-circle text-warning"></i> Needs dispatch</div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <a href="?status=delivered" class="stat-card-link">
+                    <div class="glass-widget stat-card" style="border-top-color: #2e7d32; {% if current_status == 'delivered' %}background: #e8f5e9;{% endif %}">
+                        <div class="stat-header">
+                            <span class="stat-title">Delivered</span>
+                            <div class="stat-icon icon-green"><i class="fa fa-check-circle"></i></div>
+                        </div>
+                        <div class="stat-value">{{ delivered_count }}</div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; font-weight: bold;"><i class="fa fa-box-open"></i> Successfully fulfilled</div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <div class="glass-widget stat-card" style="border-top-color: #7b1fa2; cursor: default;">
+                    <div class="stat-header">
+                        <span class="stat-title">Total Revenue</span>
+                        <form method="GET" class="m-0">
+                            {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+                            {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+                            <select name="rev_filter" class="revenue-select" onchange="this.form.submit()">
+                                <option value="all" {% if rev_filter == 'all' %}selected{% endif %}>All Time</option>
+                                <option value="month" {% if rev_filter == 'month' %}selected{% endif %}>This Month</option>
+                                <option value="year" {% if rev_filter == 'year' %}selected{% endif %}>This Year</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="stat-value">₹{{ total_revenue|floatformat:0 }}</div>
+                    <div style="font-size: 11px; color: #888; margin-top: 10px; font-weight: bold;"><i class="fa fa-bolt text-warning"></i> Direct E-Commerce Payouts</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-widget">
+            
+            <div class="p-4 border-bottom border-light">
+                <form method="GET" class="d-flex flex-column flex-md-row justify-content-between gap-3">
+                    {% if rev_filter %}<input type="hidden" name="rev_filter" value="{{ rev_filter }}">{% endif %}
+                    
+                    <div class="search-container">
+                        <i class="fa fa-search"></i>
+                        <input type="text" name="q" class="form-control" value="{{ search_query }}" placeholder="Search Order ID, Product or Farmer...">
+                    </div>
+                    <div>
+                        <select name="status" class="filter-select" onchange="this.form.submit()">
+                            <option value="">Filter by Status: All</option>
+                            <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Pending Processing</option>
+                            <option value="shipped" {% if current_status == 'shipped' %}selected{% endif %}>In Transit / Shipped</option>
+                            <option value="delivered" {% if current_status == 'delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th width="15%" class="text-start">Order ID</th>
+                            <th width="18%" class="text-start">Date & Time</th>
+                            <th width="24%" class="text-start">Customer Info</th>
+                            <th width="18%" class="text-start">Value & Qty</th>
+                            <th width="12%" class="text-center">Status</th>
+                            <th width="13%" class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td class="text-start"><span style="font-weight: 900; color: #1b5e20; letter-spacing: 0.5px;">{{ order.order_id }}</span></td>
+                            <td class="text-start">
+                                <div style="font-weight: bold; color: #333;">{{ order.created_at|date:"d M, Y" }}</div>
+                                <div style="font-size: 12px; color: #888; font-weight: bold;">{{ order.created_at|date:"h:i A" }}</div>
+                            </td>
+                            <td class="text-start">
+                                <div class="customer-info">
+                                    <div class="avatar"><i class="fa fa-user"></i></div>
+                                    <div>
+                                        <div style="font-weight: 800; font-size: 14px; color: #1a1a1a;">{{ order.farmer.username }}</div>
+                                        <div style="font-size: 11px; color: #888; font-weight: bold; margin-top: 2px;">{{ order.delivery_address|truncatechars:35 }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-start">
+                                <div style="font-weight: 900; font-size: 16px; color: #1a1a1a;">₹{{ order.total_amount }}</div>
+                                <div style="font-size: 12px; color: #666; font-weight: bold; margin-top: 2px;">{{ order.product.title|truncatechars:20 }} (x{{ order.quantity|floatformat:0 }})</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="status-badge status-{{ order.status }}">
+                                    {% if order.status == 'PENDING' %}<i class="fa fa-hourglass-half"></i> Pending
+                                    {% elif order.status == 'SHIPPED' %}<i class="fa fa-truck"></i> Shipped
+                                    {% elif order.status == 'DELIVERED' %}<i class="fa fa-check-circle"></i> Delivered
+                                    {% else %}<i class="fa fa-times-circle"></i> Cancelled{% endif %}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'seller_order_detail' order.order_id %}" class="btn-view-details">
+                                    Manage <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <i class="fa fa-search text-muted mb-3" style="font-size: 50px; opacity: 0.5;"></i>
+                                <h4 style="color: #1b5e20; font-weight: bold;">No matching records found</h4>
+                                <p class="text-muted">Adjust your filters or search query to find orders.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if orders.has_other_pages %}
+            <div class="d-flex justify-content-end p-4 border-top border-light">
+                <ul class="pagination mb-0">
+                    {% if orders.has_previous %}
+                        <li class="page-item"><a class="page-link text-success fw-bold" href="?page={{ orders.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if rev_filter %}&rev_filter={{ rev_filter }}{% endif %}">&laquo; Prev</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link" style="background-color: #1b5e20; border-color: #1b5e20;">{{ orders.number }}</span></li>
+                    {% if orders.has_next %}
+                        <li class="page-item"><a class="page-link text-success fw-bold" href="?page={{ orders.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if rev_filter %}&rev_filter={{ rev_filter }}{% endif %}">Next &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/animation.js' %}"></script>
+</body>
+</html>

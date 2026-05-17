@@ -1,0 +1,592 @@
+{% load static %}
+
+<style>
+  /* =====================================================
+     1. GLOBAL BACKGROUND & BODY
+  ===================================================== */
+  body {
+      font-family: 'Times New Roman', Times, serif !important;
+      background: rgb(255, 253, 231);
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)),
+        url("{% static 'assets/images/login-bg.png' %}"),
+        linear-gradient(180deg, rgba(255,253,231,1) 0%, rgba(220,237,200,1) 50%, rgba(255,255,255,1) 100%);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      min-height: 100vh;
+  }
+
+  /* =====================================================
+     2. HEADER SHELL
+  ===================================================== */
+  .header-area {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: 80px;
+      transition: box-shadow 0.3s ease;
+  }
+
+  /* Scrolled state — slightly deeper shadow */
+  .header-area.scrolled {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.13);
+  }
+
+  .header-area .main-nav {
+      min-height: 80px;
+      background: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+  }
+
+  /* =====================================================
+     3. LOGO
+  ===================================================== */
+  .header-area .main-nav .logo {
+      line-height: 80px;
+      color: #1b5e20;
+      font-size: 26px;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+  }
+  .header-area .main-nav .logo span {
+      color: #fbc02d;
+  }
+  /* Small "ADMIN" badge next to logo */
+  .header-area .main-nav .logo .admin-badge {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: #1b5e20;
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 4px;
+      line-height: 1;
+      align-self: center;
+      margin-left: 2px;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* =====================================================
+     4. NAV LIST
+  ===================================================== */
+  .header-area .main-nav .nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin: 0;
+      padding: 0;
+      height: 80px;
+      list-style: none;
+      gap: 0;
+  }
+
+  /* Every nav <li> is a positioning anchor for its dropdown */
+  .header-area .main-nav .nav > li {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: 80px;
+      padding: 0 2px;
+  }
+
+  /* =====================================================
+     5. TOP-LEVEL LINKS
+  ===================================================== */
+  .header-area .main-nav .nav > li > a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      font-size: 14px !important;
+      color: #1a1a1a !important;
+      text-transform: capitalize;
+      transition: color 0.25s ease;
+      height: 80px;
+      line-height: 80px;
+      padding: 0 13px;
+      cursor: pointer;
+      text-decoration: none;
+      position: relative;
+      white-space: nowrap;
+  }
+
+  /* Animated underline — expands from centre */
+  .header-area .main-nav .nav > li:not(.logout-item) > a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 3px;
+      bottom: 18px;
+      left: 50%;
+      background-color: #1b5e20;
+      transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
+      border-radius: 2px;
+  }
+
+  .header-area .main-nav .nav > li:not(.logout-item) > a:hover::after,
+  .header-area .main-nav .nav > li:not(.logout-item) > a.active::after {
+      width: 60%;
+      left: 20%;
+  }
+
+  .header-area .main-nav .nav > li:not(.logout-item) > a:hover,
+  .header-area .main-nav .nav > li:not(.logout-item) > a.active {
+      color: #1b5e20 !important;
+  }
+
+  /* Chevron icon */
+  .nav-chevron {
+      font-size: 11px;
+      transition: transform 0.3s ease;
+      color: #888;
+  }
+  .header-area .main-nav .nav > li > a:hover .nav-chevron { color: #1b5e20; }
+
+  /* =====================================================
+     6. DROPDOWN MENUS
+  ===================================================== */
+  .dropdown-menu-custom {
+      position: absolute;
+      top: 80px;
+      left: 0;
+      min-width: 220px;
+      background-color: #ffffff;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+      border-top: 3px solid #fbc02d;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+      z-index: 1001;
+      list-style: none;
+      padding: 8px 0;
+      margin: 0;
+  }
+
+  .dropdown-menu-custom.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+  }
+
+  /* Dropdown items */
+  .dropdown-menu-custom > li {
+      display: block;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      border-bottom: 1px solid #f5f5f5;
+      position: static !important; /* override nav > li positioning */
+      height: auto !important;
+  }
+  .dropdown-menu-custom > li:last-child { border-bottom: none; }
+
+  .dropdown-menu-custom > li > a {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      height: auto !important;
+      line-height: 1.4 !important;
+      padding: 11px 18px !important;
+      font-size: 13.5px !important;
+      font-weight: 500 !important;
+      color: #333 !important;
+      background: transparent;
+      transition: background 0.2s ease, padding-left 0.2s ease, color 0.2s ease;
+  }
+
+  /* No underline inside dropdowns */
+  .dropdown-menu-custom > li > a::after { display: none !important; }
+
+  .dropdown-menu-custom > li > a:hover {
+      color: #1b5e20 !important;
+      background-color: #f1f8e9;
+      padding-left: 24px !important;
+  }
+
+  .dropdown-menu-custom > li > a i {
+      font-size: 14px;
+      color: #888;
+      width: 16px;
+      flex-shrink: 0;
+  }
+  .dropdown-menu-custom > li > a:hover i { color: #2e7d32; }
+
+  /* =====================================================
+     7. SOIL LAB BADGE (inline in nav link)
+  ===================================================== */
+  .nav-count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: #d32f2f;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      border-radius: 9px;
+      line-height: 1;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      margin-left: 2px;
+      animation: pulse-badge 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.15); }
+  }
+
+  /* =====================================================
+     8. LOGOUT BUTTON
+  ===================================================== */
+  .header-area .main-nav .nav > li.logout-item {
+      padding-left: 8px;
+  }
+
+  .header-area .main-nav .nav > li.logout-item .main-red-button > a {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 6px;
+      background-color: #fbc02d !important;
+      color: #1b5e20 !important;
+      padding: 0 20px !important;
+      height: 40px !important;
+      line-height: 40px !important;
+      border-radius: 20px !important;
+      font-weight: 700;
+      font-size: 13.5px !important;
+      border: 2px solid #fbc02d;
+      transition: background-color 0.25s ease, color 0.25s ease,
+                  border-color 0.25s ease, box-shadow 0.25s ease;
+      text-decoration: none;
+      white-space: nowrap;
+  }
+
+  .header-area .main-nav .nav > li.logout-item .main-red-button > a::after {
+      display: none !important;
+  }
+
+  .header-area .main-nav .nav > li.logout-item .main-red-button > a:hover {
+      background-color: #1b5e20 !important;
+      color: #ffffff !important;
+      border-color: #1b5e20;
+      box-shadow: 0 4px 14px rgba(27, 94, 32, 0.3);
+  }
+
+  /* =====================================================
+     9. MOBILE HAMBURGER (menu-trigger)
+  ===================================================== */
+  a.menu-trigger {
+      display: none;
+      cursor: pointer;
+      width: 36px; height: 36px;
+      align-items: center; justify-content: center;
+      border-radius: 8px;
+      border: 1.5px solid #ddd;
+      background: #fff;
+      transition: background 0.2s;
+  }
+  a.menu-trigger:hover { background: #f1f8e9; border-color: #1b5e20; }
+  a.menu-trigger span,
+  a.menu-trigger span::before,
+  a.menu-trigger span::after {
+      display: block;
+      width: 18px; height: 2px;
+      background: #333; border-radius: 2px;
+      position: relative; transition: all 0.25s;
+  }
+  a.menu-trigger span::before { content:''; top: -5px; position: absolute; }
+  a.menu-trigger span::after  { content:''; top:  5px; position: absolute; }
+
+  @media (max-width: 991px) {
+      a.menu-trigger { display: flex; }
+
+      .header-area .main-nav .nav {
+          display: none;
+          flex-direction: column;
+          position: absolute;
+          top: 80px; left: 0; right: 0;
+          background: rgba(255,255,255,0.98);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+          height: auto;
+          padding: 10px 0 16px;
+          gap: 0;
+      }
+
+      .header-area .main-nav .nav.mobile-open {
+          display: flex;
+      }
+
+      .header-area .main-nav .nav > li {
+          width: 100%; height: auto;
+          padding: 0;
+      }
+
+      .header-area .main-nav .nav > li > a {
+          height: auto !important;
+          line-height: 1.4 !important;
+          padding: 12px 20px !important;
+          justify-content: space-between;
+      }
+      .header-area .main-nav .nav > li:not(.logout-item) > a::after { display: none; }
+
+      .dropdown-menu-custom {
+          position: static;
+          box-shadow: none;
+          border-top: none;
+          border-left: 3px solid #fbc02d;
+          border-radius: 0;
+          margin: 0 0 0 20px;
+          transform: none;
+          opacity: 1;
+          visibility: visible;
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease, padding 0.3s ease;
+          padding: 0;
+          display: block;
+      }
+      .dropdown-menu-custom.show {
+          max-height: 400px;
+          padding: 4px 0;
+      }
+
+      .header-area .main-nav .nav > li.logout-item {
+          padding: 10px 20px;
+      }
+      .header-area .main-nav .nav > li.logout-item .main-red-button > a {
+          border-radius: 10px !important;
+      }
+  }
+</style>
+
+<!-- =====================================================
+     HEADER MARKUP
+===================================================== -->
+<header class="header-area header-sticky" id="siteHeader">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <nav class="main-nav">
+
+          <!-- Logo -->
+          <a href="{% url 'admin_dashboard' %}" class="logo">
+            Kultiva <span>Admin</span>
+            <span class="admin-badge">Console</span>
+          </a>
+
+          <!-- Nav Links -->
+          <ul class="nav" id="mainNav">
+
+            <!-- Users -->
+            <li>
+              <a href="javascript:void(0)" class="dropdown-trigger">
+                <i class="fa fa-users" style="font-size:13px;"></i>
+                Users
+                <i class="fa fa-angle-down nav-chevron"></i>
+              </a>
+              <ul class="dropdown-menu-custom">
+                <li><a href="{% url 'manage_farmers' %}"><i class="ph ph-plant"></i>Manage Farmers</a></li>
+                <li><a href="{% url 'manage_sellers' %}"><i class="ph ph-storefront"></i>Manage Sellers</a></li>
+                <li><a href="{% url 'manage_buyers' %}"><i class="ph ph-briefcase"></i>Manage Buyers</a></li>
+              </ul>
+            </li>
+
+            <!-- Products -->
+            <!--
+            <li>
+              <a href="javascript:void(0)" class="dropdown-trigger">
+                <i class="fa fa-list-alt" style="font-size:13px;"></i>
+                Products
+                <i class="fa fa-angle-down nav-chevron"></i>
+              </a>
+              <ul class="dropdown-menu-custom">
+                <li><a href="{% url 'manage_farmer_products' %}"><i class="ph ph-leaf"></i>Farmer Products</a></li>
+                <li><a href="{% url 'manage_seller_products' %}"><i class="ph ph-package"></i>Seller Products</a></li>
+                <li><a href="{% url 'admin_manage_feedbacks' %}"><i class="ph ph-tags"></i>Feedbacks</a></li>
+              </ul>
+            </li>
+            -->
+            
+          
+            <!-- Soil Lab — direct link with live badge -->
+            <li>
+              <a href="{% url 'manage_soil_reports' %}">
+                <i class="fa fa-flask" style="font-size:13px;"></i>
+                Soil Lab
+                {% if pending_soil_count > 0 %}
+                  <span class="nav-count-badge">{{ pending_soil_count }}</span>
+                {% endif %}
+              </a>
+            </li>
+
+            <!-- Orders -->
+            <li>
+              <a href="javascript:void(0)" class="dropdown-trigger">
+                <i class="fa fa-truck" style="font-size:13px;"></i>
+                Orders
+                <i class="fa fa-angle-down nav-chevron"></i>
+              </a>
+              <ul class="dropdown-menu-custom">
+                <li><a href="{% url 'manage_seller_orders' %}"><i class="ph ph-shopping-cart"></i>B2C Seller Orders</a></li>
+                <li><a href="{% url 'manage_buyer_orders' %}"><i class="ph ph-handshake"></i>B2B Buyer Orders</a></li>
+              </ul>
+            </li>
+
+            <li><a href="{% url 'admin_manage_feedbacks' %}"><i class="ph ph-tags"></i>Feedbacks</a></li>
+
+            <!-- Escrow & Refunds -->
+            <li>
+              <a href="javascript:void(0)" class="dropdown-trigger">
+                <i class="fa fa-shield" style="font-size:13px;"></i>
+                Escrow &amp; Refunds
+                <i class="fa fa-angle-down nav-chevron"></i>
+              </a>
+              <ul class="dropdown-menu-custom">
+                <li><a href="{% url 'manage_b2b_refunds' %}"><i class="ph ph-buildings"></i>B2B Requests</a></li>
+                <li><a href="{% url 'manage_b2c_refunds' %}"><i class="ph ph-receipt"></i>B2C Requests</a></li>
+              </ul>
+            </li>
+
+            
+
+            <!-- Reports -->
+            <li>
+              <a href="javascript:void(0)" class="dropdown-trigger">
+                <i class="fa fa-bar-chart" style="font-size:13px;"></i>
+                Reports
+                <i class="fa fa-angle-down nav-chevron"></i>
+              </a>
+              <ul class="dropdown-menu-custom">
+                <li><a href="{% url 'admin_farmer_report' %}"><i class="ph ph-chart-line-up"></i>Farmer Analytics</a></li>
+                <li><a href="{% url 'admin_seller_report' %}"><i class="ph ph-chart-bar"></i>Seller Analytics</a></li>
+                <li><a href="{% url 'admin_buyer_report' %}"><i class="ph ph-chart-pie-slice"></i>Buyer Analytics</a></li>
+              </ul>
+            </li>
+
+            <!-- Logout -->
+            <li class="logout-item">
+              <div class="main-red-button">
+                <a href="{% url 'logout' %}">
+                  <i class="fa fa-sign-out"></i> Logout
+                </a>
+              </div>
+            </li>
+
+          </ul>
+
+          <!-- Mobile Hamburger -->
+          <a class="menu-trigger" id="menuTrigger" role="button" aria-label="Toggle menu">
+            <span></span>
+          </a>
+
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    /* ── 1. Dropdown toggle logic ── */
+    const triggers = document.querySelectorAll('.dropdown-trigger');
+
+    triggers.forEach(function (trigger) {
+      trigger.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const menu  = this.nextElementSibling;
+        const arrow = this.querySelector('.nav-chevron');
+        const isOpen = menu.classList.contains('show');
+
+        // Close all other open dropdowns
+        triggers.forEach(function (other) {
+          if (other !== trigger) {
+            const otherMenu  = other.nextElementSibling;
+            const otherArrow = other.querySelector('.nav-chevron');
+            if (otherMenu)  otherMenu.classList.remove('show');
+            if (otherArrow) otherArrow.style.transform = 'rotate(0deg)';
+          }
+        });
+
+        // Toggle this one
+        if (isOpen) {
+          menu.classList.remove('show');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+        } else {
+          menu.classList.add('show');
+          if (arrow) arrow.style.transform = 'rotate(180deg)';
+        }
+      });
+    });
+
+    /* ── 2. Close dropdowns when clicking outside ── */
+    document.addEventListener('click', function () {
+      triggers.forEach(function (trigger) {
+        const menu  = trigger.nextElementSibling;
+        const arrow = trigger.querySelector('.nav-chevron');
+        if (menu)  menu.classList.remove('show');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      });
+    });
+
+    /* ── 3. Mobile hamburger ── */
+    const menuTrigger = document.getElementById('menuTrigger');
+    const mainNav     = document.getElementById('mainNav');
+
+    if (menuTrigger && mainNav) {
+      menuTrigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        mainNav.classList.toggle('mobile-open');
+      });
+    }
+
+    /* ── 4. Scrolled shadow on header ── */
+    const header = document.getElementById('siteHeader');
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > 10) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    /* ── 5. Highlight active nav link based on current URL ── */
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.header-area .main-nav .nav > li > a:not(.dropdown-trigger)').forEach(function (link) {
+      if (link.getAttribute('href') && currentPath.startsWith(link.getAttribute('href'))) {
+        link.classList.add('active');
+      }
+    });
+    document.querySelectorAll('.dropdown-menu-custom > li > a').forEach(function (link) {
+      if (link.getAttribute('href') && currentPath.startsWith(link.getAttribute('href'))) {
+        // Mark parent trigger as active too
+        const parentTrigger = link.closest('ul').previousElementSibling;
+        if (parentTrigger) parentTrigger.classList.add('active');
+      }
+    });
+
+  });
+</script>

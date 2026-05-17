@@ -1,0 +1,408 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Profile: {{ seller.username }} | Kultiva Admin</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+    <style>
+        /* ================= MODERN ADMIN DASHBOARD STYLES ================= */
+        body {
+            padding-top: 100px;
+            background: #f4f7f6;
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .breadcrumb-nav { font-size: 14px; font-weight: 600; margin-bottom: 25px; }
+        .breadcrumb-nav a { color: #6c757d; text-decoration: none; transition: 0.2s; }
+        .breadcrumb-nav a:hover { color: #1565c0; }
+        .breadcrumb-nav span { color: #1565c0; }
+
+        .profile-banner {
+            background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%);
+            border-radius: 16px;
+            padding: 40px;
+            color: #ffffff !important;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(13, 71, 161, 0.15);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .profile-banner::after { 
+            content: '\f54e'; /* fa-store */
+            font-family: 'Font Awesome 5 Free'; 
+            font-weight: 900; 
+            position: absolute; 
+            right: 20px; 
+            bottom: -50px; 
+            font-size: 180px; 
+            color: rgba(255,255,255,0.05); 
+            transform: rotate(-15deg); 
+            pointer-events: none;
+        }
+
+        .profile-avatar-large { 
+            width: 100px; 
+            height: 100px; 
+            background: #ffffff; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 40px; 
+            color: #1565c0; 
+            margin-right: 30px; 
+            border: 4px solid #90caf9; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2); 
+            z-index: 2;
+        }
+
+        .banner-text-content { z-index: 2; }
+        .banner-name { margin: 0; font-weight: 800; font-size: 32px; color: #ffffff !important; letter-spacing: -0.5px; }
+        
+        /* 🔬 THE FIX: Added contact-pills styling for unified UI */
+        .contact-pills { margin-top: 10px; display: flex; gap: 15px; font-size: 14px; font-weight: 600; color: #e3f2fd; flex-wrap: wrap;}
+        .contact-pills i { color: #90caf9; margin-right: 5px; }
+
+        .info-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 25px;
+            height: calc(100% - 25px);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        .card-header-custom { 
+            padding: 18px 20px; 
+            border-bottom: 1px solid #f1f3f5; 
+            font-size: 15px; 
+            font-weight: 700; 
+            color: #1565c0; 
+            background: #f8f9fa; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body-custom { padding: 20px; }
+
+        .data-list { list-style: none; padding: 0; margin: 0; }
+        .data-list li { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px 0; 
+            border-bottom: 1px dashed #e9ecef; 
+        }
+        .data-list li:last-child { border-bottom: none; padding-bottom: 0; }
+        .data-label { font-size: 12px; text-transform: uppercase; color: #868e96; font-weight: 700; letter-spacing: 0.5px; }
+        .data-value { font-size: 15px; font-weight: 600; color: #343a40; text-align: right; }
+
+        .status-badge { padding: 6px 14px; border-radius: 30px; font-size: 12px; font-weight: 700; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
+        .status-verified { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .status-pending { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+
+        .table-responsive { border-radius: 12px; overflow: hidden; border: 1px solid #e9ecef; }
+        .modern-table { width: 100%; border-collapse: collapse; margin: 0; background: #fff; }
+        .modern-table th { padding: 15px; font-size: 12px; text-transform: uppercase; color: #495057; font-weight: 700; background: #f8f9fa; border-bottom: 2px solid #e9ecef; }
+        .modern-table td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #f1f3f5; }
+        .modern-table tr:hover { background-color: #f8f9fa; }
+        
+        .product-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid #dee2e6; }
+        .item-status-ACTIVE { color: #2e7d32; font-weight: bold; background: #e8f5e9; padding: 4px 10px; border-radius: 6px; font-size: 11px; }
+        .item-status-BANNED { color: #c62828; font-weight: bold; background: #ffebee; padding: 4px 10px; border-radius: 6px; font-size: 11px; }
+
+        .btn-action { background: #1565c0; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; transition: 0.3s; width: 100%; }
+        .btn-action:hover { background: #0d47a1; color: white; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); }
+        
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container pb-5 wow fadeIn" style="margin-top: 20px;">
+        
+        <div class="breadcrumb-nav">
+            <a href="{% url 'manage_sellers' %}"><i class="fa fa-arrow-left"></i> Back to Sellers Directory</a>
+            <span class="mx-2">/</span>
+            <span>{{ seller.username }}</span>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} shadow-sm fw-bold border-0" style="border-radius: 10px;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="profile-banner">
+            <div class="profile-avatar-large shadow-sm">
+                <i class="fa fa-store"></i>
+            </div>
+            <div class="banner-text-content">
+                <h2 class="banner-name">
+                    {% if seller.first_name %}{{ seller.first_name }} {{ seller.last_name }}{% else %}{{ profile.shop_name }}{% endif %}
+                </h2>
+                
+                <div class="contact-pills">
+                    <span><i class="fa fa-user-circle"></i> @{{ seller.username }}</span>
+                    <span><i class="fa fa-envelope"></i> {{ seller.email }}</span>
+                    <span><i class="fa fa-phone"></i> {% if seller.phone_number %}+91 {{ seller.phone_number }}{% else %}Not Provided{% endif %}</span>
+                </div>
+                
+                <div class="mt-3">
+                    {% if seller.is_verified %}
+                        <span class="status-badge status-verified"><i class="fa fa-check-circle"></i> Verified Platform Seller</span>
+                    {% else %}
+                        <span class="status-badge status-pending"><i class="fa fa-clock"></i> Verification Pending</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="info-card">
+                    <div class="card-header-custom"><i class="fa fa-id-card"></i> Legal Identity</div>
+                    <div class="card-body-custom">
+                        <ul class="data-list">
+                            <li>
+                                <span class="data-label">Account Created</span>
+                                <span class="data-value">{{ seller.date_joined|date:"d M Y" }}</span>
+                            </li>
+                            <li>
+                                <span class="data-label">Trade License No.</span>
+                                <span class="data-value"><i class="fa fa-certificate text-muted me-1"></i> {{ profile.license_number }}</span>
+                            </li>
+                            <li>
+                                <span class="data-label">Platform Role</span>
+                                <span class="data-value text-primary">SELLER (INPUTS)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="info-card">
+                    <div class="card-header-custom"><i class="fa fa-briefcase"></i> Business Info</div>
+                    <div class="card-body-custom">
+                        <ul class="data-list">
+                            <li>
+                                <span class="data-label">Shop Name</span>
+                                <span class="data-value" style="color: #1565c0;">{{ profile.shop_name }}</span>
+                            </li>
+                            <li>
+                                <span class="data-label">GST Number</span>
+                                <span class="data-value">{% if profile.gst_number %}{{ profile.gst_number }}{% else %}N/A{% endif %}</span>
+                            </li>
+                            <li>
+                                <span class="data-label">Description</span>
+                                <span class="data-value text-truncate" style="max-width: 150px; display: inline-block;">{% if profile.description %}{{ profile.description }}{% else %}N/A{% endif %}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-12">
+                <div class="info-card">
+                    <div class="card-header-custom"><i class="fa fa-map-marker-alt"></i> Geolocation Data</div>
+                    <div class="card-body-custom">
+                        {% if address %}
+                            <ul class="data-list">
+                                <li>
+                                    <span class="data-label">Village/Town</span>
+                                    <span class="data-value">{{ address.village }}</span>
+                                </li>
+                                <li>
+                                    <span class="data-label">District & State</span>
+                                    <span class="data-value">{{ address.district }}, {{ address.state }}</span>
+                                </li>
+                                <li>
+                                    <span class="data-label">PIN / GPS Coordinates</span>
+                                    <span class="data-value text-muted" style="font-size: 13px;">
+                                        {{ address.pincode }} <br>
+                                        {{ address.latitude|floatformat:4 }}, {{ address.longitude|floatformat:4 }}
+                                    </span>
+                                </li>
+                            </ul>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fa fa-exclamation-triangle text-warning mb-2" style="font-size: 24px;"></i>
+                                <p class="text-muted mb-0" style="font-size: 14px; font-weight: 600;">No GPS address mapped.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div> 
+
+        <div class="row">
+            
+            <div class="col-lg-8">
+                <div class="info-card h-auto">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <span><i class="fa fa-boxes"></i> Active Input Inventory</span>
+                        <span class="badge bg-primary rounded-pill px-3">{{ listings.count }} Items</span>
+                    </div>
+                    <div class="card-body-custom p-0">
+                        {% if listings %}
+                            <div class="table-responsive">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="45%">Product Details</th>
+                                            <th width="25%">Pricing & Stock</th>
+                                            <th width="15%">Status</th>
+                                            <th width="15%" class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in listings %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    {% if item.image %}
+                                                        <img src="{{ item.image.url }}" class="product-img">
+                                                    {% else %}
+                                                        <div class="product-img d-flex align-items-center justify-content-center" style="background:#e3f2fd;"><i class="fa fa-box text-primary"></i></div>
+                                                    {% endif %}
+                                                    <div>
+                                                        <div style="font-weight: 700; color: #212529; font-size: 14px;">{{ item.title }}</div>
+                                                        <div style="font-size: 11px; color: #868e96; font-weight: 600; text-transform: uppercase;">{{ item.get_category_display }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="font-weight: 800; color: #1565c0; font-size: 14px;">₹{{ item.price }} <span style="font-size:11px; color:#868e96; font-weight: 600;">/ {{ item.unit_of_measure }}</span></div>
+                                                <div style="font-size: 12px; color: #495057; font-weight: 500;"><i class="fa fa-cubes text-muted me-1"></i> {{ item.available_stock }} available</div>
+                                            </td>
+                                            <td>
+                                                <span class="item-status-{{ item.status }}">{{ item.get_status_display }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{% url 'admin_product_detail' item.id %}" class="btn btn-sm btn-light border fw-bold text-primary shadow-sm">View <i class="fa fa-chevron-right ms-1" style="font-size: 10px;"></i></a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fa fa-box-open text-muted mb-3" style="font-size: 40px; opacity: 0.3;"></i>
+                                <h5 class="fw-bold" style="color: #495057;">No Products Listed</h5>
+                                <p style="color: #868e96; font-size: 14px;">This seller has not uploaded any inputs or tools yet.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="info-card h-auto" style="border-top: 5px solid #1565c0;">
+                    <div class="card-header-custom bg-white border-0 pb-0"><i class="fa fa-gavel text-dark"></i> Admin Controls</div>
+                    <div class="card-body-custom text-center pt-3">
+                        <p style="font-size: 13px; color: #6c757d; margin-bottom: 25px; line-height: 1.5;">Use these controls to manage this seller's platform access and communications.</p>
+                        
+                        {% if not seller.is_verified %}
+                            <form action="{% url 'seller_action' %}" method="POST" id="statusForm">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ seller.user_id }}">
+                                <input type="hidden" name="action_type" value="approve">
+                                <input type="hidden" name="email_message" value="Your Kultiva Seller account has been successfully reviewed and verified by our team. You may now start listing your inputs and tools.">
+                                
+                                <button type="submit" class="btn-action mb-3 shadow-sm">
+                                    <i class="fa fa-check-circle me-2"></i> Approve & Verify
+                                </button>
+                                <p style="font-size: 11px; color: #868e96; font-weight: 500;">Verification allows marketplace sales.</p>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-primary p-2 mb-3 shadow-sm" style="font-size: 13px; font-weight: bold; border-radius: 8px;">
+                                <i class="fa fa-shield-alt me-1"></i> Account is Verified
+                            </div>
+                            <p style="font-size: 11px; color: #868e96; font-weight: 500;">This seller has full access to the B2C marketplace.</p>
+                        {% endif %}
+                        
+                        <hr style="border-color: #e9ecef; margin: 25px 0;">
+                        
+                        <button type="button" class="btn btn-outline-dark w-100 fw-bold shadow-sm" style="font-size: 14px; border-radius: 8px; padding: 12px;" data-bs-toggle="modal" data-bs-target="#emailModal">
+                            <i class="fa fa-envelope me-2"></i> Send Direct Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="emailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
+                <div class="modal-header" style="background: #1565c0; color: white; border: none; padding: 20px;">
+                    <h5 class="modal-title fw-bold"><i class="fa fa-paper-plane me-2"></i> Email {{ seller.username }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <form action="{% url 'send_seller_email' %}" method="POST" id="emailForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ seller.user_id }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted" style="font-size: 12px; text-transform: uppercase;">Subject Line</label>
+                            <input type="text" class="form-control p-3 border-0 shadow-sm" name="subject" required placeholder="Important update regarding your account" style="border-radius: 10px;">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted" style="font-size: 12px; text-transform: uppercase;">Message Body</label>
+                            <textarea class="form-control p-3 border-0 shadow-sm" name="message" rows="5" required placeholder="Type your message here..." style="border-radius: 10px;"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-action shadow-sm" id="sendBtn">
+                            <i class="fa fa-paper-plane me-2"></i> Transmit Email
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        document.getElementById('statusForm')?.addEventListener('submit', function() {
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i> Processing...';
+            btn.style.opacity = '0.8';
+        });
+
+        document.getElementById('emailForm')?.addEventListener('submit', function() {
+            const btn = document.getElementById('sendBtn');
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i> Sending...';
+            btn.style.opacity = '0.8';
+        });
+    </script>
+</body>
+</html>

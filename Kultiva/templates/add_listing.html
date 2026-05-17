@@ -1,0 +1,277 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva - Add New Listing</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-top: 5px solid #2e7d32;
+        }
+
+        .section-title {
+            color: #1b5e20;
+            font-weight: bold;
+            border-bottom: 2px solid #fbc02d;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            background: transparent;
+            padding: 10px 0;
+            outline: none;
+            transition: 0.3s;
+        }
+        .form-control-custom:focus { border-bottom-color: #fbc02d; }
+        
+        /* Validation Styling */
+        .form-control-custom:invalid.touched { border-bottom-color: #dc3545; }
+        .error-message { color: #dc3545; font-size: 12px; display: none; font-weight: bold; margin-top: 5px; }
+
+        .btn-submit {
+            background-color: #1b5e20;
+            color: white;
+            font-weight: bold;
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: none;
+            transition: 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn-submit:hover { background-color: #fbc02d; color: #1b5e20; }
+
+        /* --- NEW: IMAGE UPLOAD STYLING --- */
+        .image-upload-wrapper {
+            border: 2px dashed #2e7d32;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        .image-upload-wrapper:hover { background: rgba(255, 255, 255, 0.9); border-color: #fbc02d; }
+        
+        #imagePreview {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: none; /* Hidden until image is selected */
+            margin: 15px auto 0;
+        }
+    </style>
+</head>
+<body>
+
+    {% if request.user.role == 'FARMER' %}
+        {% include 'farmer_header.html' %}
+    {% else %}
+        {% include 'seller_header.html' %}
+    {% endif %}
+
+    <div class="container pb-5 wow fadeInUp">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+                            <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="form-card mt-4">
+                    <h3 class="section-title"><i class="fa fa-plus-circle"></i> Add New Marketplace Listing</h3>
+                    
+                    <form action="{% url 'add_listing' %}" method="POST" enctype="multipart/form-data" id="listingForm" novalidate>
+                        {% csrf_token %}
+                        
+                        <input type="hidden" name="wing" id="wing" value="{% if request.user.role == 'FARMER' %}PRODUCE{% else %}INPUT{% endif %}">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="fw-bold text-muted">Category <span class="text-danger">*</span></label>
+                                <select name="category" id="category" class="form-control-custom" required>
+                                    <option value="" disabled selected>Select Category...</option>
+                                </select>
+                                <div class="error-message">Please select a category.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="fw-bold text-muted">Product Title <span class="text-danger">*</span></label>
+                                <input type="text" name="title" id="title" class="form-control-custom" placeholder="e.g. Premium Basmati Rice" required minlength="3">
+                                <div class="error-message">Please enter a valid product name.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="fw-bold text-muted">Variety or Brand</label>
+                                <input type="text" name="variety_or_brand" class="form-control-custom" placeholder="e.g. Tata Rallis / Alphonso (Optional)">
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="fw-bold text-muted">Unit of Measure <span class="text-danger">*</span></label>
+                                <select name="unit_of_measure" id="uom" class="form-control-custom" required>
+                                    <option value="" disabled selected>Select Unit...</option>
+                                    <option value="Kg">Kilogram (Kg)</option>
+                                    <option value="Ton">Ton</option>
+                                    <option value="Piece">Piece / Item</option>
+                                    <option value="Bag">Bag / Sack</option>
+                                    <option value="Litre">Litre</option>
+                                </select>
+                                <div class="error-message">Please select a unit of measure.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="fw-bold text-muted">Price per Unit (₹) <span class="text-danger">*</span></label>
+                                <input type="number" name="price" id="price" class="form-control-custom" placeholder="0.00" step="0.01" min="1" required>
+                                <div class="error-message">Enter a valid price greater than 0.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="fw-bold text-muted">Total Available Stock <span class="text-danger">*</span></label>
+                                <input type="number" name="available_stock" id="stock" class="form-control-custom" placeholder="e.g. 50" min="1" step="0.1" required>
+                                <div class="error-message">Stock must be greater than 0.</div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label class="fw-bold text-muted">Product Image <span class="text-danger">*</span></label>
+                                <div class="image-upload-wrapper">
+                                    <input type="file" name="image" id="productImage" class="form-control" accept="image/*" required>
+                                    <img id="imagePreview" src="#" alt="Your Product Image Preview">
+                                    <div class="error-message text-left mt-2">Please upload a clear image of your product.</div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label class="fw-bold text-muted">Product Description <span class="text-danger">*</span></label>
+                                <textarea name="description" id="desc" rows="4" class="form-control-custom" placeholder="Describe the quality, grade, or specifications..." required minlength="10"></textarea>
+                                <div class="error-message">Please provide a description (min 10 characters).</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="fa fa-upload"></i> Publish Listing</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. DYNAMIC CATEGORY LOGIC
+            const wingValue = document.getElementById('wing').value;
+            const categorySelect = document.getElementById('category');
+            
+            const produceCategories = [
+                {val: 'GRAINS', text: 'Grains & Cereals'},
+                {val: 'VEGETABLES', text: 'Vegetables'},
+                {val: 'FRUITS', text: 'Fruits'},
+                {val: 'CASH_CROPS', text: 'Cash Crops'},
+                {val: 'SPICES', text: 'Spices & Condiments'}
+            ];
+            
+            const inputCategories = [
+                {val: 'SEEDS', text: 'Seeds'},
+                {val: 'FERTILIZERS', text: 'Fertilizers & Nutrients'},
+                {val: 'AGROCHEMICALS', text: 'Pesticides & Herbicides'},
+                {val: 'TOOLS', text: 'Farming Tools'},
+                {val: 'MACHINERY', text: 'Heavy Machinery & Parts'}
+            ];
+
+            const optionsToLoad = wingValue === 'PRODUCE' ? produceCategories : inputCategories;
+            
+            optionsToLoad.forEach(cat => {
+                let option = new Option(cat.text, cat.val);
+                categorySelect.add(option);
+            });
+
+            // --- 2. NEW: LIVE IMAGE PREVIEW LOGIC ---
+            const imageInput = document.getElementById('productImage');
+            const imagePreview = document.getElementById('imagePreview');
+
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block'; // Show the image
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.src = '#';
+                    imagePreview.style.display = 'none'; // Hide if no file selected
+                }
+            });
+
+            // 3. REAL-TIME FORM VALIDATION
+            const form = document.getElementById('listingForm');
+            const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => {
+                    input.classList.add('touched');
+                    checkInput(input);
+                });
+                input.addEventListener('input', () => {
+                    if (input.classList.contains('touched')) checkInput(input);
+                });
+            });
+
+            function checkInput(input) {
+                const errorDiv = input.nextElementSibling;
+                // Special handling for the image upload field layout
+                if (input.id === 'productImage') {
+                    const imgErrorDiv = input.parentElement.querySelector('.error-message');
+                    imgErrorDiv.style.display = input.checkValidity() ? 'none' : 'block';
+                } else if (errorDiv && errorDiv.classList.contains('error-message')) {
+                    errorDiv.style.display = input.checkValidity() ? 'none' : 'block';
+                }
+            }
+
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+                inputs.forEach(input => {
+                    input.classList.add('touched');
+                    checkInput(input);
+                    if (!input.checkValidity()) isValid = false;
+                });
+
+                if (!isValid) {
+                    event.preventDefault(); 
+                    alert("Please fill out all required fields and upload an image before submitting.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

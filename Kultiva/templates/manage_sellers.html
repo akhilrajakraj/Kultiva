@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva Admin - Manage Sellers</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body { padding-top: 110px; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid #2e7d32;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs { margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
+        .filter-tabs a {
+            display: inline-block;
+            padding: 10px 20px;
+            font-weight: bold;
+            color: #555;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        .filter-tabs a.active {
+            color: #1b5e20;
+            border-bottom-color: #1b5e20;
+        }
+        .filter-tabs a:hover { color: #1b5e20; background: #f1f8e9; }
+
+        /* Search Box */
+        .search-box input {
+            border-radius: 20px 0 0 20px;
+            border: 1px solid #ccc;
+        }
+        .search-box button {
+            border-radius: 0 20px 20px 0;
+            background-color: #1b5e20;
+            color: white;
+            border: none;
+        }
+
+        /* Status Badges */
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .status-verified { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .status-pending { background-color: #fffde7; color: #fbc02d; border: 1px solid #fff9c4; }
+        .status-removed { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        /* Action Buttons */
+        .btn-action { margin: 0 2px; border-radius: 5px; padding: 5px 10px; color: white; border:none; transition: 0.3s; }
+        .btn-approve { background-color: #2e7d32; }
+        .btn-reject { background-color: #f9a825; } 
+        .btn-remove { background-color: #c62828; }
+        .btn-view { background-color: #1b5e20; color: white; border: none; }
+        
+        .btn-action:hover { opacity: 0.8; color: white; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container pb-5">
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card wow fadeInUp">
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="color: #1b5e20; font-weight: bold;"><i class="fa fa-shopping-cart"></i> Manage Sellers</h3>
+                
+                <form action="" method="GET" class="d-flex search-box">
+                    <input type="text" name="search" class="form-control" placeholder="Search seller or shop..." value="{{ search_query }}">
+                    <input type="hidden" name="status" value="{{ filter_status }}">
+                    <button type="submit" class="px-3"><i class="fa fa-search"></i></button>
+                </form>
+            </div>
+
+            <div class="filter-tabs">
+                <a href="?status=all" class="{% if filter_status == 'all' %}active{% endif %}">All Users</a>
+                <a href="?status=pending" class="{% if filter_status == 'pending' %}active{% endif %}">Pending Requests</a>
+                <a href="?status=approved" class="{% if filter_status == 'approved' %}active{% endif %}">Approved Sellers</a>
+                <a href="?status=removed" class="{% if filter_status == 'removed' %}active{% endif %}">Removed/Rejected</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th># ID</th>
+                            <th>Shop/User Info</th>
+                            <th>Contact</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for seller in sellers %}
+                        <tr>
+                            <td>#{{ seller.pk }}</td>
+                            <td>
+                                {% if seller.seller_profile %}
+                                    <strong>{{ seller.seller_profile.shop_name }}</strong><br>
+                                {% endif %}
+                                <small class="text-muted">{{ seller.username }}</small>
+                            </td>
+                            <td>{{ seller.email }}</td>
+                            <td>
+                                {% with addr=seller.addresses.first %}
+                                    {{ addr.district|default:"--" }}, {{ addr.state|default:"" }}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                {% if not seller.is_active %}
+                                    <span class="status-badge status-removed">Removed/Rejected</span>
+                                {% elif seller.is_verified %}
+                                    <span class="status-badge status-verified">Approved</span>
+                                {% else %}
+                                    <span class="status-badge status-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'view_seller_profile' seller.pk %}" class="btn-action btn-view" title="View Full Details">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+
+                                {% if seller.is_active %}
+                                    {% if not seller.is_verified %}
+                                        <button class="btn-action btn-approve" onclick="openActionModal('{{ seller.pk }}', '{{ seller.username }}', 'approve')">
+                                            <i class="fa fa-check"></i>
+                                        </button>
+                                        <button class="btn-action btn-reject" onclick="openActionModal('{{ seller.pk }}', '{{ seller.username }}', 'reject')">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn-action btn-remove" onclick="openActionModal('{{ seller.pk }}', '{{ seller.username }}', 'remove')">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    {% endif %}
+                                {% else %}
+                                    <button class="btn btn-sm btn-secondary" disabled>Inactive</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">No sellers found matching your criteria.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{% url 'seller_action' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-header" style="background: #1b5e20; color: white;">
+                        <h5 class="modal-title" id="modalTitle">Take Action</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" id="modalUserId">
+                        <input type="hidden" name="action_type" id="modalActionType">
+                        
+                        <p id="modalDescription" class="mb-3">Please compose an email to the seller regarding this action.</p>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email Message:</label>
+                            <textarea name="email_message" id="modalMessage" class="form-control" rows="5" required></textarea>
+                            <small class="text-muted">This message will be sent to the seller immediately.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success" id="modalSubmitBtn">Send Email & Confirm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        function openActionModal(id, name, type) {
+            // Set Hidden IDs
+            document.getElementById('modalUserId').value = id;
+            document.getElementById('modalActionType').value = type;
+            
+            // Customize UI based on Action
+            const title = document.getElementById('modalTitle');
+            const desc = document.getElementById('modalDescription');
+            const msg = document.getElementById('modalMessage');
+            const btn = document.getElementById('modalSubmitBtn');
+
+            if (type === 'approve') {
+                title.innerText = "Approve Seller: " + name;
+                desc.innerText = "You are verifying this seller. They will be able to list products.";
+                msg.value = "We are pleased to inform you that your Seller Account has been verified. You can now list your products on Kultiva.";
+                btn.className = "btn btn-success";
+                btn.innerText = "Approve & Send Email";
+            } else if (type === 'reject') {
+                title.innerText = "Reject Seller: " + name;
+                desc.innerText = "Rejecting this application will deactivate the account.";
+                msg.value = "Thank you for your interest in Kultiva. Unfortunately, we cannot approve your seller registration at this time.";
+                btn.className = "btn btn-warning";
+                btn.innerText = "Reject & Send Email";
+            } else if (type === 'remove') {
+                title.innerText = "Remove Seller: " + name;
+                desc.innerText = "This will remove the seller and unlist their products.";
+                msg.value = "We regret to inform you that your Seller account has been suspended due to policy violations.";
+                btn.className = "btn btn-danger";
+                btn.innerText = "Remove & Send Email";
+            }
+
+            // Show Modal
+            var myModal = new bootstrap.Modal(document.getElementById('actionModal'));
+            myModal.show();
+        }
+    </script>
+
+</body>
+</html>

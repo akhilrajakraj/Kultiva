@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva Admin - B2B Escrow Disputes</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body { padding-top: 110px; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid #d32f2f; 
+        }
+
+        .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 12px; border-top: none; }
+        .table-custom td { vertical-align: middle; color: #555; font-size: 14px; }
+        
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .bg-locked { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        .btn-action { transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px; padding: 6px 15px; font-size: 13px; }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .user-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; color: #64748b; font-weight: bold; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px; font-weight: bold;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="color: #1e293b; font-weight: 800;"><i class="fa fa-shield text-danger me-2"></i> B2B Escrow Resolutions</h3>
+            </div>
+            
+            <div class="alert mb-4" style="background: #fff8e1; border-left: 4px solid #fbc02d; color: #856404; font-size: 14px;">
+                <i class="fa fa-exclamation-triangle me-2"></i> <strong>Financial Warning:</strong> The funds below are locked due to Corporate Buyer disputes or cancellations. Click "Review Case" to open the detailed investigation panel.
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-custom">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th>Transaction ID / Date</th>
+                            <th>Corporate Buyer</th>
+                            <th>Farmer (Vendor)</th>
+                            <th>Locked Funds</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for escrow in locked_escrows %}
+                        <tr>
+                            <td>
+                                <strong style="color: #0288d1; font-size: 15px;">{{ escrow.transaction_id }}</strong><br>
+                                <span style="font-size: 12px; color: #888;">{{ escrow.created_at|date:"d M Y, h:i A" }}</span>
+                            </td>
+                            <td>
+                                <span class="d-block fw-bold" style="color: #333;">{{ escrow.purchaser.username }}</span>
+                                <span class="user-tag"><i class="fa fa-building"></i> Buyer</span>
+                            </td>
+                            <td>
+                                <span class="d-block fw-bold" style="color: #1b5e20;">{{ escrow.vendor.username }}</span>
+                                <span class="user-tag"><i class="fa fa-leaf"></i> Farmer</span>
+                            </td>
+                            <td>
+                                <strong style="color: #d32f2f; font-size: 16px;">₹{{ escrow.amount_paid }}</strong>
+                            </td>
+                            <td><span class="badge-status bg-locked"><i class="fa fa-lock"></i> Disputed</span></td>
+                            <td class="text-center">
+                                <a href="{% url 'admin_b2b_refund_detail' escrow.transaction_id %}" class="btn btn-outline-primary btn-action">
+                                    <i class="fa fa-folder-open me-2"></i> Review Case
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa fa-check-circle-o fa-4x mb-3" style="color: #c5e1a5;"></i>
+                                <h5>No active B2B disputes.</h5>
+                                <p>All escrow contracts are currently running smoothly.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

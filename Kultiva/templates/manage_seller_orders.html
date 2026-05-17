@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva Admin - {{ page_title }}</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        body { padding-top: 110px; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid {{ theme_color }}; 
+        }
+
+        .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 12px; border-top: none; }
+        .table-custom td { vertical-align: middle; color: #555; font-size: 14px; }
+        
+        /* Search Bar Setup */
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container input { padding-left: 45px; border-radius: 15px; border: 2px solid #ffecb3; height: 50px; background: #fff8e1; transition: 0.3s; }
+        .search-container input:focus { border-color: {{ theme_color }}; background: #fff; box-shadow: none; outline: none; }
+        .search-container i { position: absolute; left: 15px; top: 15px; font-size: 20px; color: {{ theme_color }}; }
+
+        /* Scrollable Filter Tabs */
+        .tab-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; }
+        .tab-scroll::-webkit-scrollbar { display: none; }
+        .filter-tab {
+            padding: 8px 18px; border-radius: 30px; font-size: 13px; font-weight: bold;
+            white-space: nowrap; cursor: pointer; border: 1px solid #e2e8f0;
+            background: #fff; color: #64748b; transition: 0.3s; text-decoration: none !important;
+        }
+        .filter-tab.active {
+            background: {{ theme_color }}; color: white; border-color: {{ theme_color }};
+            box-shadow: 0 4px 10px rgba(245, 127, 23, 0.2);
+        }
+
+        /* Order Status Badges */
+        .status-badge { padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px; }
+        .status-PENDING { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .status-SHIPPED { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        .status-DELIVERED { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .status-REFUNDED { background: #e0e7ff; color: #0288d1; border: 1px solid #bae6fd; }
+        .status-CANCELLED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        .btn-action { transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px; padding: 6px 15px; font-size: 13px; }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px; font-weight: bold;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="color: #1e293b; font-weight: 800;"><i class="ph ph-shopping-cart" style="color: {{ theme_color }}; margin-right: 8px;"></i> {{ page_title }}</h3>
+            </div>
+
+            <form method="GET" class="search-container">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" name="q" class="form-control" placeholder="Search by Order ID, Farmer Name, or Product..." value="{{ search_query }}">
+                <input type="hidden" name="status" value="{{ current_status }}">
+            </form>
+            
+            <div class="tab-scroll">
+                <a href="?status=all{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-tab {% if current_status == 'all' or not current_status %}active{% endif %}">All Orders</a>
+                <a href="?status=pending{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-tab {% if current_status == 'pending' %}active{% endif %}">Pending</a>
+                <a href="?status=transit{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-tab {% if current_status == 'transit' %}active{% endif %}">Shipped</a>
+                <a href="?status=delivered{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-tab {% if current_status == 'delivered' %}active{% endif %}">Delivered</a>
+                <a href="?status=refunded{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-tab {% if current_status == 'refunded' %}active{% endif %}">Refunded</a>
+                <a href="?status=cancelled{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-tab {% if current_status == 'cancelled' %}active{% endif %}">Cancelled</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-custom">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th>Order ID & Date</th>
+                            <th>Product Info</th>
+                            <th>Farmer (Buyer)</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>
+                                <strong style="color: #0288d1; font-size: 15px;">{{ order.order_id }}</strong><br>
+                                <span style="font-size: 12px; color: #888;">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+                            </td>
+                            <td>
+                                <span style="font-weight: bold; color: #333;">{{ order.product.title|default:"Deleted Item" }}</span><br>
+                                <span style="font-size: 12px; color: #64748b;">Sold by: {{ order.product.listed_by.username|default:"N/A" }}</span>
+                            </td>
+                            <td>
+                                <span class="d-block fw-bold" style="color: #1b5e20;">{{ order.farmer.username }}</span>
+                                <span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #e8f5e9; color: #2e7d32; font-weight: bold; border: 1px solid #c8e6c9;">
+                                    <i class="fa fa-tractor"></i> Farmer
+                                </span>
+                            </td>
+                            <td>
+                                <strong style="color: #1e293b; font-size: 15px;">₹{{ order.total_amount }}</strong><br>
+                                <span class="badge bg-light text-dark border">{{ order.get_payment_method_display }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ order.status }}">
+                                    {% if order.status == 'PENDING' %}<i class="ph ph-clock-counter-clockwise"></i> Pending
+                                    {% elif order.status == 'SHIPPED' %}<i class="ph ph-truck"></i> Shipped
+                                    {% elif order.status == 'DELIVERED' %}<i class="ph ph-check-circle"></i> Delivered
+                                    {% elif order.status == 'REFUNDED' %}<i class="ph ph-arrow-u-up-left"></i> Refunded
+                                    {% else %}<i class="ph ph-x-circle"></i> Cancelled{% endif %}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'admin_seller_order_detail' order.order_id %}" class="btn btn-outline-primary btn-action" style="color: #0288d1; border-color: #0288d1;">
+                                    <i class="fa fa-search-plus me-2"></i> Inspect
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="ph ph-shopping-bag-open text-muted" style="font-size: 60px;"></i>
+                                <h5 class="mt-3">No orders found.</h5>
+                                <p>There are no B2C retail orders matching the current filter.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

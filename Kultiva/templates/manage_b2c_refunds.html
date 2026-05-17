@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva Admin - B2C Escrow Disputes</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body { padding-top: 110px; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            /* Orange accent to separate B2C (Farmers) from B2B (Corporate) */
+            border-top: 5px solid #f57f17; 
+        }
+
+        .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 12px; border-top: none; }
+        .table-custom td { vertical-align: middle; color: #555; font-size: 14px; }
+        
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .bg-locked { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        .btn-action { transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px; padding: 6px 15px; font-size: 13px; }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .user-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; color: #64748b; font-weight: bold; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px; font-weight: bold;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="color: #1e293b; font-weight: 800;"><i class="fa fa-shopping-basket text-warning me-2"></i> B2C Order Cancellations</h3>
+            </div>
+            
+            <div class="alert mb-4" style="background: #fff8e1; border-left: 4px solid #fbc02d; color: #856404; font-size: 14px;">
+                <i class="fa fa-exclamation-triangle me-2"></i> <strong>Admin Notice:</strong> Farmers have cancelled the following Marketplace Orders. Click "Review Case" to investigate the dispute and process their refunds.
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-custom">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th>Order ID / Date</th>
+                            <th>Farmer (Purchaser)</th>
+                            <th>Input Vendor</th>
+                            <th>Escrow Locked</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in orders_data %}
+                        <tr>
+                            <td>
+                                <strong style="color: #0288d1; font-size: 15px;">{{ data.order.order_id }}</strong><br>
+                                <span style="font-size: 12px; color: #888;">{{ data.order.created_at|date:"d M Y, h:i A" }}</span>
+                            </td>
+                            <td>
+                                <span class="d-block fw-bold" style="color: #1b5e20;">{{ data.order.farmer.username }}</span>
+                                <span class="user-tag"><i class="fa fa-leaf"></i> Farmer</span>
+                            </td>
+                            <td>
+                                <span class="d-block fw-bold" style="color: #333;">{{ data.order.product.listed_by.username|default:"Deleted User" }}</span>
+                                <span class="user-tag"><i class="fa fa-store"></i> Seller</span>
+                            </td>
+                            <td>
+                                {% if data.escrow %}
+                                    <strong style="color: #d32f2f; font-size: 16px;">₹{{ data.escrow.amount_paid }}</strong>
+                                {% else %}
+                                    <span class="text-muted" style="font-size: 12px; font-weight: bold;"><i class="fa fa-ban"></i> No Digital Escrow</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge-status bg-locked"><i class="fa fa-ban"></i> Cancelled</span></td>
+                            <td class="text-center">
+                                <a href="{% url 'admin_b2c_refund_detail' data.order.order_id %}" class="btn btn-outline-primary btn-action">
+                                    <i class="fa fa-folder-open me-2"></i> Review Case
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa fa-check-circle-o fa-4x mb-3" style="color: #c5e1a5;"></i>
+                                <h5>No active B2C cancellations.</h5>
+                                <p>All farmer seed and tool orders are currently processing normally.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

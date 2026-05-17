@@ -1,0 +1,332 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Kultiva - Farmer Terms and Agreement</title>
+
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+  <style>
+    /* ---------------------------------------------
+    Kultiva - Premium Legal Document Theme
+    --------------------------------------------- */
+    :root {
+      --color-farm-green-600: #2e7d32;
+      --color-farm-green-800: #1b5e20;
+      --color-crop-yellow-400: #fbc02d;
+      --color-crop-yellow-500: #f9a825;
+      --color-slate-800: #1e293b;
+      --shadow-classy: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif !important;
+      background: rgb(255,253,231);
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)),
+        url("{% static 'assets/images/login-bg.png' %}"), 
+        linear-gradient(180deg, rgba(255,253,231,1) 0%, rgba(220,237,200,1) 40%, rgba(255,255,255,1) 100%);
+      background-size: cover;
+      background-attachment: fixed; 
+      min-height: 100vh;
+    }
+
+    /* Document Wrapper */
+    .terms-section {
+      padding: 160px 15px 100px 15px;
+      display: flex;
+      justify-content: center;
+    }
+    
+    .dashboard-panel {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 25px;
+      padding: 60px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+      border: 1px solid rgba(197, 225, 165, 0.5);
+      max-width: 900px;
+      width: 100%;
+    }
+
+    /* Headings & Typography */
+    .section-heading { text-align: center; margin-bottom: 50px; }
+    .section-heading h2 {
+      font-size: 42px;
+      color: var(--color-farm-green-800);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .section-heading h2 em {
+      font-style: italic;
+      color: var(--color-crop-yellow-500);
+    }
+    .section-heading h2 span {
+      color: var(--color-farm-green-600);
+      border-bottom: 3px solid var(--color-crop-yellow-400);
+    }
+    .section-heading p {
+      font-size: 17px;
+      color: #64748b;
+      margin-top: 15px;
+    }
+
+    /* Content Styling */
+    .terms-content h4 {
+      font-size: 22px;
+      margin-top: 40px;
+      margin-bottom: 15px;
+      color: var(--color-farm-green-800);
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 8px;
+      font-weight: 700;
+    }
+    .terms-content p {
+      font-size: 17px;
+      line-height: 1.8;
+      margin-bottom: 15px;
+      color: #475569;
+    }
+    .terms-content ul {
+      list-style-type: disc !important;
+      margin-left: 25px;
+      margin-bottom: 20px;
+    }
+    .terms-content ul li {
+      margin-bottom: 10px;
+      font-size: 17px;
+      color: #475569;
+      line-height: 1.6;
+    }
+    .terms-content strong { color: var(--color-slate-800); font-weight: 700; }
+
+    /* Acceptance Box */
+    .agreement-box {
+      margin-top: 60px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid var(--color-crop-yellow-400);
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--color-farm-green-800);
+      cursor: pointer;
+      margin-bottom: 25px;
+    }
+    .checkbox-label input {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--color-farm-green-600);
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .main-button {
+      display: inline-block;
+      background-color: var(--color-farm-green-600);
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff !important;
+      text-transform: uppercase;
+      padding: 14px 30px;
+      border-radius: 5px;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-classy);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .main-button:hover:not(:disabled) {
+      background-color: var(--color-crop-yellow-400);
+      color: #000 !important;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    .main-button:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-panel { padding: 30px 20px; }
+      .section-heading h2 { font-size: 32px; }
+      .terms-section { padding-top: 130px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  {% include 'header.html' %}
+
+  <section class="terms-section">
+    <div class="terms-document-wrapper dashboard-panel wow fadeInUp" data-wow-duration="1s">
+        
+        <div class="section-heading">
+            <h2>🌾 Kultiva <em>Farmer</em> <br><span>Terms & Agreement</span></h2>
+            <p><strong>Effective Date:</strong> February 2026<br>
+            <strong>Platform Name:</strong> Kultiva<br>
+            <strong>Operated By:</strong> Kultiva Technologies</p>
+        </div>
+
+        <div class="terms-content">
+            <h4>1. Acceptance of Terms</h4>
+            <p>By registering as a Farmer on Kultiva, you agree to comply with and be legally bound by these Terms and Agreement. If you do not agree with these Terms, you must not use the platform.</p>
+
+            <h4>2. Eligibility</h4>
+            <p>To register as a Farmer on Kultiva, you must:</p>
+            <ul>
+                <li>Be at least 18 years old.</li>
+                <li>Be the lawful owner, tenant, or authorized cultivator of agricultural land.</li>
+                <li>Provide accurate and truthful personal and land details.</li>
+                <li>Comply with all applicable agricultural laws in India.</li>
+            </ul>
+            <p>Kultiva reserves the right to reject or suspend accounts that provide false information.</p>
+
+            <h4>3. Farmer Responsibilities</h4>
+            <p>The Farmer agrees to:</p>
+            <ul>
+                <li>Provide correct land details, including area, soil type, and irrigation method.</li>
+                <li>Provide accurate location information.</li>
+                <li>List only genuine agricultural produce grown or legally sourced by them.</li>
+                <li>Ensure products are free from adulteration, contamination, or prohibited substances.</li>
+                <li>Fulfill delivery commitments for listed produce.</li>
+            </ul>
+            <p>The Farmer is solely responsible for the authenticity and quality of their produce.</p>
+
+            <h4>4. Land & Identity Declaration</h4>
+            <p>By registering, the Farmer declares that:</p>
+            <ul>
+                <li>The Aadhaar number provided belongs to them.</li>
+                <li>The land details provided are accurate.</li>
+                <li>They are legally permitted to cultivate and sell agricultural produce.</li>
+            </ul>
+            <p>Kultiva may request verification documents at any time. False declarations may lead to account termination and legal action.</p>
+
+            <h4>5. Use of Agricultural Data</h4>
+            <p>The Farmer acknowledges that:</p>
+            <ul>
+                <li>Land details, soil type, and irrigation data may be used to provide crop recommendations.</li>
+                <li>Location data may be used for weather forecasts and advisory services.</li>
+                <li>Aggregated data may be used for research and platform improvement.</li>
+            </ul>
+            <p>Kultiva will not sell personal data without consent.</p>
+
+            <h4>6. Advisory & Prediction Services Disclaimer</h4>
+            <p>Kultiva may provide crop suggestions, weather alerts, market price trends, and AI-based recommendations. These are advisory in nature only.</p>
+            <p>Kultiva <strong>does not guarantee</strong> yield outcomes, profit margins, weather accuracy, or market stability. Final decisions remain the responsibility of the Farmer.</p>
+
+            <h4>7. Payments & Transactions</h4>
+            <p>If the Farmer sells produce through Kultiva:</p>
+            <ul>
+                <li>Payments will be processed as per platform policies.</li>
+                <li>Kultiva may deduct service fees or commission.</li>
+                <li>Payment timelines will be communicated separately.</li>
+                <li>Delays due to disputes may affect payouts.</li>
+            </ul>
+
+            <h4>8. Prohibited Activities</h4>
+            <p>The Farmer shall NOT provide false identity or land information, sell banned/illegal produce, misrepresent product quality, engage in fraud, or attempt to bypass platform transaction systems. Violation may result in immediate suspension, permanent account termination, and legal action.</p>
+
+            <h4>9. Account Verification</h4>
+            <p>Farmer accounts may require Admin approval. Kultiva may verify Aadhaar and land details. Accounts remain inactive until approved. Approval is at the discretion of Kultiva.</p>
+
+            <h4>10. Dispute Resolution</h4>
+            <p>If disputes arise between Farmer and Buyer, both parties must cooperate. Kultiva may temporarily hold payments during investigation. Kultiva’s resolution decision shall be final.</p>
+
+            <h4>11. Limitation of Liability</h4>
+            <p>Kultiva is a digital marketplace platform. Kultiva is not liable for crop failure, natural disasters, weather-related loss, market price fluctuations, or disputes between parties.</p>
+
+            <h4>12. Data Protection</h4>
+            <p>Sensitive data such as Aadhaar details will be securely stored. Kultiva will take reasonable measures to protect personal information.</p>
+
+            <h4>13. Account Suspension & Termination</h4>
+            <p>Kultiva may suspend or terminate a Farmer account if false information is provided, laws are violated, repeated complaints occur, or terms are breached. Termination does not remove liability for prior actions.</p>
+
+            <h4>14. Amendments</h4>
+            <p>Kultiva reserves the right to update these Terms at any time. Continued use of the platform means acceptance of revised Terms.</p>
+
+            <h4>15. Governing Law</h4>
+            <p>These Terms are governed by the laws of India. Jurisdiction shall lie in the courts of Kerala.</p>
+
+            <h4>16. Declaration</h4>
+            <p>By clicking “I Agree”, you confirm that all information provided is accurate, you accept responsibility for your produce, and you agree to comply with applicable agricultural laws.</p>
+        </div>
+
+        <div id="acceptance-section" class="agreement-box">
+            <label class="checkbox-label">
+                <input type="checkbox" id="terms-checkbox">
+                I have read and agree to the Kultiva Farmer Terms and Agreement.
+            </label>
+            <br>
+            <button class="main-button" id="submit-btn" disabled onclick="closeTermsTab()">I Understand & Accept</button>
+        </div>
+
+    </div>
+  </section>
+  {% include 'footer.html' %}
+
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/js/animation.js' %}"></script>
+  <script src="{% static 'assets/js/templatemo-custom.js' %}"></script>
+
+  <script>
+      document.getElementById('terms-checkbox').addEventListener('change', function() {
+          const btn = document.getElementById('submit-btn');
+          if (this.checked) {
+              btn.disabled = false;
+              btn.style.opacity = '1';
+          } else {
+              btn.disabled = true;
+              btn.style.opacity = '0.6';
+          }
+      });
+
+      // Professionally close the tab, auto-check the parent form, or redirect
+      function closeTermsTab() {
+          // 1. Check if this page was opened from the Registration Form (New Tab)
+          if (window.opener && !window.opener.closed) {
+              try {
+                  // Magically find the checkbox in the parent tab (Farmer Registration)
+                  let parentCheckbox = window.opener.document.getElementById('termsCheckbox');
+                  
+                  if (parentCheckbox) {
+                      // Auto-check it
+                      parentCheckbox.checked = true;
+                      
+                      // Trigger the 'change' event in the parent so the Submit button unlocks!
+                      parentCheckbox.dispatchEvent(new Event('change'));
+                  }
+              } catch (e) {
+                  console.log("Could not access parent window.");
+              }
+              
+              // Close the terms tab and return the user to their form
+              window.close();
+              
+          } else {
+              // 2. Fallback: If they opened it in the same window, redirect them back to the Farmer Form
+              window.location.href = "{% url 'register_role' 'farmer' %}";
+          }
+      }
+  </script>
+
+</body>
+</html>

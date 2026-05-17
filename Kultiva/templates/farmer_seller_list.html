@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verified Sellers | Kultiva</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <style>
+        body { padding-top: 110px; background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-bottom: 4px solid #1b5e20;
+        }
+        
+        .shop-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(27, 94, 32, 0.2);
+        }
+        
+        .trust-badge { background: #fff8e1; color: #f57f17; font-weight: bold; padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #ffecb3; }
+        .sales-badge { background: #e8f5e9; color: #2e7d32; font-weight: bold; padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #c8e6c9; }
+        
+        .star-rating { color: #fbc02d; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container mb-5">
+        <div class="row mb-4 align-items-center">
+            <div class="col-lg-6">
+                <h2 style="color: #1e293b; font-weight: 800;"><i class="fa fa-store text-success"></i> Top Ranked Vendors</h2>
+                <p class="text-muted">Discover trusted suppliers ranked by community feedback and sales volume.</p>
+            </div>
+            <div class="col-lg-6">
+                <form method="GET" action="{% url 'farmer_seller_list' %}">
+                    <div class="input-group shadow-sm" style="border-radius: 25px; overflow: hidden;">
+                        <input type="text" name="q" class="form-control border-0 bg-white px-4" placeholder="Search by shop name, vendor, or district..." value="{{ search_query }}" style="height: 50px;">
+                        <button class="btn text-white px-4 fw-bold" type="submit" style="background: #1b5e20; border-radius: 0 25px 25px 0;">
+                            <i class="fa fa-search"></i> Find
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for seller in sellers %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="glass-widget d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="shop-avatar">
+                                {{ seller.seller_profile.shop_name|make_list|first|upper|default:seller.username|make_list|first|upper }}
+                            </div>
+                            <div class="text-end">
+                                <div class="trust-badge mb-1">
+                                    <i class="fa fa-star"></i> {{ seller.avg_rating|floatformat:1 }} ({{ seller.total_reviews }})
+                                </div>
+                                <div class="sales-badge">
+                                    <i class="fa fa-check-circle"></i> {{ seller.total_sales }} Orders
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4 style="color: #1e293b; font-weight: bold; margin-bottom: 5px;">{{ seller.seller_profile.shop_name|default:seller.username }}</h4>
+                        <p class="text-muted mb-2" style="font-size: 13px;">Managed by {{ seller.username }}</p>
+                        
+                        <p class="text-muted" style="font-size: 14px; margin-bottom: 20px; flex-grow: 1;">
+                            <i class="fa fa-map-marker text-danger me-1"></i> 
+                            {% if seller.addresses.first %}
+                                {{ seller.addresses.first.district }}, {{ seller.addresses.first.state }}
+                            {% else %}
+                                Location Pending
+                            {% endif %}
+                        </p>
+
+                        <a href="{% url 'farmer_view_seller_profile' seller.user_id %}" class="btn w-100 fw-bold" style="background: #f1f8e9; color: #1b5e20; border: 1px solid #c5e1a5; border-radius: 10px; transition: 0.3s;">
+                            Visit Storefront <i class="fa fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="fa fa-store-slash fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No vendors found.</h4>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

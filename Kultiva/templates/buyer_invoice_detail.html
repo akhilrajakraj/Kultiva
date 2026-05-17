@@ -1,0 +1,245 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction Details - {{ txn.transaction_id }}</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    
+    <style>
+        body { 
+            background-color: #f0f2f5; 
+            padding: 40px 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        
+        .invoice-container { 
+            max-width: 850px; 
+            margin: 0 auto; 
+            background: #fff; 
+            padding: 50px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        }
+        
+        .invoice-header { 
+            border-bottom: 2px solid #1b5e20; 
+            padding-bottom: 20px; 
+            margin-bottom: 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+        }
+        
+        .invoice-title { color: #1b5e20; font-weight: 800; font-size: 32px; margin: 0; }
+        .invoice-meta { text-align: right; color: #666; font-size: 14px; }
+        
+        .details-box { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 30px; 
+            border: 1px solid #e9ecef;
+        }
+        
+        .table-custom th { background-color: #e8f5e9; color: #1b5e20; border-bottom: 2px solid #c5e1a5; }
+        .table-custom td { vertical-align: middle; }
+        
+        .totals-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .totals-final { font-size: 20px; font-weight: bold; color: #1b5e20; border-bottom: none; border-top: 2px solid #333; margin-top: 10px; padding-top: 15px; }
+        
+        .status-stamp { 
+            display: inline-block; 
+            padding: 10px 25px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            font-size: 14px; 
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+        .stamp-locked { background: #fff3e0; color: #e65100; border: 2px dashed #ffb74d; }
+        .stamp-paid { background: #e8f5e9; color: #1b5e20; border: 2px dashed #81c784; }
+        .stamp-refunded { background: #ffebee; color: #c62828; border: 2px dashed #e57373; }
+
+        /* --- FEEDBACK STYLING --- */
+        .feedback-section {
+            background: #fdfbf7;
+            border: 1px solid #e0d4c3;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mb-3" style="max-width: 850px;">
+        <a href="{% url 'buyer_purchase_history' %}" class="btn btn-outline-secondary rounded-pill shadow-sm">
+            <i class="fa fa-arrow-left"></i> Back to Purchase Ledger
+        </a>
+    </div>
+
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <div>
+                <h1 class="invoice-title">TRANSACTION DETAILS</h1>
+                <p class="text-muted mt-2 mb-0"><strong>ID:</strong> {{ txn.transaction_id }}</p>
+                <p class="text-muted mb-0"><strong>Date:</strong> {{ txn.created_at|date:"F d, Y" }}</p>
+            </div>
+            <div class="invoice-meta">
+                <h4 style="color: #333; font-weight: bold; margin-bottom: 5px;">Kultiva Platform</h4>
+                <p class="mb-0">Smart Contract B2B Escrow</p>
+                <p class="mb-0">Status: <strong>{{ txn.get_payment_status_display }}</strong></p>
+            </div>
+        </div>
+
+        <div class="row details-box">
+            <div class="col-md-6">
+                <h6 class="text-muted text-uppercase fw-bold" style="font-size: 12px;">Purchaser (Buyer)</h6>
+                <h5 style="color: #1b5e20; font-weight: bold;">{{ buyer.username }}</h5>
+                <p class="mb-0 text-muted" style="font-size: 14px;"><i class="fa fa-envelope-o"></i> {{ buyer.email }}</p>
+            </div>
+            <div class="col-md-6 border-start">
+                <h6 class="text-muted text-uppercase fw-bold" style="font-size: 12px;">Vendor (Farmer)</h6>
+                <h5 style="color: #0288d1; font-weight: bold;">{{ vendor.username }}</h5>
+                <p class="mb-0 text-muted" style="font-size: 14px;"><i class="fa fa-envelope-o"></i> {{ vendor.email }}</p>
+            </div>
+        </div>
+
+        <table class="table table-custom mb-4">
+            <thead>
+                <tr>
+                    <th>Commodity Description</th>
+                    <th class="text-center">Quantity Secured</th>
+                    <th class="text-end">Total Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong style="font-size: 16px;">{{ listing.title|default:"Custom Trade Proposal" }}</strong>
+                        <div style="font-size: 13px; color: #666; margin-top: 5px;">
+                            {% for key, value in formatted_specs.items %}
+                                <span class="badge bg-light text-dark border me-1 mb-1">{{ key|title }}: {{ value }}</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td class="text-center align-middle">
+                        <strong>{{ proposal.requested_quantity }} {{ listing.unit_of_measure }}</strong>
+                    </td>
+                    <td class="text-end align-middle">
+                        <strong>₹{{ subtotal }}</strong>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="container" style="max-width: 850px;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+        <div class="row justify-content-end">
+            <div class="col-md-5">
+                <div class="totals-row">
+                    <span class="text-muted">Subtotal</span>
+                    <strong>₹{{ subtotal }}</strong>
+                </div>
+                <div class="totals-row">
+                    <span class="text-muted">Kultiva Zero-Fee Escrow</span>
+                    <strong>₹{{ platform_fee }}</strong>
+                </div>
+                <div class="totals-row totals-final">
+                    <span>Final Amount Paid</span>
+                    <span>₹{{ total }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4 border-top pt-4">
+            {% if txn.payment_status == 'ESCROW_LOCKED' %}
+                <div class="status-stamp stamp-locked">
+                    <i class="fa fa-lock"></i> FUNDS SECURELY LOCKED IN ESCROW
+                </div>
+            {% elif txn.payment_status == 'COMPLETED' %}
+                <div class="status-stamp stamp-paid">
+                    <i class="fa fa-check-circle"></i> PAYMENT RELEASED TO VENDOR
+                </div>
+            {% elif txn.payment_status == 'REFUNDED' %}
+                <div class="status-stamp stamp-refunded">
+                    <i class="fa fa-undo"></i> FUNDS REFUNDED TO BUYER
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="feedback-section shadow-sm">
+            <h4 class="mb-3" style="color: #1e293b; font-weight: bold;">
+                <i class="fa fa-star text-warning me-2"></i> Vendor Assessment
+            </h4>
+
+            {% if txn.payment_status == 'COMPLETED' %}
+                
+                {% if existing_review %}
+                    <div class="alert alert-success shadow-sm mb-0" style="border-radius: 10px; border-left: 5px solid #2e7d32; background-color: #f1f8e9;">
+                        <h5 class="fw-bold mb-2" style="color: #1b5e20;"><i class="fa fa-heart text-danger me-2"></i> Thank you for your feedback!</h5>
+                        <p class="mb-0 text-muted" style="font-size: 15px;">
+                            Your assessment of <strong>{{ vendor.username }}</strong> has been successfully recorded. This helps the Kultiva community build a stronger, more transparent agricultural network.
+                        </p>
+                    </div>
+
+                {% else %}
+                    <p class="text-muted" style="font-size: 14px;">The transaction is complete. How was your experience doing business with <strong>{{ vendor.username }}</strong>?</p>
+                    
+                    <form action="{% url 'submit_unified_review' %}" method="POST" class="mt-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="transaction_id" value="{{ txn.transaction_id }}">
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="fw-bold mb-2" style="font-size: 13px; color: #555;">Overall Rating *</label>
+                                <select name="rating" required class="form-select shadow-sm" style="border-radius: 8px;">
+                                    <option value="" disabled selected>Select Stars...</option>
+                                    <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+                                    <option value="4">⭐⭐⭐⭐ 4 - Good</option>
+                                    <option value="3">⭐⭐⭐ 3 - Average</option>
+                                    <option value="2">⭐⭐ 2 - Poor</option>
+                                    <option value="1">⭐ 1 - Unacceptable</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label class="fw-bold mb-2" style="font-size: 13px; color: #555;">Public Review (Optional)</label>
+                                <textarea name="comment" class="form-control shadow-sm" rows="2" style="border-radius: 8px;" placeholder="Describe crop quality, delivery speed, and communication..."></textarea>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-warning fw-bold text-dark px-4 shadow-sm" style="border-radius: 20px;">
+                                <i class="fa fa-paper-plane me-1"></i> Submit Review
+                            </button>
+                        </div>
+                    </form>
+                {% endif %}
+
+            {% else %}
+                <div class="alert mb-0" style="background: rgba(255,183,77,0.1); border-left: 4px solid #ffb74d; color: #d84315;">
+                    <i class="fa fa-clock-o me-2"></i> <strong>Feedback Locked.</strong> You can rate this vendor and leave a review once the physical crop is delivered and escrow funds are released.
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center mt-5 text-muted" style="font-size: 12px;">
+            This is a computer-generated record from the Kultiva AI Supply Chain Platform.<br>
+            A smart contract digital handshake &copy; 2026.
+        </div>
+        
+    </div>
+
+</body>
+</html>

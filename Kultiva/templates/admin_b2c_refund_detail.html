@@ -1,0 +1,238 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Case Review: {{ order.order_id }} | Kultiva Admin</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body { padding-top: 110px; background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+
+        .section-title { font-size: 16px; font-weight: 800; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        .info-label { font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .info-value { font-size: 16px; color: #0f172a; font-weight: bold; }
+
+        .action-panel { background: #fff; border: 2px solid #e2e8f0; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        
+        .btn-action-main { padding: 12px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; margin-bottom: 15px; }
+        .btn-action-main:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        .status-badge { padding: 8px 15px; border-radius: 30px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+        .bg-locked { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb fw-bold">
+                <li class="breadcrumb-item"><a href="{% url 'manage_b2c_refunds' %}" style="color: #f57f17; text-decoration: none;"><i class="fa fa-arrow-left me-1"></i> Back to B2C Disputes</a></li>
+                <li class="breadcrumb-item active" style="color: #64748b;">Case Investigation: {{ order.order_id }}</li>
+            </ol>
+        </nav>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px; font-weight: bold;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="management-card" style="border-top: 5px solid #f57f17;">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h3 style="color: #1e293b; font-weight: 900; margin-bottom: 5px;">{{ order.order_id }}</h3>
+                            <p class="text-muted mb-0"><i class="fa fa-calendar me-2"></i> Order Cancelled On: {{ order.created_at|date:"F d, Y - h:i A" }}</p>
+                        </div>
+                        <span class="status-badge bg-locked"><i class="fa fa-ban"></i> CANCELLED</span>
+                    </div>
+
+                    <h4 class="section-title mt-5"><i class="fa fa-users text-primary me-2"></i> Involved Parties</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-box border-start border-success border-4">
+                                <div class="info-label text-success"><i class="fa fa-leaf me-1"></i> Farmer (Purchaser)</div>
+                                <div class="info-value">{{ farmer.username }}</div>
+                                <div style="font-size: 13px; color: #555; margin-top: 5px;"><i class="fa fa-envelope-o me-1"></i> {{ farmer.email }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box border-start border-warning border-4">
+                                <div class="info-label text-warning"><i class="fa fa-store me-1"></i> Input Vendor (Seller)</div>
+                                <div class="info-value">{{ vendor.username|default:"Deleted Vendor" }}</div>
+                                <div style="font-size: 13px; color: #555; margin-top: 5px;"><i class="fa fa-envelope-o me-1"></i> {{ vendor.email|default:"N/A" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="section-title mt-4"><i class="fa fa-shopping-basket text-warning me-2"></i> Order Specifications</h4>
+                    <div class="info-box">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="info-label">Retail Product</div>
+                                <div class="info-value mb-2" style="font-size: 18px;">{{ order.product.title|default:"Deleted Item" }}</div>
+                                <span class="badge bg-light text-dark border">Qty: {{ order.quantity|floatformat:0 }} {{ order.product.unit_of_measure }}</span>
+                                <span class="badge bg-light text-dark border ms-2">Payment: {{ order.get_payment_method_display }}</span>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0 border-start">
+                                <div class="info-label">Escrow Lock</div>
+                                {% if escrow %}
+                                    <div style="font-size: 32px; font-weight: 900; color: #d32f2f;">₹{{ escrow.amount_paid }}</div>
+                                    <span class="badge bg-danger mt-1">Escrow Vault</span>
+                                {% else %}
+                                    <div style="font-size: 20px; font-weight: 900; color: #888;">No Escrow Found</div>
+                                    <span class="badge bg-secondary mt-1">Offline / COD</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="action-panel">
+                    <h5 style="color: #1e293b; font-weight: 800; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                        <i class="fa fa-gavel text-danger me-2"></i> Resolution Actions
+                    </h5>
+
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 25px;">Investigate why the Farmer cancelled this order before proceeding with irreversible financial transfers.</p>
+
+                    <button type="button" class="btn btn-outline-primary btn-action-main" data-bs-toggle="modal" data-bs-target="#emailModal" style="background: #f0f9ff;">
+                        <i class="fa fa-envelope"></i> Email Both Parties
+                    </button>
+
+                    <hr style="border-color: #e2e8f0; margin: 25px 0;">
+
+                    <button type="button" onclick="openResolutionModal('refund')" class="btn btn-danger text-white btn-action-main shadow-sm" {% if not escrow %}disabled{% endif %}>
+                        <i class="fa fa-undo"></i> Refund Farmer
+                    </button>
+
+                    <button type="button" onclick="openResolutionModal('release')" class="btn btn-success text-white btn-action-main shadow-sm" {% if not escrow %}disabled{% endif %}>
+                        <i class="fa fa-check-circle"></i> Release to Seller
+                    </button>
+                    
+                    {% if not escrow %}
+                        <div class="alert mt-3 mb-0" style="background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; font-size: 11px; text-align: center; font-weight: bold;">
+                            <i class="fa fa-ban me-1"></i> Financial actions disabled.<br>No digital escrow vault exists for this order.
+                        </div>
+                    {% else %}
+                        <div class="alert mt-4 mb-0" style="background: #fff8e1; border: 1px solid #ffecb3; color: #856404; font-size: 11px; text-align: center;">
+                            <i class="fa fa-shield me-1"></i> All financial actions are heavily logged and monitored.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="emailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; overflow: hidden;">
+                <div class="modal-header" style="background: #e0f2fe; color: #0288d1; border-bottom: none; padding: 25px;">
+                    <h5 class="modal-title fw-bold"><i class="fa fa-paper-plane me-2"></i> Request Evidence</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'admin_b2c_refund_detail' order.order_id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="send_investigation_email">
+                    <div class="modal-body px-4">
+                        <p style="font-size: 14px; color: #555;">This message will be dispatched via official HTML email to both the Farmer (<strong>{{ farmer.username }}</strong>) and the Seller (<strong>{{ vendor.username|default:"Vendor" }}</strong>) simultaneously.</p>
+                        <label class="fw-bold mb-2 text-muted">Admin Investigation Message <span class="text-danger">*</span></label>
+                        <textarea name="custom_message" class="form-control shadow-sm" rows="4" style="border-radius: 10px;" placeholder="E.g., Please provide proof of dispatch or reasoning for cancellation before we process the refund..." required></textarea>
+                    </div>
+                    <div class="modal-footer" style="background: #f8f9fa; border-top: 1px solid #eee; padding: 20px;">
+                        <button type="button" class="btn btn-light fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fw-bold rounded-pill px-4 shadow-sm"><i class="fa fa-envelope me-1"></i> Send Official Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="resolutionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; overflow: hidden;">
+                <div class="modal-header" id="resModalHeader" style="border-bottom: none; padding: 25px;">
+                    <h5 class="modal-title fw-bold" id="resModalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form action="{% url 'process_b2c_refund' order.order_id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" id="resModalAction">
+                    <div class="modal-body px-4">
+                        <p id="resModalDesc" style="font-size: 16px; color: #333; line-height: 1.6;"></p>
+                        <div class="alert alert-light border mt-4 mb-0 text-center" style="font-size: 13px; color: #666; font-weight: bold;">
+                            <i class="fa fa-envelope text-primary me-1"></i> A detailed financial receipt will automatically be emailed.
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background: #f8f9fa; border-top: 1px solid #eee; padding: 20px;">
+                        <button type="button" class="btn btn-light fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancel Review</button>
+                        <button type="submit" id="resModalBtn" class="btn fw-bold rounded-pill px-4 shadow-sm">Confirm Action</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        // The Senior Developer Logic: A single modal dynamically morphs for B2C financial outcomes
+        function openResolutionModal(actionType) {
+            document.getElementById('resModalAction').value = actionType;
+            
+            let header = document.getElementById('resModalHeader');
+            let title = document.getElementById('resModalTitle');
+            let desc = document.getElementById('resModalDesc');
+            let btn = document.getElementById('resModalBtn');
+            
+            // Fetch Python variables into JS safely
+            let amount = "{{ escrow.amount_paid|default:'0' }}";
+            let farmerName = "{{ farmer.username }}";
+            let vendorName = "{{ vendor.username|default:'the seller' }}";
+            
+            if (actionType === 'refund') {
+                header.style.backgroundColor = '#ffebee';
+                header.style.color = '#c62828';
+                title.innerHTML = '<i class="fa fa-undo me-2"></i> Authorize Farmer Refund';
+                desc.innerHTML = `You are permanently processing this cancellation. <strong style="color:#d32f2f; font-size: 20px;">₹${amount}</strong> will be returned to the farmer (<strong>${farmerName}</strong>).`;
+                btn.className = 'btn btn-danger fw-bold rounded-pill px-4';
+                btn.innerHTML = '<i class="fa fa-undo me-1"></i> Yes, Process Refund';
+            } else if (actionType === 'release') {
+                header.style.backgroundColor = '#e8f5e9';
+                header.style.color = '#1b5e20';
+                title.innerHTML = '<i class="fa fa-check-circle me-2"></i> Force Release Funds';
+                desc.innerHTML = `You are overriding the farmer's cancellation. The order will be marked as Delivered, and <strong style="color:#1b5e20; font-size: 20px;">₹${amount}</strong> will be forcefully released to <strong>${vendorName}</strong>.`;
+                btn.className = 'btn btn-success fw-bold rounded-pill px-4';
+                btn.innerHTML = '<i class="fa fa-check me-1"></i> Yes, Release Funds';
+            }
+            
+            var resModal = new bootstrap.Modal(document.getElementById('resolutionModal'));
+            resModal.show();
+        }
+    </script>
+</body>
+</html>

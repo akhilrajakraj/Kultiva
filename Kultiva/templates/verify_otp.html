@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kultiva - Verify OTP</title>
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+  <style>
+    :root { --farm-green: #2e7d32; --deep-green: #1b5e20; --crop-yellow: #fbc02d; }
+    body { font-family: 'Times New Roman', Times, serif !important; background: rgb(255,253,231); background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}"), linear-gradient(180deg, rgba(255,253,231,1) 0%, rgba(220,237,200,1) 50%, rgba(255,255,255,1) 100%); background-size: cover; min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+    .login-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid #c5e1a5; border-radius: 20px; padding: 40px; width: 100%; max-width: 450px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin-top: 120px; margin-bottom: 60px; z-index: 2; text-align: center; }
+    .form-group { margin-bottom: 20px; }
+    .otp-input { width: 100%; border: none; border-bottom: 2px solid var(--farm-green); background: transparent; padding: 10px 0; font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: bold; color: var(--deep-green); outline: none; }
+    .otp-input:focus { border-bottom-color: var(--crop-yellow); }
+    .btn-login { width: 100%; background-color: var(--farm-green); color: #fff; font-size: 18px; padding: 12px; border: none; border-radius: 5px; font-weight: bold; margin-top: 15px; transition: 0.3s; cursor: pointer; }
+    .btn-login:hover:not(:disabled) { background-color: var(--crop-yellow); color: #1b5e20; }
+    .btn-login:disabled { background-color: #9e9e9e; cursor: not-allowed; opacity: 0.7; }
+    .timer-text { font-size: 16px; font-weight: bold; color: var(--farm-green); margin-bottom: 20px; }
+    .resend-link { color: #d32f2f; font-weight: bold; display: none; margin-top: 15px; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  {% include 'header.html' %}
+
+  <div class="login-card wow fadeInUp">
+    <i class="fa fa-envelope-open" style="font-size: 40px; color: var(--crop-yellow); margin-bottom: 15px;"></i>
+    <h2 style="color: #1b5e20; font-weight: bold;">Enter OTP</h2>
+    <p class="text-muted" style="font-size: 14px;">Sent to <strong>{{ request.session.reset_email }}</strong></p>
+
+    <div class="timer-text" id="timerDisplay">Time remaining: <span>01:00</span></div>
+
+    {% if messages %}
+      <div class="alert-container" style="margin-bottom: 20px; text-align: left;">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" style="background-color: #ffebee; color: #d32f2f; padding: 10px; border-radius: 5px; border-left: 5px solid #d32f2f; font-size: 14px;">
+             {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form action="{% url 'verify_otp' %}" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        <input type="text" name="otp" id="otpInput" class="otp-input" placeholder="------" required maxlength="6" pattern="\d{6}" autocomplete="off" autofocus>
+      </div>
+      <button type="submit" class="btn-login" id="submitBtn">Verify Code</button>
+    </form>
+    
+    <a href="{% url 'forgot_password' %}" class="resend-link" id="resendLink">Time expired. Click here to resend OTP.</a>
+  </div>
+
+  {% include 'footer.html' %}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let timeLeft = parseInt("{{ time_left }}"); 
+        const timerDisplay = document.getElementById('timerDisplay');
+        const otpInput = document.getElementById('otpInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const resendLink = document.getElementById('resendLink');
+
+        if (timeLeft <= 0) {
+            expireState();
+        } else {
+            const countdown = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    expireState();
+                } else {
+                    let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                    let s = (timeLeft % 60).toString().padStart(2, '0');
+                    timerDisplay.innerHTML = "Time remaining: <span>" + m + ":" + s + "</span>";
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function expireState() {
+            timerDisplay.innerHTML = "<span style='color: #d32f2f;'>OTP Expired!</span>";
+            otpInput.disabled = true;
+            submitBtn.disabled = true;
+            resendLink.style.display = 'block';
+        }
+    });
+  </script>
+</body>
+</html>

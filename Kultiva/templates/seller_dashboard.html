@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard | Kultiva</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 24px;
+            height: 100%;
+        }
+
+        .page-title { color: #1b5e20; font-weight: 900; letter-spacing: -0.5px; }
+        
+        /* KPI Cards */
+        .kpi-card { display: flex; justify-content: space-between; align-items: center; border-left: 5px solid transparent; }
+        .kpi-revenue { border-color: #1b5e20; }
+        .kpi-orders { border-color: #0288d1; }
+        .kpi-alerts { border-color: #d32f2f; }
+        
+        .kpi-info h6 { color: #666; font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .kpi-info h2 { color: #1a1a1a; font-weight: 900; margin: 0; }
+        
+        .kpi-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .icon-revenue { background: #e8f5e9; color: #1b5e20; }
+        .icon-orders { background: #e1f5fe; color: #0288d1; }
+        .icon-alerts { background: #ffebee; color: #d32f2f; }
+
+        /* Widget Titles */
+        .widget-title { font-size: 18px; font-weight: bold; color: #1b5e20; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f1f8e9; }
+
+        /* List Items (Top Products & Low Stock) */
+        .data-list { list-style: none; padding: 0; margin: 0; }
+        .data-list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f8e9; }
+        .data-list li:last-child { border-bottom: none; }
+        
+        .product-name { font-size: 15px; font-weight: bold; color: #333; }
+        
+        .badge-stock { background: #ffebee; color: #d32f2f; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; border: 1px solid #ffcdd2; }
+        .badge-sales { background: #fff8e1; color: #f57f17; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #ffecb3; }
+
+    </style>
+</head>
+<body>
+
+    {% include 'seller_header.html' %}
+
+    <div class="container pb-5 wow fadeIn">
+        
+        <header class="d-flex justify-content-between align-items-center mb-4 mt-2">
+            <div>
+                <h2 class="page-title">Performance Dashboard</h2>
+                <p class="text-muted fw-bold mb-0">Welcome back! Here is your business overview.</p>
+            </div>
+            <a href="{% url 'seller_orders' %}" class="btn btn-outline-success fw-bold rounded-pill shadow-sm">
+                <i class="fa fa-truck"></i> Fulfill Orders
+            </a>
+        </header>
+
+        <div class="row mb-4 g-4">
+            <div class="col-md-4">
+                <div class="glass-widget kpi-card kpi-revenue">
+                    <div class="kpi-info">
+                        <h6>Total Revenue</h6>
+                        <h2>₹{{ total_revenue|floatformat:2 }}</h2>
+                    </div>
+                    <div class="kpi-icon icon-revenue"><i class="fa fa-inr"></i></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-widget kpi-card kpi-orders">
+                    <div class="kpi-info">
+                        <h6>Total Orders</h6>
+                        <h2>{{ orders_count }}</h2>
+                    </div>
+                    <div class="kpi-icon icon-orders"><i class="fa fa-shopping-basket"></i></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-widget kpi-card kpi-alerts">
+                    <div class="kpi-info">
+                        <h6 class="text-danger">Low Stock Alerts</h6>
+                        <h2 class="text-danger">{{ low_stock_items|length }} Items</h2>
+                    </div>
+                    <div class="kpi-icon icon-alerts"><i class="fa fa-exclamation-triangle"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-lg-8">
+                <div class="glass-widget">
+                    <h4 class="widget-title"><i class="fa fa-chart-line text-warning"></i> 6-Month Revenue Trend</h4>
+                    <canvas id="revenueChart" height="120"></canvas>
+                </div>
+            </div>
+
+            <div class="col-lg-4 d-flex flex-column gap-4">
+                
+                <div class="glass-widget flex-grow-1">
+                    <h4 class="widget-title"><i class="fa fa-box-open text-danger"></i> Needs Restocking</h4>
+                    <ul class="data-list">
+                        {% for item in low_stock_items %}
+                        <li>
+                            <span class="product-name">{{ item.title|truncatechars:20 }}</span>
+                            <span class="badge-stock">{{ item.available_stock|floatformat:0 }} left</span>
+                        </li>
+                        {% empty %}
+                        <li class="text-success fw-bold"><i class="fa fa-check-circle"></i> All stock levels are healthy!</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="glass-widget flex-grow-1">
+                    <h4 class="widget-title"><i class="fa fa-fire text-warning"></i> Top Selling Items</h4>
+                    <ul class="data-list">
+                        {% for item in top_products %}
+                        <li>
+                            <span class="product-name">{{ item.title|truncatechars:20 }}</span>
+                            <span class="badge-sales"><i class="fa fa-arrow-trend-up"></i> {{ item.total_sold|floatformat:0 }} sold</span>
+                        </li>
+                        {% empty %}
+                        <li class="text-muted fw-bold">No sales data recorded yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/animation.js' %}"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            // Create a gradient for the chart line
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(27, 94, 32, 0.4)'); // Kultiva Green
+            gradient.addColorStop(1, 'rgba(27, 94, 32, 0.0)');
+
+            const revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ chart_labels|safe }}, // Safe injection from Django backend
+                    datasets: [{
+                        label: 'Revenue (₹)',
+                        data: {{ chart_data|safe }}, // Safe injection from Django backend
+                        borderColor: '#1b5e20',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fbc02d',
+                        pointBorderColor: '#1b5e20',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        tension: 0.4 // Smooth curves
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleFont: { size: 14, family: 'Times New Roman' },
+                            bodyFont: { size: 14, weight: 'bold', family: 'Times New Roman' },
+                            padding: 10,
+                            displayColors: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)', borderDash: [5, 5] },
+                            ticks: { callback: function(value) { return '₹' + value; }, font: { family: 'Times New Roman', weight: 'bold' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Times New Roman', weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

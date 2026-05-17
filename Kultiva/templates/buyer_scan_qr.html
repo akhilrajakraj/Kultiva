@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kultiva - Scan QR</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <style>
+        body { padding-top: 110px; background-color: #1e293b; color: white; }
+        .scanner-card { background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: 3px solid #2e7d32; }
+    </style>
+</head>
+<body>
+    {% include 'buyer_header.html' %}
+
+    <div class="container mb-5 d-flex justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="scanner-card">
+                <h3 style="color: #c5e1a5; font-weight: bold;"><i class="fa fa-qrcode"></i> Digital Handshake</h3>
+                <p class="text-muted" style="font-size: 14px;">Point your camera at the Farmer's QR code to verify pickup and securely release funds.</p>
+                
+                <div id="reader" class="mt-4 mb-4 bg-dark"></div>
+                
+                <div id="status-msg" class="alert alert-info" style="display: none; font-size: 13px; font-weight: bold;">
+                    <i class="fa fa-spinner fa-spin"></i> Processing Secure Token...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // Stop scanning to prevent multiple triggers
+            html5QrcodeScanner.clear();
+            document.getElementById('reader').style.display = 'none';
+            document.getElementById('status-msg').style.display = 'block';
+            
+            // Redirect the phone to the decoded URL (The Checkout Page)
+            window.location.href = decodedText;
+        }
+
+        function onScanFailure(error) {
+            // ignore constant background scanning failures
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, qrbox: {width: 250, height: 250} }, /* verbose= */ false);
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    </script>
+</body>
+</html>

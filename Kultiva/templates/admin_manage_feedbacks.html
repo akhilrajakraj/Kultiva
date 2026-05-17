@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva Admin - {{ page_title }}</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body { padding-top: 110px; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid {{ theme_color }}; 
+        }
+
+        .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 12px; border-top: none; }
+        .table-custom td { vertical-align: middle; color: #555; font-size: 14px; }
+        
+        /* Scrollable Filter Tabs */
+        .tab-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; }
+        .tab-scroll::-webkit-scrollbar { display: none; }
+        .filter-tab {
+            padding: 8px 18px; border-radius: 30px; font-size: 13px; font-weight: bold;
+            white-space: nowrap; cursor: pointer; border: 1px solid #e2e8f0;
+            background: #fff; color: #64748b; transition: 0.3s; text-decoration: none !important;
+        }
+        .filter-tab.active {
+            background: {{ theme_color }}; color: white; border-color: {{ theme_color }};
+            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.2);
+        }
+
+        .role-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .role-buyer { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .role-farmer { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .role-seller { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        
+        .rating-stars { color: #fbc02d; font-size: 14px; }
+        .review-img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; transition: 0.3s; }
+        .review-img:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px; font-weight: bold;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="color: #1e293b; font-weight: 800;"><i class="fa fa-comments-o" style="color: {{ theme_color }}; margin-right: 8px;"></i> {{ page_title }}</h3>
+            </div>
+            
+            <div class="tab-scroll">
+                <a href="?type=all" class="filter-tab {% if current_filter == 'all' %}active{% endif %}">All Feedbacks</a>
+                <a href="?type=b2b" class="filter-tab {% if current_filter == 'b2b' %}active{% endif %}"><i class="fa fa-handshake-o"></i> Corporate Trades (Buyer to Farmer)</a>
+                <a href="?type=b2c" class="filter-tab {% if current_filter == 'b2c' %}active{% endif %}"><i class="fa fa-shopping-cart"></i> Input Market (Farmer to Seller)</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-custom">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th>Date & Type</th>
+                            <th>Reviewer</th>
+                            <th>Reviewed Entity</th>
+                            <th>Rating</th>
+                            <th>Comment & Proof</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in feedbacks %}
+                        <tr>
+                            <td>
+                                <div style="font-size: 12px; font-weight: bold; color: #888;">{{ feedback.created_at|date:"d M Y" }}</div>
+                                {% if feedback.b2b_trade %}
+                                    <span class="badge bg-primary mt-1" style="font-size: 10px;">B2B Contract</span>
+                                {% elif feedback.input_order %}
+                                    <span class="badge bg-success mt-1" style="font-size: 10px;">Input Purchase</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong style="color: #333;">{{ feedback.reviewer.username }}</strong><br>
+                                <span class="role-badge role-{{ feedback.reviewer.role|lower }}">{{ feedback.reviewer.role }}</span>
+                            </td>
+                            <td>
+                                <strong style="color: #333;">{{ feedback.reviewee.username }}</strong><br>
+                                <span class="role-badge role-{{ feedback.reviewee.role|lower }}">{{ feedback.reviewee.role }}</span>
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= feedback.rating %}
+                                            <i class="fa fa-star"></i>
+                                        {% else %}
+                                            <i class="fa fa-star-o" style="color: #e0e0e0;"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span style="font-size: 11px; font-weight: bold; color: #555;">{{ feedback.rating }}/5</span>
+                            </td>
+                            <td>
+                                <div style="max-width: 300px; font-size: 13px; line-height: 1.4; color: #444; margin-bottom: 8px;">
+                                    "{{ feedback.comment|default:'No text provided.' }}"
+                                </div>
+                                {% if feedback.image %}
+                                    <a href="{{ feedback.image.url }}" target="_blank">
+                                        <img src="{{ feedback.image.url }}" class="review-img" title="Click to view full image">
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fa fa-commenting-o text-muted" style="font-size: 60px;"></i>
+                                <h5 class="mt-3">No feedback data found.</h5>
+                                <p>There are no reviews matching the current filter.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

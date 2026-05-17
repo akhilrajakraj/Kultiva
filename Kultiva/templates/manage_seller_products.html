@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva Admin - {{ page_title }}</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body { padding-top: 110px; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid {{ theme_color }}; 
+        }
+
+        .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 12px; border-top: none; }
+        .table-custom td { vertical-align: middle; color: #555; font-size: 14px; }
+        
+        .product-thumb-wrapper {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* --- NEW: SCROLLABLE TABS --- */
+        .tab-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; }
+        .tab-scroll::-webkit-scrollbar { display: none; }
+        .filter-tab {
+            padding: 8px 18px; border-radius: 30px; font-size: 13px; font-weight: bold;
+            white-space: nowrap; cursor: pointer; border: 1px solid #ffecb3;
+            background: #fff; color: #666; transition: 0.3s; text-decoration: none !important;
+        }
+        .filter-tab.active {
+            background: {{ theme_color }}; color: white; border-color: {{ theme_color }};
+            box-shadow: 0 4px 10px rgba(245, 127, 23, 0.2);
+        }
+
+        /* BADGES */
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bg-active { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+        .bg-out { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        .bg-hidden { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+        .bg-banned { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; } /* NEW: Banned Badge */
+
+        .btn-action { transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px; padding: 6px 15px; font-size: 13px; }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .user-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #fff8e1; color: #f57f17; font-weight: bold; border: 1px solid #ffecb3; }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px; font-weight: bold;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="color: #1e293b; font-weight: 800;"><i class="fa fa-shopping-basket" style="color: {{ theme_color }}; margin-right: 8px;"></i> {{ page_title }}</h3>
+            </div>
+            
+            <div class="tab-scroll">
+                <a href="?status=all" class="filter-tab {% if current_status == 'all' or not current_status %}active{% endif %}">All Inputs</a>
+                <a href="?status=ACTIVE" class="filter-tab {% if current_status == 'ACTIVE' %}active{% endif %}">Active Listings</a>
+                <a href="?status=OUT_OF_STOCK" class="filter-tab {% if current_status == 'OUT_OF_STOCK' %}active{% endif %}">Out of Stock</a>
+                <a href="?status=HIDDEN" class="filter-tab {% if current_status == 'HIDDEN' %}active{% endif %}">Hidden</a>
+                <a href="?status=BANNED" class="filter-tab {% if current_status == 'BANNED' %}active{% endif %}" style="{% if current_status == 'BANNED' %}background: #d32f2f; border-color: #d32f2f;{% endif %}"><i class="fa fa-ban"></i> Removed (Takedowns)</a>
+            </div>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-hover table-custom">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th>Product Info</th>
+                            <th>Category</th>
+                            <th>Input Seller</th>
+                            <th>Price & Stock</th>
+                            <th>Status</th>
+                            <th class="text-center">Moderation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="product-thumb-wrapper me-3">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                                        {% else %}
+                                            <i class="fa fa-box-open text-muted"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong style="color: #333; font-size: 15px;">{{ product.title }}</strong><br>
+                                        <span style="font-size: 12px; color: #888;"><i class="fa fa-clock-o me-1"></i>{{ product.created_at|date:"d M Y" }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="font-weight: bold; color: #555;">{{ product.get_category_display }}</span>
+                            </td>
+                            <td>
+                                <span class="d-block fw-bold" style="color: #f57f17;">{{ product.listed_by.username }}</span>
+                                <span class="user-tag"><i class="fa fa-store"></i> Seller</span>
+                            </td>
+                            <td>
+                                <strong style="color: #1e293b; font-size: 15px;">₹{{ product.price }}</strong> <span style="font-size: 12px; color: #888;">/ {{ product.unit_of_measure }}</span><br>
+                                <span style="font-size: 12px; font-weight: bold; color: #64748b;">Stock: {{ product.available_stock|floatformat:0 }} {{ product.unit_of_measure }}</span>
+                            </td>
+                            <td>
+                                {% if product.status == 'ACTIVE' %}
+                                    <span class="badge-status bg-active"><i class="fa fa-check-circle"></i> Active</span>
+                                {% elif product.status == 'OUT_OF_STOCK' %}
+                                    <span class="badge-status bg-out"><i class="fa fa-exclamation-circle"></i> No Stock</span>
+                                {% elif product.status == 'BANNED' %}
+                                    <span class="badge-status bg-banned"><i class="fa fa-ban"></i> Removed</span>
+                                {% else %}
+                                    <span class="badge-status bg-hidden"><i class="fa fa-eye-slash"></i> Hidden</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'admin_product_detail' product.id %}" class="btn btn-outline-primary btn-action" style="color: #0288d1; border-color: #0288d1;">
+                                    <i class="fa fa-search me-2"></i> Investigate
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa fa-filter fa-4x mb-3" style="color: #e2e8f0;"></i>
+                                <h5>No products found.</h5>
+                                <p>There are no seller inputs matching the current filter.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

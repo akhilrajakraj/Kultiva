@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Investigate Order: {{ order.order_id }} | Kultiva Admin</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        :root {
+            --theme-main: #f57f17; /* B2C Retail Orange Theme */
+            --theme-light: #fff8e1;
+            --theme-border: #ffecb3;
+        }
+
+        body { padding-top: 110px; background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--theme-main);
+            height: 100%;
+        }
+
+        .section-title { font-size: 16px; font-weight: 800; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        .info-label { font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .info-value { font-size: 16px; color: #0f172a; font-weight: bold; }
+
+        .action-panel { background: #fff; border: 2px solid #e2e8f0; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        
+        .btn-action-main { padding: 12px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; margin-bottom: 15px; }
+        .btn-action-main:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        .status-badge { padding: 8px 15px; border-radius: 30px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; }
+        .status-PENDING { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .status-SHIPPED { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        .status-DELIVERED { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .status-REFUNDED { background: #e0e7ff; color: #0288d1; border: 1px solid #bae6fd; }
+        .status-CANCELLED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    </style>
+</head>
+<body>
+
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb fw-bold">
+                <li class="breadcrumb-item"><a href="{% url 'manage_seller_orders' %}" style="color: var(--theme-main); text-decoration: none;"><i class="fa fa-arrow-left me-1"></i> Back to Seller Orders</a></li>
+                <li class="breadcrumb-item active" style="color: #64748b;">Investigate Order: {{ order.order_id }}</li>
+            </ol>
+        </nav>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px; font-weight: bold;">
+                    <i class="fa fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="management-card">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h3 style="color: #1e293b; font-weight: 900; margin-bottom: 5px;">{{ order.order_id }}</h3>
+                            <p class="text-muted mb-0"><i class="fa fa-clock-o me-2"></i> Placed On: {{ order.created_at|date:"F d, Y - h:i A" }}</p>
+                        </div>
+                        <span class="status-badge status-{{ order.status }}">
+                            {% if order.status == 'PENDING' %}<i class="ph ph-clock-counter-clockwise"></i> Pending
+                            {% elif order.status == 'SHIPPED' %}<i class="ph ph-truck"></i> Shipped
+                            {% elif order.status == 'DELIVERED' %}<i class="ph ph-check-circle"></i> Delivered
+                            {% elif order.status == 'REFUNDED' %}<i class="ph ph-arrow-u-up-left"></i> Refunded
+                            {% else %}<i class="ph ph-x-circle"></i> Cancelled{% endif %}
+                        </span>
+                    </div>
+
+                    <h4 class="section-title mt-5"><i class="ph ph-users text-primary me-2"></i> Involved Parties</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-box border-start border-success border-4">
+                                <div class="info-label text-success"><i class="fa fa-tractor me-1"></i> Buyer (Farmer)</div>
+                                <div class="info-value">{{ order.farmer.username }}</div>
+                                <div style="font-size: 13px; color: #555; margin-top: 5px;"><i class="fa fa-envelope-o me-1"></i> {{ order.farmer.email }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box border-start border-4" style="border-color: var(--theme-main) !important;">
+                                <div class="info-label" style="color: var(--theme-main);"><i class="fa fa-store me-1"></i> Vendor (Seller)</div>
+                                <div class="info-value">{{ order.product.listed_by.username|default:"Deleted Vendor" }}</div>
+                                <div style="font-size: 13px; color: #555; margin-top: 5px;"><i class="fa fa-envelope-o me-1"></i> {{ order.product.listed_by.email|default:"N/A" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="section-title mt-4"><i class="ph ph-shopping-cart text-warning me-2"></i> Order Specifications</h4>
+                    <div class="info-box">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="info-label">Product Name</div>
+                                <div class="info-value mb-2" style="font-size: 18px;">{{ order.product.title|default:"Deleted Item" }}</div>
+                                <span class="badge bg-light text-dark border">Qty: {{ order.quantity|floatformat:0 }} {{ order.product.unit_of_measure }}</span>
+                                <span class="badge bg-light text-dark border ms-2">Method: {{ order.get_payment_method_display }}</span>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0 border-start">
+                                <div class="info-label">Total Value</div>
+                                <div style="font-size: 32px; font-weight: 900; color: #1e293b;">₹{{ order.total_amount }}</div>
+                                
+                                {% if escrow %}
+                                    <span class="badge mt-1" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;">
+                                        <i class="fa fa-lock"></i> Escrow Vault: ₹{{ escrow.amount_paid }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary mt-1">No Escrow / COD</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="action-panel">
+                    <h5 style="color: #1e293b; font-weight: 800; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                        <i class="ph ph-headset text-danger me-2"></i> Support Actions
+                    </h5>
+
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 25px;">Use official communications to request dispatch proofs from the seller or provide updates to the buyer.</p>
+
+                    <button type="button" class="btn btn-outline-primary btn-action-main" data-bs-toggle="modal" data-bs-target="#emailModal" style="background: #f0f9ff;">
+                        <i class="ph ph-envelope-simple me-2"></i> Email Parties
+                    </button>
+
+                    <hr style="border-color: #e2e8f0; margin: 25px 0;">
+                    
+                    <div class="alert mt-4 mb-0 text-center" style="background: var(--theme-light); border: 1px solid var(--theme-border); color: #856404; font-size: 12px; font-weight: bold;">
+                        <i class="ph ph-shield-check me-1" style="color: var(--theme-main); font-size: 16px; vertical-align: middle;"></i> Logistics Monitored Securely
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="emailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; overflow: hidden;">
+                <div class="modal-header" style="background: #e0f2fe; color: #0288d1; border-bottom: none; padding: 25px;">
+                    <h5 class="modal-title fw-bold"><i class="ph ph-paper-plane-tilt me-2"></i> Dispatch Official Email</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'admin_seller_order_detail' order.order_id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="send_order_email">
+                    
+                    <div class="modal-body px-4">
+                        <label class="fw-bold mb-3 text-muted">Select Recipients <span class="text-danger">*</span></label>
+                        
+                        <div class="d-flex flex-column gap-2 mb-4">
+                            <label class="d-flex align-items-center" style="cursor: pointer;">
+                                <input type="radio" name="recipient_type" value="seller" class="form-check-input me-2" required>
+                                <span style="font-size: 14px; font-weight: bold; color: var(--theme-main);">Vendor Only ({{ order.product.listed_by.username|default:"Vendor" }})</span>
+                            </label>
+                            <label class="d-flex align-items-center" style="cursor: pointer;">
+                                <input type="radio" name="recipient_type" value="farmer" class="form-check-input me-2">
+                                <span style="font-size: 14px; font-weight: bold; color: #2e7d32;">Buyer Only ({{ order.farmer.username }})</span>
+                            </label>
+                            <label class="d-flex align-items-center" style="cursor: pointer;">
+                                <input type="radio" name="recipient_type" value="both" class="form-check-input me-2" checked>
+                                <span style="font-size: 14px; font-weight: bold; color: #333;">Email Both Parties</span>
+                            </label>
+                        </div>
+
+                        <label class="fw-bold mb-2 text-muted">Admin Message <span class="text-danger">*</span></label>
+                        <textarea name="custom_message" class="form-control shadow-sm" rows="4" style="border-radius: 10px;" placeholder="E.g., We notice this order has been pending for 3 days. Please update the shipping status..." required></textarea>
+                    </div>
+                    
+                    <div class="modal-footer" style="background: #f8f9fa; border-top: 1px solid #eee; padding: 20px;">
+                        <button type="button" class="btn btn-light fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fw-bold rounded-pill px-4 shadow-sm"><i class="fa fa-envelope me-1"></i> Send Official Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kultiva - Sell Agri-Inputs</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+
+    <style>
+        body { padding-top: 110px; background-color: #f4f7f6; }
+        .wizard-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border-top: 5px solid #0288d1; /* Industrial Blue theme for Sellers */
+        }
+        
+        .category-box {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            height: 100%;
+            background: #fff;
+        }
+        .category-box:hover { border-color: #0288d1; background: #e1f5fe; transform: translateY(-5px); }
+        .category-box.active { border-color: #01579b; background: #e1f5fe; box-shadow: 0 5px 15px rgba(2, 136, 209, 0.2); }
+        .cat-icon { font-size: 40px; color: #ffb300; margin-bottom: 10px; }
+        
+        .form-label { font-weight: bold; color: #555; font-size: 13px; margin-top: 10px; }
+        .custom-input { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px 15px; outline: none; transition: 0.3s; background: #fafafa; }
+        .custom-input:focus { border-color: #0288d1; box-shadow: 0 0 5px rgba(2, 136, 209, 0.3); background: #fff; }
+        
+        .dynamic-section { display: none; background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px dashed #ccc; margin-top: 20px; }
+        
+        /* The AJAX Image Preview Box */
+        .image-preview-container {
+            width: 100%; height: 200px; border: 2px dashed #ccc; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            background: #f8f9fa; position: relative; margin-top: 10px;
+        }
+        .image-preview-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .image-preview-container span { color: #888; font-size: 14px; text-align: center;}
+        
+        .error-msg { color: #d32f2f; font-size: 12px; font-weight: bold; display: none; margin-top: 5px; }
+        .custom-input:invalid.touched { border-color: #d32f2f; }
+    </style>
+</head>
+<body>
+
+    {% include 'seller_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="wizard-card">
+            <h2 style="color: #01579b; font-weight: bold;" class="mb-1"><i class="fa fa-boxes"></i> Publish Inventory</h2>
+            <p class="text-muted mb-4">Select the supply category to configure technical specifications.</p>
+
+            <div class="row mb-5">
+                <div class="col-md-4 mb-3">
+                    <div class="category-box" onclick="selectCategory('SEEDS', this)">
+                        <i class="fa fa-seedling cat-icon" style="color: #4caf50;"></i>
+                        <h5 style="color: #1e293b; font-weight: bold;">Hybrid Seeds</h5>
+                        <p class="text-muted" style="font-size: 12px;">High-yield & GMO varieties</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="category-box" onclick="selectCategory('FERTILIZERS', this)">
+                        <i class="fa fa-flask cat-icon" style="color: #0288d1;"></i>
+                        <h5 style="color: #1e293b; font-weight: bold;">Fertilizers & Chems</h5>
+                        <p class="text-muted" style="font-size: 12px;">NPK, Pesticides, Herbicides</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="category-box" onclick="selectCategory('TOOLS', this)">
+                        <i class="fa fa-tractor cat-icon" style="color: #ff9800;"></i>
+                        <h5 style="color: #1e293b; font-weight: bold;">Machinery & Tools</h5>
+                        <p class="text-muted" style="font-size: 12px;">Tractors, Drip Kits, Hand Tools</p>
+                    </div>
+                </div>
+            </div>
+
+            <form action="{% url 'add_seller_listing' %}" method="POST" enctype="multipart/form-data" id="listingForm" style="display: none;" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="category" id="hiddenCategory">
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Product Name / Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="custom-input" placeholder="e.g., Urea 46% N / Mahindra Tractor" required>
+                        <div class="error-msg">Please provide a product title.</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Manufacturer / Brand</label>
+                        <input type="text" name="variety_or_brand" class="custom-input" placeholder="e.g., Tata, Syngenta">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Total Inventory <span class="text-danger">*</span></label>
+                        <input type="number" step="0.1" name="available_stock" class="custom-input" required min="1">
+                        <div class="error-msg">Must be > 0.</div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Unit <span class="text-danger">*</span></label>
+                        <select name="unit_of_measure" id="unitSelect" class="custom-input" required></select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Price per Unit (₹) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" name="price" class="custom-input" required min="1">
+                        <div class="error-msg">Must be > 0.</div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Min. Order Qty</label>
+                        <input type="number" step="0.1" name="min_order_quantity" class="custom-input" value="1">
+                    </div>
+                </div>
+
+                <div id="seedSection" class="dynamic-section">
+                    <h6 style="color: #01579b; font-weight: bold;"><i class="fa fa-microscope"></i> Seed Specifications</h6>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label style="font-size: 11px; font-weight:bold;">Germination Rate (%)</label>
+                            <input type="number" name="spec_germination" class="custom-input" placeholder="e.g., 95">
+                        </div>
+                        <div class="col-md-6">
+                            <label style="font-size: 11px; font-weight:bold;">Treated/Untreated</label>
+                            <select name="spec_treatment" class="custom-input">
+                                <option value="Treated">Chemically Treated</option>
+                                <option value="Untreated">Untreated / Organic</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="chemicalSection" class="dynamic-section">
+                    <h6 style="color: #01579b; font-weight: bold;"><i class="fa fa-flask"></i> Chemical Composition</h6>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label style="font-size: 11px; font-weight:bold;">NPK Ratio</label>
+                            <input type="text" name="spec_npk" class="custom-input" placeholder="e.g., 20-20-20">
+                        </div>
+                        <div class="col-md-6">
+                            <label style="font-size: 11px; font-weight:bold;">Expiry Date</label>
+                            <input type="date" name="spec_expiry" class="custom-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="machinerySection" class="dynamic-section">
+                    <h6 style="color: #01579b; font-weight: bold;"><i class="fa fa-cogs"></i> Technical Specs</h6>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label style="font-size: 11px; font-weight:bold;">Power / Horsepower</label>
+                            <input type="text" name="spec_power" class="custom-input" placeholder="e.g., 45 HP or 2000W">
+                        </div>
+                        <div class="col-md-6">
+                            <label style="font-size: 11px; font-weight:bold;">Warranty (Months)</label>
+                            <input type="number" name="spec_warranty" class="custom-input" placeholder="e.g., 24">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Detailed Description <span class="text-danger">*</span></label>
+                        <textarea name="description" class="custom-input" rows="7" placeholder="Provide full product details, usage instructions, or delivery boundaries..." required minlength="15"></textarea>
+                        <div class="error-msg">Description must be at least 15 characters.</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Upload Product Image <span class="text-danger">*</span></label>
+                        <input type="file" name="image" id="productImage" class="custom-input" accept="image/*" required>
+                        <div class="error-msg" id="imgError">Please upload an image.</div>
+                        
+                        <div class="image-preview-container" id="previewContainer">
+                            <span id="previewText"><i class="fa fa-camera fa-2x"></i><br>Live Preview</span>
+                            <img id="imagePreview" src="#" alt="Preview">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn text-white w-100 rounded-pill fw-bold mt-3" style="background: #0288d1; padding: 15px; font-size: 16px;"><i class="fa fa-upload"></i> Publish to Vendor Store</button>
+            </form>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <script>
+        // --- 1. DYNAMIC UI WIZARD LOGIC ---
+        function selectCategory(cat, element) {
+            document.querySelectorAll('.category-box').forEach(box => box.classList.remove('active'));
+            element.classList.add('active');
+
+            document.getElementById('listingForm').style.display = 'block';
+            document.getElementById('hiddenCategory').value = cat;
+
+            let unitSelect = document.getElementById('unitSelect');
+            let seedSec = document.getElementById('seedSection');
+            let chemSec = document.getElementById('chemicalSection');
+            let machSec = document.getElementById('machinerySection');
+
+            seedSec.style.display = 'none';
+            chemSec.style.display = 'none';
+            machSec.style.display = 'none';
+            unitSelect.innerHTML = '';
+
+            if (cat === 'SEEDS') {
+                seedSec.style.display = 'block';
+                unitSelect.innerHTML = '<option value="Kg">Kilograms (Kg)</option><option value="Packets">Packets</option><option value="Quintal">Quintals</option>';
+            } 
+            else if (cat === 'FERTILIZERS') {
+                chemSec.style.display = 'block';
+                unitSelect.innerHTML = '<option value="Bags">Bags (50kg)</option><option value="Litres">Litres</option><option value="Ton">Tons</option>';
+            }
+            else if (cat === 'TOOLS') {
+                machSec.style.display = 'block';
+                unitSelect.innerHTML = '<option value="Pieces">Pieces / Units</option><option value="Sets">Tool Sets</option>';
+            }
+        }
+
+        // --- 2. LIVE IMAGE PREVIEW LOGIC (FileReader API) ---
+        document.getElementById('productImage').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const previewText = document.getElementById('previewText');
+            const imagePreview = document.getElementById('imagePreview');
+            const imgError = document.getElementById('imgError');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    previewText.style.display = 'none';
+                    imgError.style.display = 'none'; 
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.src = '#';
+                imagePreview.style.display = 'none';
+                previewText.style.display = 'inline-block';
+            }
+        });
+
+        // --- 3. FORM VALIDATION LOGIC ---
+        const form = document.getElementById('listingForm');
+        const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+
+        inputs.forEach(input => {
+            input.addEventListener('blur', () => {
+                input.classList.add('touched');
+                checkValidation(input);
+            });
+            input.addEventListener('input', () => {
+                if (input.classList.contains('touched')) checkValidation(input);
+            });
+        });
+
+        function checkValidation(input) {
+            const errorMsg = input.nextElementSibling;
+            if (errorMsg && errorMsg.classList.contains('error-msg')) {
+                errorMsg.style.display = input.checkValidity() ? 'none' : 'block';
+            }
+        }
+
+        form.addEventListener('submit', function(event) {
+            let isValid = true;
+            inputs.forEach(input => {
+                input.classList.add('touched');
+                checkValidation(input);
+                if (!input.checkValidity()) isValid = false;
+            });
+
+            if (!isValid) {
+                event.preventDefault();
+                alert("Please correct the highlighted errors before publishing your listing.");
+            }
+        });
+    </script>
+</body>
+</html>

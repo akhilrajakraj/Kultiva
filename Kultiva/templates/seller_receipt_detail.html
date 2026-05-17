@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if order.status == 'CANCELLED' %}Refund {{ order.order_id }}{% else %}Receipt {{ order.order_id }}{% endif %} | Kultiva Finance</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .breadcrumb-nav { font-size: 14px; font-weight: bold; margin-bottom: 20px; }
+        .breadcrumb-nav a { color: #888; text-decoration: none; transition: 0.2s; }
+        .breadcrumb-nav a:hover { color: #1b5e20; }
+        
+        /* The Digital Paper */
+        .receipt-paper {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Top Accent Line (Changes color if cancelled) */
+        .receipt-paper::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 8px; 
+            background: {% if order.status == 'CANCELLED' %}#dc3545{% else %}#1b5e20{% endif %};
+        }
+
+        /* Header Alignment */
+        .receipt-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #eee; padding-bottom: 30px; margin-bottom: 40px; }
+        .brand-title { font-size: 32px; font-weight: 900; color: #1b5e20; margin: 0; letter-spacing: 1px; }
+        .receipt-meta { text-align: right; }
+        .receipt-meta h2 { font-size: 24px; color: {% if order.status == 'CANCELLED' %}#dc3545{% else %}#1a1a1a{% endif %}; font-weight: 800; margin: 0 0 5px 0; text-transform: uppercase; }
+        .receipt-meta p { margin: 0; color: #666; font-size: 14px; font-weight: bold; }
+
+        /* Party Details Grid */
+        .party-details { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+        .party-block h6 { font-size: 11px; text-transform: uppercase; color: #888; font-weight: 900; letter-spacing: 1px; margin-bottom: 10px; }
+        .party-block p { margin: 0; font-size: 15px; color: #333; line-height: 1.6; }
+        .party-block strong { color: #1a1a1a; font-size: 16px; }
+
+        /* Perfectly Aligned Data Table */
+        .receipt-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .receipt-table th { background: #f8f9fa; padding: 15px; font-size: 12px; color: #555; text-transform: uppercase; font-weight: 800; border-top: 1px solid #ddd; border-bottom: 2px solid #ddd; }
+        .receipt-table td { padding: 20px 15px; border-bottom: 1px solid #eee; font-size: 15px; color: #333; vertical-align: top; }
+        
+        /* Financial Summary Alignment */
+        .financial-summary { width: 400px; margin-left: auto; }
+        .summary-line { display: flex; justify-content: space-between; padding: 10px 15px; font-size: 14px; color: #555; }
+        .summary-line strong { color: #1a1a1a; }
+        .summary-total { 
+            display: flex; justify-content: space-between; padding: 15px; 
+            background: {% if order.status == 'CANCELLED' %}#fff5f5{% else %}#f1f8e9{% endif %}; 
+            border-radius: 8px; margin-top: 10px; font-size: 18px; font-weight: 900; 
+            color: {% if order.status == 'CANCELLED' %}#dc3545{% else %}#1b5e20{% endif %}; 
+            border: 1px solid {% if order.status == 'CANCELLED' %}#f5c6cb{% else %}#c5e1a5{% endif %}; 
+        }
+
+        /* Dynamic Payment Stamp */
+        .payment-stamp { display: inline-flex; align-items: center; gap: 8px; border: 2px solid #166534; color: #166534; padding: 10px 20px; border-radius: 8px; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; transform: rotate(-5deg); opacity: 0.8; margin-top: 20px; }
+        .refund-stamp { border-color: #dc3545; color: #dc3545; background: #fff5f5; }
+
+        /* Print Media Query */
+        @media print {
+            body { background: #fff !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+            .receipt-paper { box-shadow: none; padding: 0; max-width: 100%; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        {% include 'seller_header.html' %}
+    </div>
+
+    <div class="container pb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+            <div class="breadcrumb-nav mb-0">
+                <a href="{% url 'seller_reports' %}"><i class="fa fa-arrow-left"></i> Back to Financial Ledger</a>
+            </div>
+            <button onclick="window.print()" class="btn btn-outline-success fw-bold rounded-pill px-4">
+                <i class="fa fa-print"></i> Download / Print PDF
+            </button>
+        </div>
+
+        <div class="receipt-paper">
+            
+            <div class="receipt-header">
+                <div>
+                    <h1 class="brand-title">KULTIVA</h1>
+                    <p style="color: #888; font-weight: bold; margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 2px;">
+                        {% if order.status == 'CANCELLED' %}Official Credit Note{% else %}Official Tax Receipt{% endif %}
+                    </p>
+                </div>
+                <div class="receipt-meta">
+                    <h2>{% if order.status == 'CANCELLED' %}Refund Note{% else %}Receipt{% endif %}</h2>
+                    <p>Transaction ID: {{ order.order_id }}</p>
+                    <p>Date: {{ order.created_at|date:"F d, Y" }}</p>
+                </div>
+            </div>
+
+            <div class="party-details">
+                <div class="party-block">
+                    <h6>{% if order.status == 'CANCELLED' %}Credited By (Vendor){% else %}Billed By (Vendor){% endif %}</h6>
+                    <p>
+                        <strong>{{ request.user.username|upper }}</strong><br>
+                        Registered Kultiva Vendor<br>
+                        Email: {{ request.user.email }}
+                    </p>
+                </div>
+                <div class="party-block">
+                    <h6>{% if order.status == 'CANCELLED' %}Refunded To (Customer){% else %}Billed To (Customer){% endif %}</h6>
+                    <p>
+                        <strong>{{ order.farmer.username|upper }}</strong><br>
+                        {{ order.delivery_address }}<br>
+                    </p>
+                </div>
+            </div>
+
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th class="text-start" width="55%">Description</th>
+                        <th class="text-center" width="15%">Qty</th>
+                        <th class="text-center" width="15%">Rate</th>
+                        <th class="text-end" width="15%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-start">
+                            <strong style="color: #1a1a1a;">
+                                {% if order.status == 'CANCELLED' %}[CANCELLED] {% endif %}{{ order.product.title }}
+                            </strong><br>
+                            <span style="font-size: 12px; color: #888;">Category: {{ order.product.get_category_display }}</span>
+                        </td>
+                        <td class="text-center fw-bold">{{ order.quantity|floatformat:0 }}</td>
+                        <td class="text-center">₹{{ order.product.price }}</td>
+                        <td class="text-end fw-bold">₹{{ subtotal|add:gst }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    {% if order.status == 'CANCELLED' %}
+                        <div class="payment-stamp refund-stamp">
+                            <i class="fa fa-times-circle"></i> Refunded / Void
+                        </div>
+                    {% else %}
+                        <div class="payment-stamp">
+                            <i class="fa fa-check-circle"></i> Paid in Full
+                        </div>
+                    {% endif %}
+                    
+                    <p style="margin-top: 15px; font-size: 12px; color: #888; font-weight: bold;">Original Payment: {{ order.get_payment_method_display }}</p>
+                </div>
+                
+                <div class="financial-summary">
+                    <div class="summary-line">
+                        <span>Taxable Value:</span>
+                        <strong>₹{{ subtotal }}</strong>
+                    </div>
+                    <div class="summary-line">
+                        <span>GST ({{ gst_rate }}%):</span>
+                        <strong>₹{{ gst }}</strong>
+                    </div>
+                    <div class="summary-line">
+                        <span>Handling & Packaging:</span>
+                        <strong>₹{{ packaging_fee }}</strong>
+                    </div>
+                    <div class="summary-total">
+                        <span>{% if order.status == 'CANCELLED' %}Total Refunded:{% else %}Total Paid:{% endif %}</span>
+                        <span>{% if order.status == 'CANCELLED' %}-{% endif %}₹{{ order.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 60px; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+                <p style="font-size: 11px; color: #aaa; margin: 0; font-weight: bold; text-transform: uppercase;">This is a computer generated {% if order.status == 'CANCELLED' %}credit note{% else %}receipt{% endif %} and requires no physical signature.</p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Reports | Kultiva Vendor</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 24px;
+            height: 100%;
+        }
+
+        .page-title { color: #1b5e20; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 5px; }
+
+        /* Dark Gross Sales Card */
+        .card-dark {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            border: none;
+        }
+        .card-dark .stat-title { color: #cbd5e1; }
+        .card-dark .stat-value { color: #fff; }
+
+        .stat-title { font-size: 14px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .stat-value { font-size: 36px; font-weight: 900; color: #0f172a; margin: 0; line-height: 1.2; }
+        
+        /* Table Styling */
+        .table { margin-bottom: 0; }
+        .table th { background: rgba(248, 249, 250, 0.8); color: #64748b; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 2px solid #e2e8f0; padding: 15px; }
+        .table td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; color: #333; font-size: 15px; }
+        .table tbody tr:hover { background: rgba(248, 249, 250, 0.9); }
+        
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 900; display: inline-flex; align-items: center; gap: 5px; text-transform: uppercase; }
+        .status-paid { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status-refunded { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
+        /* NEW: Unpaid COD Badge Style */
+        .status-pending-cod { background: #fffde7; color: #f57f17; border: 1px solid #fbc02d; }
+
+        /* Professional Dropdown UI */
+        .time-filter-select {
+            border: 2px solid #1b5e20;
+            color: #1b5e20;
+            background-color: #fff;
+            padding: 8px 30px 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231b5e20%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 10px auto;
+        }
+
+        .btn-view-receipt {
+            background-color: #fff; color: #1b5e20; border: 2px solid #1b5e20; border-radius: 8px;
+            font-size: 12px; font-weight: bold; padding: 6px 12px; transition: all 0.3s ease;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-view-receipt:hover { background-color: #1b5e20; color: #fff; }
+        
+        /* NEW: Disabled Receipt Button Style */
+        .btn-disabled {
+            background-color: #f8f9fa; color: #adb5bd; border: 2px dashed #dee2e6; cursor: not-allowed;
+        }
+        .btn-disabled:hover { background-color: #f8f9fa; color: #adb5bd; }
+    </style>
+</head>
+<body>
+
+    {% include 'seller_header.html' %}
+
+    <div class="container pb-5 wow fadeIn" data-wow-duration="1s">
+        
+        <header class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 mt-2 gap-3">
+            <div>
+                <h2 class="page-title"><i class="fa fa-file-invoice-dollar text-warning"></i> Financial Accounting</h2>
+                <p class="text-muted fw-bold mb-0">Track direct payments, calculate net margins, and manage GST liabilities.</p>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <form method="GET" class="m-0">
+                    <select name="time_filter" class="time-filter-select" onchange="this.form.submit()">
+                        <option value="all" {% if time_filter == 'all' %}selected{% endif %}>All Time</option>
+                        <option value="week" {% if time_filter == 'week' %}selected{% endif %}>Past 7 Days</option>
+                        <option value="month" {% if time_filter == 'month' %}selected{% endif %}>This Month</option>
+                        <option value="year" {% if time_filter == 'year' %}selected{% endif %}>This Year</option>
+                    </select>
+                </form>
+
+                <a href="{% url 'export_seller_orders_csv' %}" class="btn btn-dark fw-bold rounded-pill shadow-sm px-4 py-2" style="height: 42px; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-download"></i> Export Tax CSV
+                </a>
+            </div>
+        </header>
+
+        <div class="row mb-4 g-4">
+            <div class="col-md-4">
+                <div class="glass-widget card-dark">
+                    <span class="stat-title">Gross Sales (Including Tax)</span>
+                    <h2 class="stat-value">₹{{ total_sales }}</h2>
+                    <p style="font-size: 12px; color: #94a3b8; margin-top: 15px; margin-bottom: 0;">
+                        <i class="fa fa-arrow-trend-up text-success"></i> Booked revenue from buyers
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="glass-widget" style="border-top: 4px solid #1b5e20;">
+                    <span class="stat-title">Net Revenue (Excluding Tax)</span>
+                    <h2 class="stat-value text-success">₹{{ net_earnings }}</h2>
+                    <p style="font-size: 12px; color: #888; margin-top: 15px; margin-bottom: 0; font-weight: bold;">
+                        <i class="fa fa-wallet text-success"></i> Your actual take-home earnings
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-widget d-flex flex-column justify-content-center align-items-center text-center" style="border-top: 4px solid #0288d1;">
+                    <div style="background: #e1f5fe; color: #0288d1; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 10px;">
+                        <i class="fa fa-percent"></i>
+                    </div>
+                    <span class="stat-title mb-1">Est. GST Liability</span>
+                    <h3 style="font-weight: 900; color: #1a1a1a; margin: 0;">₹{{ gst_collected }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-widget p-0">
+            <div class="p-4 border-bottom border-light">
+                <h4 style="font-size: 18px; font-weight: bold; color: #1a1a1a; margin: 0;"><i class="fa fa-book"></i> Transactions Ledger</h4>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Transaction ID</th>
+                            <th>Date Processed</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Payment Status</th>
+                            <th class="text-end pe-4">Tax Invoice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_transactions %}
+                        <tr>
+                            <td class="ps-4 fw-bold" style="color: #1b5e20;">{{ order.order_id }}</td>
+                            <td style="font-weight: bold; color: #555;">{{ order.created_at|date:"d M, Y" }}</td>
+                            <td style="font-weight: 900; color: #1a1a1a;">₹{{ order.total_amount }}</td>
+                            <td style="font-weight: bold; color: #666;"><i class="fa fa-credit-card"></i> {{ order.get_payment_method_display }}</td>
+                            <td>
+                                {% if order.status == 'CANCELLED' %}
+                                    <span class="status-badge status-refunded"><i class="fa fa-arrow-rotate-left"></i> Cancelled/Refunded</span>
+                                {% elif order.payment_method == 'COD' and order.status != 'DELIVERED' %}
+                                    <span class="status-badge status-pending-cod" title="Payment to be collected upon delivery"><i class="fa fa-clock-o"></i> Pending COD</span>
+                                {% else %}
+                                    <span class="status-badge status-paid"><i class="fa fa-check-circle"></i> Paid & Cleared</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if order.payment_method != 'COD' or order.status == 'DELIVERED' %}
+                                    <a href="{% url 'seller_receipt_detail' order.order_id %}" class="btn-view-receipt">
+                                        <i class="fa fa-receipt"></i> View Receipt
+                                    </a>
+                                {% else %}
+                                    <button class="btn-view-receipt btn-disabled" disabled title="Receipt generates after COD payment is collected">
+                                        <i class="fa fa-clock-o"></i> Bill Pending
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted fw-bold">
+                                <i class="fa fa-folder-open mb-2" style="font-size: 30px;"></i><br>
+                                No transactions found for this timeframe.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/animation.js' %}"></script>
+</body>
+</html>

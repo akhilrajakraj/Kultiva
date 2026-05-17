@@ -1,0 +1,460 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="AI Driven Farming Marketplace & Export Portal">
+  <meta name="author" content="Kultiva">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  
+  <title>Kultiva - Smart AI Farming & Export</title>
+
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/owl.css' %}">
+</head>
+
+<body>
+
+  {% include 'header.html' %}
+
+  <div class="main-banner wow fadeIn" id="top" data-wow-duration="1s" data-wow-delay="0.5s">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          
+          <div class="owl-carousel owl-theme" id="main-banner-carousel">
+            
+            <div class="item">
+              <div class="row">
+                <div class="col-lg-6 align-self-center">
+                  <div class="left-content header-text">
+                    <h6>Smart Farming Evolution</h6>
+                    <h2>Grow with <em>AI Logic</em> &amp; <span>Global</span> Export</h2>
+                    <p>Welcome to Kultiva. The premium ecosystem where AI calculates your soil nutrients and weather forecasts, recommends high-yield seeds, and connects your harvest directly to global exporters via our secure QR-Code tracking system.</p>
+                    <form id="search" action="#" method="GET">
+                      <fieldset>
+                        <input type="text" name="address" class="email" placeholder="Enter Location or Soil Type..." autocomplete="on" required>
+                      </fieldset>
+                      <fieldset>
+                        <button type="submit" class="main-button">Get AI Plan</button>
+                      </fieldset>
+                    </form>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="right-image">
+                    <img src="{% static 'assets/images/smartcrop.png' %}" alt="Smart Farmer" style="border-radius: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.1);">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="row">
+                <div class="col-lg-6 align-self-center">
+                  <div class="left-content header-text">
+                    <h6>AI-Driven Precision</h6>
+                    <h2>Intelligent <em>Crop</em> &amp; <span>Planning</span></h2>
+                    <p>Stop guessing and start farming with data-driven precision. Our AI engine analyzes your soil and weather to recommend the most profitable crop. Maximize your yield and secure your financial future before you even plant.</p>
+                    <div class="main-button-group" style="margin-top: 30px;">
+                       <a href="#" class="main-button">Learn More</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="right-image">
+                    <img src="{% static 'assets/images/intelligent.png' %}" alt="Harvest" style="border-radius: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.1);">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="row">
+                <div class="col-lg-6 align-self-center">
+                  <div class="left-content header-text">
+                    <h6>Zero Middlemen</h6>
+                    <h2>Direct <em>Farmer</em> &amp; <span>to</span> Buyer</h2>
+                    <p>Sell your harvest directly to global buyers without any middlemen involved. You can list your produce and get the fair market price you truly deserve. Connect instantly with exporters to boost your farm income significantly.</p>
+                    <div class="main-button-group" style="margin-top: 30px;">
+                      <a href="#" class="main-button">Explore Now</a>
+                   </div>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="right-image">
+                    <img src="{% static 'assets/images/Directfarmer.png' %}" alt="Greenhouse" style="border-radius: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.1);">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div> 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="analysis" class="analysis-orbit-section">
+    <div class="container">
+      <div class="row align-items-center">
+        
+        <div class="col-lg-4 col-md-12 orbit-column">
+          <div class="service-orbit-item left-orbit top-item wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.2s">
+            <div class="icon">
+              <img src="{% static 'assets/images/service-icon-01.png' %}" alt="Nutrient Calc">
+            </div>
+            <h4>Nutrient Calc</h4>
+            <p>AI scans soil data to recommend exact NPK values needed for growth.</p>
+            <span class="connector-line"></span>
+          </div>
+
+          <div class="service-orbit-item left-orbit bottom-item wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.4s">
+            <div class="icon">
+              <img src="{% static 'assets/images/service-icon-02.png' %}" alt="Weather AI">
+            </div>
+            <h4>Weather AI</h4>
+            <p>Precise rain & humidity forecasts to plan your sowing schedule perfectly.</p>
+            <span class="connector-line" style="transform: rotate(15deg);"></span>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+          <div class="orbit-center-img wow growIn" data-wow-duration="1.5s">
+            <img src="{% static 'assets/images/sprout.png' %}" alt="Smart Farming Core">
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12 orbit-column">
+          <div class="service-orbit-item right-orbit top-item wow fadeInRight" data-wow-duration="1s" data-wow-delay="0.2s">
+            <span class="connector-line" style="transform: rotate(15deg);"></span>
+            <div class="icon">
+              <img src="{% static 'assets/images/service-icon-03.png' %}" alt="Smart Buying">
+            </div>
+            <h4>Smart Buying</h4>
+            <p>Purchase fertilizers and tools directly based on real-time AI suggestions.</p>
+          </div>
+
+          <div class="service-orbit-item right-orbit bottom-item wow fadeInRight" data-wow-duration="1s" data-wow-delay="0.4s">
+            <span class="connector-line" style="transform: rotate(-15deg);"></span>
+            <div class="icon">
+              <img src="{% static 'assets/images/service-icon-04.png' %}" alt="QR Traceability">
+            </div>
+            <h4>QR Traceability</h4>
+            <p>Generate a unique QR code for your harvest to sell to verified exporters.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="marketplace" class="our-services section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 align-self-center wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.2s">
+          <div class="left-image">
+            <img src="{% static 'assets/images/markets.png' %}" style="border-radius: 20px;" alt="Seeds and Tools">
+          </div>
+        </div>
+        <div class="col-lg-6 wow fadeInRight" data-wow-duration="1s" data-wow-delay="0.2s">
+          <div class="section-heading">
+            <h2>Buy High-Yield <em>Seeds</em> &amp; <span>Fertilizers</span></h2>
+            <p>Based on your location's weather analysis, here is the predicted efficiency of crops you can grow this season.</p>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="first-bar progress-skill-bar">
+                <h4>Wheat (Hybrid Gold)</h4>
+                <span>94% Success Rate</span>
+                <div class="filled-bar"></div>
+                <div class="full-bar"></div>
+              </div>
+            </div>
+            <div class="col-lg-12">
+              <div class="second-bar progress-skill-bar">
+                <h4>Organic Corn Seeds</h4>
+                <span>88% Success Rate</span>
+                <div class="filled-bar"></div>
+                <div class="full-bar"></div>
+              </div>
+            </div>
+            <div class="col-lg-12">
+              <div class="third-bar progress-skill-bar">
+                <h4>Rice (Basmati Premium)</h4>
+                <span>92% Success Rate</span>
+                <div class="filled-bar"></div>
+                <div class="full-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="export" class="our-portfolio section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+          <div class="section-heading wow fadeInDown" data-wow-duration="1s" data-wow-delay="0.2s">
+            <h2>Farmer's <em>Shop</em> &amp; Export <span>Requests</span></h2>
+            <p>Send requests to exporters. A unique QR code is generated for every deal.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="portfolio-carousel" class="owl-carousel owl-theme">
+
+            <div class="item">
+              <a href="#">
+                <div class="portfolio-item">
+                  <div class="hidden-content">
+                    <h4>Buy Seeds</h4>
+                    <p>Genetically modified for high yield.</p>
+                  </div>
+                  <div class="showed-content">
+                    <div class="qr-badge">AI Pick</div>
+                    <img src="{% static 'assets/images/buyseeds.png' %}" alt="">
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="item">
+              <a href="#">
+                <div class="portfolio-item">
+                  <div class="hidden-content">
+                    <h4>Sell Harvest</h4>
+                    <p>Generate QR Code for Exporters.</p>
+                  </div>
+                  <div class="showed-content">
+                     <div class="qr-badge">Export</div>
+                    <img src="{% static 'assets/images/sellharvest.png' %}" alt="">
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="item">
+              <a href="#">
+                <div class="portfolio-item">
+                  <div class="hidden-content">
+                    <h4>Tools & Kits</h4>
+                    <p>Shovels, Sprayers, and Sensors.</p>
+                  </div>
+                  <div class="showed-content">
+                     <div class="qr-badge">Sale</div>
+                    <img src="{% static 'assets/images/toolsandkits.png' %}" alt="">
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="item">
+              <a href="#">
+                <div class="portfolio-item">
+                  <div class="hidden-content">
+                    <h4>Organic Fertilizer</h4>
+                    <p>Eco-friendly growth boosters.</p>
+                  </div>
+                  <div class="showed-content">
+                     <div class="qr-badge">Organic</div>
+                    <img src="{% static 'assets/images/organicfertlizers.png' %}" alt="">
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="item">
+              <a href="#">
+                <div class="portfolio-item">
+                  <div class="hidden-content">
+                    <h4>Weather Based Planning</h4>
+                    <p>Enhancing productivity systematic way.</p>
+                  </div>
+                  <div class="showed-content">
+                     <div class="qr-badge">Tech</div>
+                    <img src="{% static 'assets/images/weathertech.png' %}" alt="">
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="item">
+              <a href="#">
+                <div class="portfolio-item">
+                  <div class="hidden-content">
+                    <h4>Staffing & Support</h4>
+                    <p>Verify processes to secure your business.</p>
+                  </div>
+                  <div class="showed-content">
+                     <div class="qr-badge">Service</div>
+                    <img src="{% static 'assets/images/farmerservices.png' %}" alt="">
+                  </div>
+                </div>
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="blog" class="control-panel-section section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 wow fadeInDown">
+          <div class="section-heading center-heading">
+            <h2>System <em>Modules</em> &amp; Core <span>Capabilities</span></h2>
+            <p>A unified interface combining precision agronomy with secure financial infrastructure.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="dashboard-panel green-panel wow fadeInLeft" data-wow-duration="1s">
+            <div class="panel-header">
+              <div class="panel-icon"><i class="fa fa-leaf"></i></div>
+              <h3>Precision Advisory</h3>
+              <span class="status-dot">Active</span>
+            </div>
+            <div class="widget-grid">
+              <div class="feature-widget">
+                <div class="widget-img"><img src="{% static 'assets/images/weatheralerts.png' %}" alt="Weather"></div>
+                <div class="widget-info"><h4>Weather Alerts</h4><p>Storm & drought warnings.</p></div>
+              </div>
+              <div class="feature-widget">
+                <div class="widget-img"><img src="{% static 'assets/images/healthtips.png' %}" alt="Health"></div>
+                <div class="widget-info"><h4>Health Tips</h4><p>Disease remedies & fertilizer.</p></div>
+              </div>
+              <div class="feature-widget">
+                <div class="widget-img"><img src="{% static 'assets/images/harvesttime.png' %}" alt="Harvest"></div>
+                <div class="widget-info"><h4>Harvest Time</h4><p>Best cutting schedules.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="dashboard-panel gold-panel wow fadeInRight" data-wow-duration="1s">
+            <div class="panel-header">
+              <div class="panel-icon"><i class="fa fa-lock"></i></div>
+              <h3>Secure Finance</h3>
+              <span class="status-dot">Secured</span>
+            </div>
+            <div class="widget-grid">
+              <div class="feature-widget">
+                <div class="widget-img"><img src="{% static 'assets/images/safeescrow.png' %}" alt="Escrow"></div>
+                <div class="widget-info"><h4>Safe Escrow</h4><p>Hold funds until verified.</p></div>
+              </div>
+              <div class="feature-widget">
+                <div class="widget-img"><img src="{% static 'assets/images/wallet.png' %}" alt="Wallet"></div>
+                <div class="widget-info"><h4>Digital Wallet</h4><p>Instant refunds & credits.</p></div>
+              </div>
+              <div class="feature-widget">
+                <div class="widget-img"><img src="{% static 'assets/images/invoice.png' %}" alt="Invoicing"></div>
+                <div class="widget-info"><h4>Auto-Invoice</h4><p>Automated billing history.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="contact" class="contact-modern-section section">
+    <div class="container">
+      <div class="contact-card-wrapper wow fadeInUp" data-wow-duration="0.5s" data-wow-delay="0.25s">
+        <div class="row g-0">
+          
+          <div class="col-lg-5">
+            <div class="contact-info-panel">
+              <div class="panel-content">
+                <h2>Connect with <br><em>Global Markets</em></h2>
+                <p>Ready to sell? List your harvest details here. Our AI system will instantly verify your quality and generate a secure <strong>QR Code</strong> for international buyers.</p>
+                <div class="contact-details">
+                  <div class="detail-item">
+                    <div class="icon"><i class="fa fa-phone"></i></div>
+                    <div class="text"><h6>Helpline</h6><span>1800-KULTIVA-AI</span></div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="icon"><i class="fa fa-envelope"></i></div>
+                    <div class="text"><h6>Email Support</h6><span>export@kultiva.com</span></div>
+                  </div>
+                </div>
+                <div class="contact-feature-image">
+                  <img src="{% static 'assets/images/Contactus.png' %}" alt="Global Trade Network">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="contact-form-panel">
+              <div class="section-heading">
+                <h2>Generate Sale <span>Request</span></h2>
+                <p>Fill in the details below to create your digital listing.</p>
+              </div>
+              
+              <form id="contact" action="" method="post">
+                <div class="row">
+                  <div class="col-lg-6">
+                    <fieldset>
+                      <label for="name">Full Name</label>
+                      <input type="text" name="name" id="name" placeholder="Ex: John Doe" autocomplete="on" required>
+                    </fieldset>
+                  </div>
+                  <div class="col-lg-6">
+                    <fieldset>
+                       <label for="crop">Crop Variety</label>
+                      <input type="text" name="crop" id="crop" placeholder="Ex: Organic Wheat" autocomplete="on" required>
+                    </fieldset>
+                  </div>
+                  <div class="col-lg-12">
+                    <fieldset>
+                       <label for="quantity">Quantity Available</label>
+                      <input type="text" name="quantity" id="quantity" placeholder="Ex: 500 Tons" required="">
+                    </fieldset>
+                  </div>
+                  <div class="col-lg-12">
+                    <fieldset>
+                       <label for="message">Crop Details & Quality</label>
+                      <textarea name="message" id="message" placeholder="Describe soil quality, harvest date, and storage conditions..." required=""></textarea>  
+                    </fieldset>
+                  </div>
+                  <div class="col-lg-12">
+                    <fieldset>
+                      <button type="submit" id="form-submit" class="main-button">Generate QR Code & List</button>
+                    </fieldset>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include 'footer.html' %}
+
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/js/owl-carousel.js' %}"></script>
+  <script src="{% static 'assets/js/animation.js' %}"></script>
+  <script src="{% static 'assets/js/imagesloaded.js' %}"></script>
+  <script src="{% static 'assets/js/templatemo-custom.js' %}"></script>
+
+</body>
+</html>

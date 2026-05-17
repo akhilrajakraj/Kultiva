@@ -1,0 +1,337 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Kultiva - Buyer Terms and Agreement</title>
+
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+  <style>
+    /* ---------------------------------------------
+    Kultiva - Premium Legal Document Theme
+    --------------------------------------------- */
+    :root {
+      --color-farm-green-600: #2e7d32;
+      --color-farm-green-800: #1b5e20;
+      --color-crop-yellow-400: #fbc02d;
+      --color-crop-yellow-500: #f9a825;
+      --color-slate-800: #1e293b;
+      --shadow-classy: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif !important;
+      background: rgb(255,253,231);
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)),
+        url("{% static 'assets/images/login-bg.png' %}"), 
+        linear-gradient(180deg, rgba(255,253,231,1) 0%, rgba(220,237,200,1) 40%, rgba(255,255,255,1) 100%);
+      background-size: cover;
+      background-attachment: fixed; 
+      min-height: 100vh;
+    }
+
+    /* Document Wrapper */
+    .terms-section {
+      padding: 160px 15px 100px 15px;
+      display: flex;
+      justify-content: center;
+    }
+    
+    .dashboard-panel {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 25px;
+      padding: 60px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+      border: 1px solid rgba(197, 225, 165, 0.5);
+      max-width: 900px;
+      width: 100%;
+    }
+
+    /* Headings & Typography */
+    .section-heading { text-align: center; margin-bottom: 50px; }
+    .section-heading h2 {
+      font-size: 42px;
+      color: var(--color-farm-green-800);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .section-heading h2 em {
+      font-style: italic;
+      color: var(--color-crop-yellow-500);
+    }
+    .section-heading h2 span {
+      color: var(--color-farm-green-600);
+      border-bottom: 3px solid var(--color-crop-yellow-400);
+    }
+    .section-heading p {
+      font-size: 17px;
+      color: #64748b;
+      margin-top: 15px;
+    }
+
+    /* Content Styling */
+    .terms-content h4 {
+      font-size: 22px;
+      margin-top: 40px;
+      margin-bottom: 15px;
+      color: var(--color-farm-green-800);
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 8px;
+      font-weight: 700;
+    }
+    .terms-content p {
+      font-size: 17px;
+      line-height: 1.8;
+      margin-bottom: 15px;
+      color: #475569;
+    }
+    .terms-content ul {
+      list-style-type: disc !important;
+      margin-left: 25px;
+      margin-bottom: 20px;
+    }
+    .terms-content ul li {
+      margin-bottom: 10px;
+      font-size: 17px;
+      color: #475569;
+      line-height: 1.6;
+    }
+    .terms-content strong { color: var(--color-slate-800); font-weight: 700; }
+
+    /* Acceptance Box */
+    .agreement-box {
+      margin-top: 60px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid var(--color-crop-yellow-400);
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--color-farm-green-800);
+      cursor: pointer;
+      margin-bottom: 25px;
+    }
+    .checkbox-label input {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--color-farm-green-600);
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .main-button {
+      display: inline-block;
+      background-color: var(--color-farm-green-600);
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff !important;
+      text-transform: uppercase;
+      padding: 14px 30px;
+      border-radius: 5px;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-classy);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .main-button:hover:not(:disabled) {
+      background-color: var(--color-crop-yellow-400);
+      color: #000 !important;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    .main-button:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-panel { padding: 30px 20px; }
+      .section-heading h2 { font-size: 32px; }
+      .terms-section { padding-top: 130px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  {% include 'header.html' %}
+
+  <section class="terms-section">
+    <div class="terms-document-wrapper dashboard-panel wow fadeInUp" data-wow-duration="1s">
+        
+        <div class="section-heading">
+            <h2>🌾 Kultiva <em>Buyer</em> <br><span>Terms & Agreement</span></h2>
+            <p><strong>Effective Date:</strong> February 2026<br>
+            <strong>Platform Name:</strong> Kultiva<br>
+            <strong>Operated By:</strong> Kultiva Technologies</p>
+        </div>
+
+        <div class="terms-content">
+            <h4>1. Acceptance of Terms</h4>
+            <p>By registering as a Buyer on Kultiva, you agree to comply with and be legally bound by these Terms and Agreement. If you do not agree, you must not use the platform as a Buyer.</p>
+
+            <h4>2. Eligibility</h4>
+            <p>To register as a Buyer on Kultiva, you must:</p>
+            <ul>
+                <li>Be at least 18 years old.</li>
+                <li>Be legally authorized to conduct business in India.</li>
+                <li>Possess valid GST registration (if applicable).</li>
+                <li>Possess Import Export Code (IEC) if engaging in exports.</li>
+                <li>Provide accurate and truthful business information.</li>
+            </ul>
+            <p>Kultiva reserves the right to reject or suspend accounts providing false information.</p>
+
+            <h4>3. Buyer Responsibilities</h4>
+            <p>The Buyer agrees to:</p>
+            <ul>
+                <li>Provide accurate company details.</li>
+                <li>Ensure timely payment for purchased agricultural produce.</li>
+                <li>Comply with all applicable trade, tax, and export regulations.</li>
+                <li>Use purchased goods only for lawful purposes.</li>
+                <li>Maintain transparency in communication with Farmers and Sellers.</li>
+            </ul>
+
+            <h4>4. GST & Tax Compliance</h4>
+            <p>The Buyer is solely responsible for:</p>
+            <ul>
+                <li>Paying applicable GST and other taxes.</li>
+                <li>Filing tax returns as required under Indian law.</li>
+                <li>Maintaining proper financial records.</li>
+                <li>Providing valid tax information.</li>
+            </ul>
+            <p>Kultiva is not responsible for tax liabilities of Buyers.</p>
+
+            <h4>5. Import & Export Compliance</h4>
+            <p>If the Buyer engages in export activities:</p>
+            <ul>
+                <li>A valid IEC code must be provided.</li>
+                <li>APEDA or other required regulatory registrations must be maintained.</li>
+                <li>The Buyer must comply with DGFT and customs regulations.</li>
+            </ul>
+            <p>Kultiva does not assume responsibility for customs clearance or export compliance failures.</p>
+
+            <h4>6. Orders & Payments</h4>
+            <p>Orders placed through Kultiva constitute legally binding purchase agreements. Buyers must make payments within specified timelines. Failure to complete payment may result in account suspension. Kultiva may hold payments in escrow in case of disputes.</p>
+
+            <h4>7. Dispute Resolution</h4>
+            <p>If a dispute arises between Buyer and Farmer/Seller:</p>
+            <ul>
+                <li>Both parties must cooperate in good faith.</li>
+                <li>Kultiva may temporarily freeze transactions during investigation.</li>
+                <li>Kultiva’s decision regarding dispute handling shall be final.</li>
+            </ul>
+
+            <h4>8. Prohibited Activities</h4>
+            <p>The Buyer shall NOT provide false GST, IEC, or business details; engage in fraudulent transactions; manipulate pricing or exploit platform vulnerabilities; attempt to bypass the platform to avoid service fees; or use the platform for money laundering or illegal activities.</p>
+            <p>Violations may result in immediate suspension, permanent ban, and legal reporting to authorities.</p>
+
+            <h4>9. Verification & Approval</h4>
+            <p>Buyer accounts may remain inactive until Admin approval. Kultiva may request supporting documents. Approval is at the sole discretion of Kultiva.</p>
+
+            <h4>10. Commission & Service Fees</h4>
+            <p>Kultiva may charge commission or service fees. Fee structures may be updated from time to time. Continued use of the platform implies acceptance of updated fees.</p>
+
+            <h4>11. Limitation of Liability</h4>
+            <p>Kultiva operates as a digital marketplace platform only. Kultiva is not liable for:</p>
+            <ul>
+                <li>Product defects or delivery delays.</li>
+                <li>Regulatory violations by Farmers or Sellers.</li>
+                <li>Business losses or market price fluctuations.</li>
+            </ul>
+
+            <h4>12. Data Usage & Privacy</h4>
+            <p>Buyer information will be handled in accordance with the Kultiva Privacy Policy. Sensitive business information will be protected using reasonable security measures.</p>
+
+            <h4>13. Account Suspension & Termination</h4>
+            <p>Kultiva may suspend or terminate a Buyer account if false information is provided, laws are violated, payments are defaulted, or terms are breached. Termination does not remove liability for pending obligations.</p>
+
+            <h4>14. Amendments</h4>
+            <p>Kultiva reserves the right to update these Terms at any time. Continued platform use constitutes acceptance of updated Terms.</p>
+
+            <h4>15. Governing Law</h4>
+            <p>These Terms shall be governed by the laws of India. Jurisdiction shall lie in the courts of Kerala.</p>
+
+            <h4>16. Declaration</h4>
+            <p>By clicking “I Agree” during registration, you confirm that all business information provided is accurate, you accept responsibility for regulatory compliance, and you agree to follow all applicable laws and platform rules.</p>
+        </div>
+
+        <div id="acceptance-section" class="agreement-box">
+            <label class="checkbox-label">
+                <input type="checkbox" id="terms-checkbox">
+                I have read and agree to the Kultiva Buyer Terms and Agreement.
+            </label>
+            <br>
+            <button class="main-button" id="submit-btn" disabled onclick="closeTermsTab()">I Understand & Accept</button>
+        </div>
+
+    </div>
+  </section>
+  {% include 'footer.html' %}
+
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/js/animation.js' %}"></script>
+  <script src="{% static 'assets/js/templatemo-custom.js' %}"></script>
+
+  <script>
+      document.getElementById('terms-checkbox').addEventListener('change', function() {
+          const btn = document.getElementById('submit-btn');
+          if (this.checked) {
+              btn.disabled = false;
+              btn.style.opacity = '1';
+          } else {
+              btn.disabled = true;
+              btn.style.opacity = '0.6';
+          }
+      });
+
+      // Professionally close the tab, auto-check the parent form, or redirect
+      function closeTermsTab() {
+          // 1. Check if this page was opened from the Registration Form (New Tab)
+          if (window.opener && !window.opener.closed) {
+              try {
+                  // Magically find the checkbox in the parent tab (Buyer Registration)
+                  let parentCheckbox = window.opener.document.getElementById('termsCheckbox');
+                  
+                  if (parentCheckbox) {
+                      // Auto-check it
+                      parentCheckbox.checked = true;
+                      
+                      // Trigger the 'change' event in the parent so the Submit button unlocks!
+                      parentCheckbox.dispatchEvent(new Event('change'));
+                  }
+              } catch (e) {
+                  console.log("Could not access parent window.");
+              }
+              
+              // Close the terms tab and return the user to their form
+              window.close();
+              
+          } else {
+              // 2. Fallback: If they opened it in the same window, redirect them back to the Buyer Form
+              window.location.href = "{% url 'register_role' 'buyer' %}";
+          }
+      }
+  </script>
+
+</body>
+</html>

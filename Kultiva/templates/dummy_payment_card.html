@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Card Gateway | Kultiva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Inter', sans-serif; }
+        .checkout-container { background: #ffffff; width: 100%; max-width: 420px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); overflow: hidden; position: relative; }
+        .demo-badge { background: #ff3b30; color: white; text-align: center; font-size: 11px; font-weight: 700; padding: 6px 0; letter-spacing: 1px; text-transform: uppercase; }
+        .header { padding: 24px 24px 10px; background: #1d1d1f; color: white; text-align: center; }
+        
+        /* Interactive Virtual Card */
+        .virtual-card-wrapper { padding: 0 24px; margin-top: -30px; margin-bottom: 20px; perspective: 1000px; }
+        .virtual-card { 
+            background: linear-gradient(135deg, #2b2b2b, #1a1a1a); 
+            color: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3); 
+            border: 1px solid #444;
+            transition: transform 0.3s ease;
+        }
+        .virtual-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            transform: rotate(30deg); pointer-events: none;
+        }
+        .vc-chip { width: 45px; height: 32px; background: linear-gradient(135deg, #e5b252, #c58f22); border-radius: 6px; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .vc-chip::after { content:''; position:absolute; top:50%; left:0; width:100%; height:1px; background:rgba(0,0,0,0.2); }
+        .vc-chip::before { content:''; position:absolute; left:50%; top:0; width:1px; height:100%; background:rgba(0,0,0,0.2); }
+        .vc-num { font-size: 20px; letter-spacing: 2px; margin-bottom: 15px; font-family: 'Space Mono', monospace; text-shadow: 0 2px 2px rgba(0,0,0,0.5); min-height: 30px; }
+        .vc-row { display: flex; justify-content: space-between; font-size: 11px; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
+        .vc-val { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: bold; color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); text-transform: uppercase;}
+
+        /* Form Inputs */
+        .input-group { margin-bottom: 16px; position: relative; }
+        .input-group label { display: block; font-size: 12px; color: #86868b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+        .input-field { width: 100%; padding: 14px 16px; border: 2px solid #e5e5ea; border-radius: 12px; font-size: 15px; outline: none; transition: 0.2s; background: #fafafa; }
+        .input-field:focus { border-color: #1a73e8; background: #fff; box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1); }
+        .input-field.error { border-color: #ff3b30; background: #fff5f5; }
+        
+        .error-msg { color: #ff3b30; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; display: flex; align-items: center; gap: 4px; }
+        
+        /* Button & Success */
+        .pay-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; color: white; background: #1a73e8; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3); }
+        .pay-btn:hover { background: #1557b0; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4); }
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s infinite linear; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .success-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(5px); }
+        .success-overlay.active { opacity: 1; pointer-events: all; }
+        .success-icon { width: 70px; height: 70px; background: #34c759; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(52, 199, 89, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="checkout-container">
+        <div class="demo-badge">Gateway Mockup Environment</div>
+        
+        <div class="header" style="padding-bottom: 50px;">
+            <h2 style="font-size: 13px; opacity: 0.7; font-weight: 500; letter-spacing: 1px;">KULTIVA SECURE CHECKOUT</h2>
+            <h1 style="font-size: 38px; font-weight: 700; margin-top: 5px;">₹ {{ total_amount }}</h1>
+        </div>
+
+        <div class="virtual-card-wrapper">
+            <div class="virtual-card" id="virtualCard">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div class="vc-chip"></div>
+                    <i class="fab fa-cc-visa text-white text-3xl opacity-80" id="vc-brand"></i>
+                </div>
+                <div class="vc-num" id="vc-number">•••• •••• •••• ••••</div>
+                <div class="vc-row">
+                    <div style="width: 70%;">
+                        <div style="font-size: 9px;">Card Holder</div>
+                        <div class="vc-val truncate" id="vc-name">YOUR NAME</div>
+                    </div>
+                    <div style="width: 30%; text-align: right;">
+                        <div style="font-size: 9px;">Expires</div>
+                        <div class="vc-val" id="vc-expiry">MM/YY</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 0 24px 24px;">
+            <div class="input-group">
+                <label>Card Number</label>
+                <div style="position: relative;">
+                    <input type="text" id="cardNumber" class="input-field" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off">
+                    <i class="far fa-credit-card absolute right-4 top-4 text-gray-400"></i>
+                </div>
+                <div class="error-msg" id="err-cardNumber"><i class="fas fa-exclamation-circle"></i> <span>Invalid card number</span></div>
+            </div>
+            
+            <div class="input-group">
+                <label>Name on Card</label>
+                <input type="text" id="cardName" class="input-field" placeholder="John Doe" autocomplete="off">
+                <div class="error-msg" id="err-cardName"><i class="fas fa-exclamation-circle"></i> <span>Please enter a valid name</span></div>
+            </div>
+
+            <div style="display: flex; gap: 16px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>Expiry Date</label>
+                    <input type="text" id="cardExpiry" class="input-field" placeholder="MM/YY" maxlength="5" autocomplete="off">
+                    <div class="error-msg" id="err-cardExpiry"><i class="fas fa-exclamation-circle"></i> <span>Invalid date</span></div>
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>CVV</label>
+                    <div style="position: relative;">
+                        <input type="password" id="cardCvv" class="input-field" placeholder="•••" maxlength="3" autocomplete="off">
+                        <i class="fas fa-lock absolute right-4 top-4 text-gray-400 text-sm"></i>
+                    </div>
+                    <div class="error-msg" id="err-cardCvv"><i class="fas fa-exclamation-circle"></i> <span>Invalid CVV</span></div>
+                </div>
+            </div>
+
+            <button class="pay-btn" id="payBtn" onclick="processPayment()" style="margin-top: 10px;">
+                <span id="btn-text">Authenticate & Pay</span>
+                <div class="spinner" id="btn-spinner"></div>
+            </button>
+            
+            <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #86868b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i class="fas fa-shield-alt text-green-500 text-sm"></i> AES-256 Bit Bank Grade Encryption
+            </div>
+        </div>
+
+        <div class="success-overlay" id="success-screen">
+            <div class="success-icon"><svg width="34" height="34" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+            <h2 style="color: #1d1d1f; margin-bottom: 8px; font-weight: 800; font-size: 22px;">Payment Successful!</h2>
+            <p style="color: #86868b; font-size: 14px; font-weight: 500;">Routing securely back to Kultiva...</p>
+        </div>
+
+        <form id="hiddenDjangoForm" method="POST" action="{% url 'process_input_order' product.id %}" style="display: none;">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="{{ qty }}">
+            <input type="hidden" name="payment_mode" value="CARD">
+        </form>
+    </div>
+
+    <script>
+        // DOM Elements
+        const inputs = {
+            number: document.getElementById('cardNumber'),
+            name: document.getElementById('cardName'),
+            expiry: document.getElementById('cardExpiry'),
+            cvv: document.getElementById('cardCvv')
+        };
+        const vc = {
+            number: document.getElementById('vc-number'),
+            name: document.getElementById('vc-name'),
+            expiry: document.getElementById('vc-expiry'),
+            brand: document.getElementById('vc-brand')
+        };
+
+        // Live Formatting & Virtual Card Updating
+        inputs.number.addEventListener('input', function(e) {
+            // Remove non-digits
+            let val = this.value.replace(/\D/g, '');
+            // Auto-format with spaces
+            val = val.match(/.{1,4}/g)?.join(' ') || '';
+            this.value = val;
+            vc.number.innerText = val || '•••• •••• •••• ••••';
+            
+            // Dynamic Brand Icon (Visa vs Mastercard logic)
+            if (val.startsWith('4')) vc.brand.className = 'fab fa-cc-visa text-white text-3xl opacity-80';
+            else if (val.startsWith('5')) vc.brand.className = 'fab fa-cc-mastercard text-white text-3xl opacity-80';
+            else vc.brand.className = 'far fa-credit-card text-white text-3xl opacity-80';
+        });
+
+        inputs.name.addEventListener('input', function(e) {
+            // Remove numbers and special chars
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+            vc.name.innerText = this.value || 'YOUR NAME';
+        });
+
+        inputs.expiry.addEventListener('input', function(e) {
+            let val = this.value.replace(/\D/g, '');
+            if (val.length >= 2) {
+                // Add the slash automatically
+                val = val.substring(0, 2) + '/' + val.substring(2, 4);
+            }
+            this.value = val;
+            vc.expiry.innerText = val || 'MM/YY';
+        });
+
+        inputs.cvv.addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
+        // 3D Tilt Effect on Virtual Card
+        const vcWrapper = document.querySelector('.virtual-card-wrapper');
+        const vCard = document.getElementById('virtualCard');
+        vcWrapper.addEventListener('mousemove', (e) => {
+            const rect = vcWrapper.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((y - centerY) / centerY) * -10;
+            const rotateY = ((x - centerX) / centerX) * 10;
+            vCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+        vcWrapper.addEventListener('mouseleave', () => {
+            vCard.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        });
+
+        // Clear Errors function
+        function clearErrors() {
+            Object.values(inputs).forEach(el => el.classList.remove('error'));
+            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
+        }
+
+        // Show Specific Error
+        function showError(fieldId, msg) {
+            const el = document.getElementById(fieldId);
+            el.classList.add('error');
+            const errDiv = document.getElementById('err-' + fieldId);
+            errDiv.querySelector('span').innerText = msg;
+            errDiv.style.display = 'flex';
+            // Slight shake animation for error
+            el.style.transform = 'translateX(-5px)';
+            setTimeout(() => el.style.transform = 'translateX(5px)', 100);
+            setTimeout(() => el.style.transform = 'translateX(0)', 200);
+        }
+
+        function processPayment() {
+            clearErrors();
+            let isValid = true;
+
+            // 1. Validate Card Number (Must be exactly 19 chars including spaces)
+            if (inputs.number.value.length !== 19) {
+                showError('cardNumber', 'Card number must be 16 digits');
+                isValid = false;
+            }
+
+            // 2. Validate Name
+            if (inputs.name.value.trim().length < 3) {
+                showError('cardName', 'Please enter a valid full name');
+                isValid = false;
+            }
+
+            // 3. Validate Expiry
+            const expVal = inputs.expiry.value;
+            if (expVal.length !== 5 || !expVal.includes('/')) {
+                showError('cardExpiry', 'Format must be MM/YY');
+                isValid = false;
+            } else {
+                const parts = expVal.split('/');
+                const month = parseInt(parts[0], 10);
+                const year = parseInt(parts[1], 10);
+                const currentYear = parseInt(new Date().getFullYear().toString().slice(-2), 10);
+                
+                if (month < 1 || month > 12) {
+                    showError('cardExpiry', 'Invalid month (01-12)');
+                    isValid = false;
+                } else if (year < currentYear) {
+                    showError('cardExpiry', 'Card has expired');
+                    isValid = false;
+                }
+            }
+
+            // 4. Validate CVV
+            if (inputs.cvv.value.length !== 3) {
+                showError('cardCvv', 'CVV must be 3 digits');
+                isValid = false;
+            }
+
+            // If any validation failed, stop the process
+            if (!isValid) return;
+
+            // If Valid, start the processing animation
+            document.getElementById('btn-text').style.display = 'none';
+            document.getElementById('btn-spinner').style.display = 'block';
+            const payBtn = document.getElementById('payBtn');
+            payBtn.style.cursor = 'not-allowed';
+            payBtn.style.pointerEvents = 'none';
+
+            // Simulate 2.5 second Bank Processing
+            setTimeout(() => {
+                document.getElementById('success-screen').classList.add('active');
+                
+                // Wait 1.5 seconds on success screen, then SUBMIT to Django
+                setTimeout(() => {
+                    document.getElementById('hiddenDjangoForm').submit();
+                }, 1500);
+
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

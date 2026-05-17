@@ -1,0 +1,376 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.title }} | Kultiva Input Market</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .assured-badge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #1b5e20;
+            color: #fbc02d;
+            font-size: 12px;
+            font-weight: 900;
+            padding: 8px 15px;
+            border-bottom-right-radius: 15px;
+            border-top-left-radius: 15px;
+            z-index: 10;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .product-img-main {
+            height: 400px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            position: relative;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+        }
+
+        .product-img-main img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            transition: transform 0.5s ease;
+        }
+
+        .product-img-main:hover img {
+            transform: scale(1.1);
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            color: #1b5e20;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .price-display {
+            font-size: 36px;
+            font-weight: 900;
+            color: #1a1a1a;
+            line-height: 1;
+        }
+
+        /* Nav Tabs Customization */
+        .nav-tabs .nav-link {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            color: #555;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 15px 25px;
+            font-size: 18px;
+        }
+        .nav-tabs .nav-link.active {
+            color: #1b5e20;
+            background: transparent;
+            border-color: transparent transparent #fbc02d transparent;
+        }
+        .nav-tabs .nav-link:hover {
+            border-color: transparent transparent #c5e1a5 transparent;
+        }
+
+        .btn-amazon-orange {
+            background-color: #f57f17;
+            border: 1px solid #e65100;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 30px;
+            padding: 12px;
+            transition: 0.3s;
+        }
+        .btn-amazon-orange:hover {
+            background-color: #e65100;
+        }
+
+        .trust-icon-box {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+        }
+        .trust-icon-box i {
+            font-size: 24px;
+            color: #1b5e20;
+            margin-bottom: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container pb-5 wow fadeIn" data-wow-duration="1s">
+        
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb" style="background: transparent; padding: 0; font-size: 14px; font-weight: bold;">
+                <li class="breadcrumb-item"><a href="{% url 'farmer_home' %}" style="color: #1b5e20;">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'farmer_input_market' %}" style="color: #1b5e20;">Marketplace</a></li>
+                <li class="breadcrumb-item active" aria-current="page" style="color: #888;">{{ product.category|title }}</li>
+            </ol>
+        </nav>
+
+        <div class="glass-widget mb-5 p-0 overflow-hidden">
+            <div class="row g-0">
+                
+                <div class="col-lg-5 p-4 border-end">
+                    <div class="product-img-main mb-3">
+                        <div class="assured-badge"><i class="fa fa-shield"></i> Kultiva Assured</div>
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                        {% else %}
+                            <i class="fa fa-image text-muted" style="font-size: 80px;"></i>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-lg-4 p-4 border-end">
+                    <div class="brand-subtitle">{{ product.variety_or_brand|default:"Standard Quality" }}</div>
+                    <h1 class="mt-2 mb-3" style="font-size: 28px; font-weight: 800; color: #1a1a1a; line-height: 1.2;">
+                        {{ product.title }}
+                    </h1>
+                    
+                    <div class="mb-3">
+                        <span class="text-warning"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i></span>
+                        <span class="ms-2" style="font-size: 14px; color: #1b5e20; font-weight: bold; cursor: pointer;">{{ avg_rating }} ({{ total_reviews }} Reviews)</span>
+                    </div>
+
+                    <div class="border-top border-bottom py-3 mb-4">
+                        <div class="d-flex align-items-baseline">
+                            <span class="price-display">₹{{ product.price }}</span>
+                            <span class="ms-2 text-muted fw-bold">/ {{ product.unit_of_measure }}</span>
+                        </div>
+                        <div style="font-size: 12px; color: #666; font-weight: bold;">Inclusive of all taxes</div>
+                    </div>
+
+                    <h5 style="font-size: 16px; font-weight: bold; color: #1b5e20; margin-bottom: 15px;">Key Highlights</h5>
+                    <ul style="list-style: none; padding-left: 0; font-size: 14px; color: #555;">
+                        <li class="mb-2"><i class="fa fa-check text-success me-2"></i> <strong>Category:</strong> {{ product.category|title }}</li>
+                        {% for key, value in formatted_specs.items %}
+                            {% if value %}
+                                <li class="mb-2"><i class="fa fa-check text-success me-2"></i> <strong class="text-capitalize">{{ key }}:</strong> {{ value }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+
+                    <div class="row mt-4 border-top pt-4">
+                        <div class="col-3 trust-icon-box"><i class="fa fa-undo"></i> 7 Days<br>Return</div>
+                        <div class="col-3 trust-icon-box"><i class="fa fa-truck"></i> Fast<br>Delivery</div>
+                        <div class="col-3 trust-icon-box"><i class="fa fa-money"></i> Pay on<br>Delivery</div>
+                        <div class="col-3 trust-icon-box"><i class="fa fa-certificate"></i> Top<br>Brand</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 p-4" style="background: rgba(248, 249, 250, 0.5);">
+                    <div class="price-display mb-3">₹{{ product.price }}</div>
+                    
+                    <div class="mb-4" style="font-size: 14px;">
+                        <div style="color: #1b5e20; font-weight: bold;"><i class="fa fa-map-marker"></i> Deliver to Your Farm</div>
+                        <div class="mt-1 fw-bold">Status: 
+                            {% if product.available_stock > 10 %}
+                                <span class="text-success">In Stock</span>
+                            {% elif product.available_stock > 0 %}
+                                <span class="text-warning" style="color: #f57f17 !important;">Only {{ product.available_stock|floatformat:0 }} left!</span>
+                            {% else %}
+                                <span class="text-danger">Out of Stock</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="fw-bold mb-1" style="font-size: 14px;">Quantity ({{ product.unit_of_measure }}s)</label>
+                        <input type="number" id="qtyInput" class="form-control rounded-3" value="{{ product.min_order_quantity|floatformat:0 }}" min="{{ product.min_order_quantity }}" max="{{ product.available_stock }}">
+                        {% if product.min_order_quantity > 1 %}
+                            <div class="text-muted mt-1" style="font-size: 11px;">Min. Order: {{ product.min_order_quantity|floatformat:0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'farmer_checkout' product.id %}?qty={{ product.min_order_quantity|floatformat:0 }}" id="buyNowBtn" class="btn btn-amazon-orange w-100 mb-4 shadow-sm d-flex justify-content-center align-items-center gap-2">
+                        <i class="fa fa-bolt"></i> Buy Now
+                    </a>
+
+                    <div style="font-size: 12px; color: #666;">
+                        <div class="d-flex justify-content-between mb-1"><span>Ships from</span> <span class="fw-bold text-dark">Kultiva Fulfillment</span></div>
+                        <div class="d-flex justify-content-between mb-1"><span>Sold by</span> <span class="fw-bold" style="color: #1b5e20;">{{ product.listed_by.seller_profile.shop_name|default:product.listed_by.username }}</span></div>
+                        <div class="text-center mt-3 fw-bold text-muted"><i class="fa fa-lock"></i> Secure Escrow Transaction</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="glass-widget p-4 mb-5">
+            <ul class="nav nav-tabs mb-4" id="productTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button" role="tab">Manufacturer Description</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button" role="tab">Technical Specifications</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content px-2" id="productTabsContent">
+                <div class="tab-pane fade show active" id="desc" role="tabpanel">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h4 style="color: #1b5e20; font-weight: bold; margin-bottom: 20px;">Product Overview</h4>
+                            <p style="font-size: 16px; line-height: 1.8; color: #444;">
+                                {{ product.description|linebreaks }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="specs" role="tabpanel">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <table class="table table-bordered table-striped" style="border-color: #c5e1a5;">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 40%; background: #f1f8e9; color: #1b5e20;">Brand / Variety</th>
+                                        <td>{{ product.variety_or_brand|default:"N/A" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th style="background: #f1f8e9; color: #1b5e20;">Market Category</th>
+                                        <td>{{ product.category|title }}</td>
+                                    </tr>
+                                    {% for key, value in formatted_specs.items %}
+                                        <tr>
+                                            <th class="text-capitalize" style="background: #f1f8e9; color: #1b5e20;">{{ key }}</th>
+                                            <td>{{ value|default:"N/A" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="color: #1a1a1a; font-weight: 800; margin-bottom: 20px;">Customer Ratings & Reviews</h3>
+        <div class="glass-widget p-4">
+            <div class="row">
+                <div class="col-md-4 border-end text-center pt-3">
+                    <div style="font-size: 60px; font-weight: 900; color: #1a1a1a; line-height: 1;">{{ avg_rating }}</div>
+                    <div class="text-warning fs-5 mb-2"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i></div>
+                    <div class="text-muted fw-bold mb-4" style="font-size: 13px;">Based on {{ total_reviews }} verified ratings</div>
+                    
+                    {% if has_purchased %}
+                        <a href="{% url 'farmer_orders' %}" class="btn w-100 fw-bold rounded-pill" style="background-color: #2e7d32; color: white;">Write a Review (Via Orders)</a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary w-100 fw-bold rounded-pill" disabled style="cursor: not-allowed;">
+                            <i class="fa fa-lock"></i> Reviews Locked
+                        </button>
+                        <div style="font-size: 11px; color: #888; margin-top: 8px;">Only verified buyers can leave a review.</div>
+                    {% endif %}
+
+                </div>
+                <div class="col-md-8 ps-md-5 pt-3">
+                    
+                    {% for review in reviews %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-success me-2 fs-6">{{ review.rating }} <i class="fa fa-star" style="font-size: 10px;"></i></span>
+                                <span class="fw-bold text-dark">
+                                    {% if review.rating == 5 %}Excellent Quality!
+                                    {% elif review.rating == 4 %}Very Good Product
+                                    {% elif review.rating == 3 %}Average Experience
+                                    {% elif review.rating == 2 %}Below Expectations
+                                    {% else %}Poor Quality{% endif %}
+                                </span>
+                            </div>
+                            <p class="text-muted mb-2" style="font-size: 14px;">{{ review.comment|default:"No description provided." }}</p>
+                            
+                            {% if review.image %}
+                                <div class="mb-3 mt-2">
+                                    <a href="{{ review.image.url }}" target="_blank">
+                                        <img src="{{ review.image.url }}" alt="Review Photo" class="shadow-sm" style="height: 90px; width: 90px; object-fit: cover; border-radius: 8px; border: 2px solid #e2e8f0; transition: transform 0.2s ease;">
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                            <div style="font-size: 12px; color: #888;">
+                                {{ review.reviewer.username|title }} <i class="fa fa-check-circle text-success" title="Verified Buyer"></i> • {{ review.created_at|timesince }} ago
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa fa-commenting-o mb-3" style="font-size: 40px; opacity: 0.5;"></i>
+                            <h5>No Reviews Yet</h5>
+                            <p>Be the first verified buyer to leave a review for this product!</p>
+                        </div>
+                    {% endfor %}
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/animation.js' %}"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const qtyInput = document.getElementById('qtyInput');
+            const buyBtn = document.getElementById('buyNowBtn');
+            const baseUrl = "{% url 'farmer_checkout' product.id %}";
+
+            // Function to dynamically update the href based on what the user types
+            function updateCheckoutLink() {
+                let qty = qtyInput.value;
+                
+                // Safety net: if they clear the box, default to minimum order
+                if(!qty || parseFloat(qty) <= 0) {
+                    qty = {{ product.min_order_quantity|floatformat:0 }};
+                }
+                
+                // Rewrite the button's URL
+                buyBtn.href = baseUrl + "?qty=" + qty;
+            }
+
+            // Listen for any changes or typing in the quantity box
+            qtyInput.addEventListener('input', updateCheckoutLink);
+            qtyInput.addEventListener('change', updateCheckoutLink);
+        });
+    </script>
+</body>
+</html>
