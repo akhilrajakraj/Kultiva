@@ -25,59 +25,60 @@
             border-top: 5px solid #0288d1; /* Seller Blue */
             border-radius: 15px;
             padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         .section-title {
             color: #01579b;
-            font-weight: bold;
-            border-bottom: 2px solid #fbc02d;
+            font-weight: 800;
+            margin-bottom: 20px;
             padding-bottom: 10px;
-            margin-bottom: 25px;
-            margin-top: 20px;
+            border-bottom: 2px solid #e1f5fe;
         }
 
         .form-control-custom {
             width: 100%;
-            border: none;
-            border-bottom: 2px solid #ccc;
-            background: transparent;
-            padding: 10px 0;
-            outline: none;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
             transition: 0.3s;
+            color: #333;
         }
-        .form-control-custom:focus { border-bottom-color: #0288d1; }
-        
+
+        .form-control-custom:focus {
+            border-color: #0288d1;
+            box-shadow: 0 0 8px rgba(2, 136, 209, 0.2);
+            background: #fff;
+            outline: none;
+        }
+
         .form-control-custom[readonly] {
-            color: #888;
-            border-bottom: 2px dashed #ddd;
-            background-color: rgba(0,0,0,0.02);
+            background: #e9ecef;
             cursor: not-allowed;
+            color: #6c757d;
+            font-weight: bold;
         }
 
         .btn-submit {
-            background-color: #0288d1;
+            background: #0288d1;
             color: white;
-            font-weight: bold;
-            padding: 12px 30px;
-            border-radius: 30px;
             border: none;
-            transition: 0.3s;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: bold;
             width: 100%;
             margin-top: 20px;
+            transition: 0.3s;
+            font-size: 16px;
         }
-        .btn-submit:hover { background-color: #fbc02d; color: #1b5e20; }
-        
-        .vendor-badge {
-            background: #e1f5fe;
-            color: #0288d1;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            border: 1px solid #b3e5fc;
-            display: inline-block;
-            margin-top: 8px;
+
+        .btn-submit:hover {
+            background: #01579b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(1, 87, 155, 0.3);
         }
     </style>
 </head>
@@ -85,108 +86,79 @@
 
     {% include 'seller_header.html' %}
 
-    <div class="container pb-5 wow fadeInUp">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3">
-                            <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                <div class="form-card mt-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <div style="width: 60px; height: 60px; border-radius: 50%; background: #0288d1; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-right: 15px; border: 2px solid #b3e5fc;">
-                            <i class="fa fa-store"></i>
-                        </div>
-                        <div>
-                            <h3 style="color: #01579b; font-weight: bold; margin: 0;">Vendor Settings</h3>
-                            <div class="vendor-badge"><i class="fa fa-check-circle"></i> Registered Seller</div>
-                        </div>
-                    </div>
-                    
-                    <form action="{% url 'seller_profile' %}" method="POST">
-                        {% csrf_token %}
-
-                        <h5 class="section-title"><i class="fa fa-user-tie"></i> Account Details</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">Owner Name</label>
-                                <input type="text" name="username" class="form-control-custom" value="{{ request.user.username }}" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">Email Address <i class="fa fa-lock" title="Cannot be changed"></i></label>
-                                <input type="email" class="form-control-custom" value="{{ request.user.email }}" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">Phone Number</label>
-                                <input type="tel" name="phone" id="phoneInput" class="form-control-custom" value="{{ request.user.phone_number }}" required pattern="[0-9]{10}" maxlength="10">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">Shop/Enterprise Name</label>
-                                <input type="text" name="shop_name" class="form-control-custom" value="{{ profile.shop_name|default:'' }}" required>
-                            </div>
-                        </div>
-
-                        <h5 class="section-title"><i class="fa fa-map-marked-alt"></i> Store Location</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">Village / Town</label>
-                                <input type="text" name="village" class="form-control-custom" value="{{ address.village|default:'' }}" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">District</label>
-                                <input type="text" name="district" class="form-control-custom" value="{{ address.district|default:'' }}" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">State</label>
-                                <input type="text" name="state" class="form-control-custom" value="{{ address.state|default:'' }}" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">Pincode</label>
-                                <input type="text" name="pincode" class="form-control-custom" value="{{ address.pincode|default:'' }}" required pattern="[0-9]{6}">
-                            </div>
-                        </div>
-
-                        <h5 class="section-title"><i class="fa fa-shield-alt"></i> Verified Business Credentials <i class="fa fa-lock float-right text-muted" style="font-size: 14px; margin-top: 5px;"></i></h5>
-                        <p class="text-muted" style="font-size: 12px; margin-top: -15px; margin-bottom: 20px;">These credentials have been verified by Kultiva Admin and cannot be altered.</p>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">Trade License Number</label>
-                                <input type="text" class="form-control-custom" value="{{ masked_reg_no }}" readonly>
-                                <small class="text-muted" style="font-size: 11px;">Masked for corporate security.</small>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="fw-bold text-muted">Corporate GST Number</label>
-                                <input type="text" class="form-control-custom" value="{{ masked_gst }}" readonly>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn-submit"><i class="fa fa-save"></i> Save Vendor Settings</button>
-                    </form>
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="max-width: 900px; margin: 0 auto 20px auto;">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="form-card">
+            <div class="text-center mb-4">
+                <i class="fa fa-store fa-4x mb-3" style="color: #0288d1;"></i>
+                <h2 style="color: #1e293b; font-weight: 800;">Vendor Business Profile</h2>
+                <p class="text-muted">Manage your store details and physical location.</p>
             </div>
+
+            <form method="POST" action="{% url 'seller_profile' %}">
+                {% csrf_token %}
+                
+                <h4 class="section-title"><i class="fa fa-id-card"></i> Account & Business Info</h4>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted mb-2">Username</label>
+                        <input type="text" name="username" class="form-control-custom" value="{{ request.user.username }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted mb-2">Email Address (Login ID)</label>
+                        <input type="email" class="form-control-custom" value="{{ request.user.email }}" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted mb-2">Store / Brand Name</label>
+                        <input type="text" name="shop_name" class="form-control-custom" value="{{ profile.shop_name }}" required placeholder="e.g., GreenAgri Supplies">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted mb-2">Business Reg. No (GST/TIN)</label>
+                        <input type="text" class="form-control-custom text-success" value="{{ masked_reg_no }}" readonly>
+                        <small class="text-muted" style="font-size: 11px;"><i class="fa fa-lock"></i> Masked for corporate security.</small>
+                    </div>
+                </div>
+
+                <h4 class="section-title"><i class="fa fa-map-marked-alt"></i> Store Location</h4>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted mb-2">Village / City</label>
+                        <input type="text" name="village" class="form-control-custom" value="{{ address.village }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted mb-2">District</label>
+                        <input type="text" name="district" class="form-control-custom" value="{{ address.district }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted mb-2">State</label>
+                        <input type="text" name="state" class="form-control-custom" value="{{ address.state }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted mb-2">Pincode</label>
+                        <input type="text" name="pincode" class="form-control-custom" value="{{ address.pincode }}" required pattern="[0-9]{6}">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit"><i class="fa fa-save"></i> Save Vendor Profile</button>
+            </form>
         </div>
     </div>
 
+    {% include 'footer.html' %}
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        
-        // 🔬 THE FIX: Strict Phone Number format enforcer
-        const phoneInput = document.getElementById('phoneInput');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function() {
-                this.value = this.value.replace(/\D/g, ''); // Removes non-numeric characters instantly
-            });
-        }
-
-        // Pincode Automation Logic
+        // Target inputs by name to ensure compatibility with your Django backend
         const pincodeInput = document.querySelector('input[name="pincode"]');
         const districtInput = document.querySelector('input[name="district"]');
         const stateInput = document.querySelector('input[name="state"]');
@@ -195,8 +167,10 @@
             pincodeInput.addEventListener('input', function() {
                 const pincode = this.value.trim();
 
+                // Trigger lookup only when exactly 6 digits are entered
                 if (pincode.length === 6 && /^\d{6}$/.test(pincode)) {
                     
+                    // Show a subtle loading status in the District box
                     const originalDistrict = districtInput.value;
                     districtInput.value = "Locating Vendor Zone...";
 
@@ -204,12 +178,15 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
+                                // 1. Update the District and State automatically
                                 districtInput.value = data.district;
-                                districtInput.style.borderBottom = '2px solid #0288d1'; 
-                                
                                 stateInput.value = data.state;
+
+                                // 2. Visual Success Indicator (Seller Blue Theme)
+                                districtInput.style.borderBottom = '2px solid #0288d1';
                                 stateInput.style.borderBottom = '2px solid #0288d1';
                                 
+                                // Brief highlight to notify the user of the change
                                 districtInput.style.backgroundColor = 'rgba(2, 136, 209, 0.05)';
                                 stateInput.style.backgroundColor = 'rgba(2, 136, 209, 0.05)';
                                 setTimeout(() => {
@@ -218,9 +195,11 @@
                                 }, 800);
 
                             } else {
+                                // Revert to original if pincode is not found in the directory
                                 if (districtInput.value === "Locating Vendor Zone...") {
                                     districtInput.value = originalDistrict;
                                 }
+                                console.log("Pincode lookup: No match found.");
                             }
                         })
                         .catch(error => {

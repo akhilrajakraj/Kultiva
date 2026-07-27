@@ -80,14 +80,8 @@
       transition: all 0.3s;
       border-radius: 0;
     }
-    
     .form-control-custom:focus { border-bottom-color: var(--crop-yellow); }
     
-    select.form-control-custom {
-      cursor: pointer;
-      color: #555;
-    }
-
     /* --- EYE ICON STYLING --- */
     .toggle-password {
       position: absolute;
@@ -137,6 +131,7 @@
       opacity: 0.7;
     }
 
+    /* Inline error text styling dynamically created by JS */
     .inline-error {
         color: #d32f2f;
         font-size: 12px;
@@ -207,8 +202,14 @@
         
         <div class="row mt-3">
             <div class="col-md-6 form-group">
-                <label>Phone Number <span class="text-danger">*</span></label>
-                <input type="tel" name="phone" class="form-control-custom" placeholder="10-digit Phone Number" maxlength="10" inputmode="numeric" required>
+                <label>Password</label>
+                <input type="password" name="password" id="passwordField" class="form-control-custom" placeholder="Min 8 chars, 1 Upper, 1 Lower..." required>
+                <i class="fa fa-eye toggle-password" onclick="togglePasswordVisibility('passwordField', this)"></i>
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" id="confirmPasswordField" class="form-control-custom" placeholder="Re-enter password" required>
+                <i class="fa fa-eye toggle-password" onclick="togglePasswordVisibility('confirmPasswordField', this)"></i>
             </div>
         </div>
 
@@ -235,44 +236,34 @@
             </div>
         </div>
 
-        <h5 class="section-title mt-4"><i class="fa fa-map-marker"></i> Office Location</h5>
+        <h5 class="section-title"><i class="fa fa-map-marker"></i> Office Location</h5>
         <div class="row">
-             <div class="col-md-6 form-group">
-                <label>State</label>
-                <select name="state" id="stateSelect" class="form-control-custom" required>
-                    <option value="" disabled selected>Select State</option>
-                    </select>
-             </div>
-             <div class="col-md-6 form-group">
-                <label>District</label>
-                <select name="district" id="districtSelect" class="form-control-custom" required disabled>
-                    <option value="" disabled selected>First select a State</option>
-                    </select>
-             </div>
-        </div>
-        <div class="row mt-3">
              <div class="col-md-6 form-group">
                 <label>City/Town</label>
                 <input type="text" name="village" class="form-control-custom" placeholder="City" required>
              </div>
              <div class="col-md-6 form-group">
+                <label>District</label>
+                <input type="text" name="district" class="form-control-custom" placeholder="District" required>
+             </div>
+        </div>
+        <div class="row mt-3">
+             <div class="col-md-6 form-group">
+                <label>State</label>
+                <select name="state" class="form-control-custom" required>
+                    <option value="" disabled selected>Select State</option>
+                    <option value="Kerala">Kerala</option>
+                    <option value="Tamil Nadu">Tamil Nadu</option>
+                    <option value="Karnataka">Karnataka</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Delhi">Delhi</option>
+                </select>
+             </div>
+             <div class="col-md-6 form-group">
                 <label>Pincode</label>
                 <input type="text" name="pincode" class="form-control-custom" placeholder="6-digit PIN" required>
              </div>
-        </div>
-
-        <h5 class="section-title mt-4"><i class="fa fa-lock"></i> Account Security</h5>
-        <div class="row">
-            <div class="col-md-6 form-group">
-                <label>Password</label>
-                <input type="password" name="password" id="passwordField" class="form-control-custom" placeholder="Min 8 chars, 1 Upper, 1 Lower..." required>
-                <i class="fa fa-eye toggle-password" onclick="togglePasswordVisibility('passwordField', this)"></i>
-            </div>
-            <div class="col-md-6 form-group">
-                <label>Confirm Password</label>
-                <input type="password" name="confirm_password" id="confirmPasswordField" class="form-control-custom" placeholder="Re-enter password" required>
-                <i class="fa fa-eye toggle-password" onclick="togglePasswordVisibility('confirmPasswordField', this)"></i>
-            </div>
         </div>
 
         <div class="terms-container">
@@ -317,85 +308,23 @@
   </script>
 
   <script>
-    // ==========================================
-    // CASCADING STATE & DISTRICT DATA ENGINE
-    // ==========================================
-    const locationData = {
-        'Andhra Pradesh': ['Anantapur', 'Chittoor', 'East Godavari', 'Guntur', 'Kadapa', 'Krishna', 'Kurnool', 'Nellore', 'Prakasam', 'Srikakulam', 'Visakhapatnam', 'Vizianagaram', 'West Godavari'],
-    'Arunachal Pradesh': ['Anjaw', 'Changlang', 'Dibang Valley', 'East Kameng', 'East Siang', 'Kamle', 'Kra Daadi', 'Kurung Kumey', 'Lepa Rada', 'Lohit', 'Longding', 'Namsai', 'Papum Pare', 'Siang', 'Tawang', 'Tirap', 'Upper Dibang Valley', 'Upper Siang', 'Upper Subansiri', 'West Kameng', 'West Siang'],
-    'Assam': ['Baksa', 'Barpeta', 'Biswanath', 'Bongaigaon', 'Cachar', 'Charaideo', 'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh', 'Dima Hasao', 'Goalpara', 'Golaghat', 'Hailakandi', 'Hojai', 'Jorhat', 'Kamrup', 'Kamrup Metropolitan', 'Karbi Anglong', 'Karimganj', 'Kathai', 'Lakhimpur', 'Majuli', 'Morigaon', 'Nagaon', 'Nalbari', 'North Cachar Hills', 'Nagaland Hills', 'Sivasagar', 'Sonitpur', 'South Salmara-Mankachar', 'Tinsukia', 'Udalguri', 'West Karbi Anglong'],
-    'Bihar': ['Araria', 'Arwal', 'Aurangabad', 'Banka', 'Begusarai', 'Bhagalpur', 'Bhojpur', 'Buxar', 'Chhapra', 'Darbhanga', 'East Champaran', 'Gaya', 'Gopalganj', 'Jamui', 'Jehanabad', 'Jhalokati', 'Jhari', 'Jharkhand', 'Katihar', 'Khagaria', 'Kishanganj', 'Kita', 'Kushinagar', 'Lakhisarai', 'Madhepura', 'Madhubani', 'Munger', 'Muzaffarpur', 'Nalanda', 'Namkhal', 'Naya Garh', 'Nawada', 'Niamul Haq', 'North West', 'Pashchim Champaran', 'Patna', 'Purnia', 'Rohtas', 'Saharsa', 'Samastipur', 'Samurai', 'Saran', 'Satara', 'Sheikhpura', 'Sheohar', 'Sherghati', 'Simdega', 'Sitamarhi', 'Siwan', 'South Champaran (West Champaran)', 'Supaul', 'Sutiya', 'Svarnim', 'Tarbha', 'Tikamgarh', 'Tindivanam', 'Tirhut', 'Vaishali', 'Valmiki Nagar'],
-    'Chhattisgarh': ['Balod', 'Balodabazar', 'Balrampur', 'Bastar', 'Bemetara', 'Bijapur', 'Bilaspur', 'Dantewada', 'Dhamtari', 'Dindori', 'Gariaband', 'Gaurella-Pendra-Marwahi', 'Gondia', 'Jaisingpur', 'Janjgir-Champa', 'Jeypore', 'Kabirdham', 'Kanker', 'Kawardha', 'Khairagarh', 'Kondagaon', 'Korba', 'Koriya', 'Mahasamund', 'Mandir-Hasaud', 'Mungeli', 'Narayanpur', 'Nagpia', 'Naxalite', 'Raigarh', 'Raipur', 'Rajnandgaon', 'Ramanujganj', 'Ramsagar', 'Sakti', 'Sarfold', 'Semaria', 'Sihawa', 'Sukma', 'Surajpur', 'Tarapur', 'Thakurmunda', 'Tipasgarh', 'Udanti', 'Umaria', 'Uttar Pradesh'],
-    'Goa': ['North Goa', 'South Goa'],
-    'Gujarat': ['Ahmedabad', 'Amreli', 'Anand', 'Aravalli', 'Banaskantha', 'Bharuch', 'Bhavnagar', 'Botad', 'Chhota Udaipur', 'Devbhoomi Dwarka', 'Dohad', 'Gandhinagar', 'Gir Somnath', 'Godhpur', 'Gujarat', 'Gurukul', 'Jamnagar', 'Junagadh', 'Kheda', 'Kutch', 'Mahesana', 'Mehsana', 'Morbi', 'Narmada', 'Navsari', 'Pandhapur', 'Panvel', 'Patan', 'Porbandar', 'Prakasam', 'Rajkot', 'Sabarkantha', 'Saurashtra', 'Silicon Valley', 'Siren', 'Surendranagar', 'Sursangam', 'Tapi', 'Vadodara', 'Valsad', 'Vapi', 'Varodara', 'Viramgam', 'Vispet'],
-    'Haryana': ['Ambala', 'Bhiwani', 'Charkhi Dadri', 'Faridabad', 'Fatehabad', 'Gurugram', 'Hisar', 'Jhajjar', 'Jind', 'Kaithal', 'Karnal', 'Kurukshetra', 'Mahendragarh', 'Mewat', 'Palwal', 'Panchkula', 'Panipat', 'Rewari', 'Rohtak', 'Sirsa', 'Sonipat', 'Yamunanagar'],
-    'Himachal Pradesh': ['Bilaspur', 'Chamba', 'Dalhousie', 'Hamirpur', 'Kangra', 'Kinnaur', 'Kullu', 'Lahaul and Spiti', 'Mandi', 'Shimla', 'Sirmour', 'Solan', 'Una'],
-    'Jharkhand': ['Araria', 'Arwal', 'Aurangabad', 'Banka', 'Begusarai', 'Bhagalpur', 'Bokaro', 'Chatra', 'Deoghar', 'Dhanbad', 'Deogarh', 'Dumka', 'Flushing', 'Garhwa', 'Giridih', 'Godda', 'Gumla', 'Gurudwara', 'Hazaribag', 'Jamtara', 'Jamshedpur', 'Jharia', 'Jind', 'Koderma', 'Kolhan', 'Latehar', 'Lohardaga', 'Madhupur', 'Markacho', 'Mihijam', 'Moriajhari', 'Motihari', 'Muzaffarpur', 'Nalanda', 'Naya Garh', 'Pakur', 'Palamu', 'Panamkot', 'Pashchim Singhbhum', 'Patna', 'Purbi Singhbhum', 'Purulia', 'Ramgarh', 'Ranchi', 'Riverbend', 'Sahebganj', 'Sahibganj', 'Sahasaram', 'Sambalpur', 'Sambhal', 'Samastipur', 'Samratgarh', 'Sandi', 'Sanghol', 'Santiniketan', 'Saraikela', 'Sarangarh', 'Sarnath', 'Sarni', 'Sarsar', 'Satara', 'Satapur', 'Satipur', 'Satupur', 'Saundatti', 'Saundale', 'Saundha', 'Saurashtra', 'Sauri', 'Sauriya', 'Saurpani', 'Saut', 'Saving', 'Sawai', 'Sawaibagh', 'Sawal', 'Sawalkot', 'Sawalpur', 'Sawampur', 'Sawand', 'Sawani', 'Sawapur', 'Sawargaon', 'Sawartal', 'Sawarth', 'Sawarua', 'Sawatra', 'Sawer', 'Sawer', 'Sawerkot', 'Seiopur', 'Seraikela', 'Serawa', 'Sereh', 'Serpur', 'Shahi', 'Shahpur', 'Shamoli', 'Shamotar', 'Shamsabad', 'Shamspur', 'Shanapur', 'Shanbarpur', 'Shandol', 'Shandor', 'Shandur', 'Shangpur', 'Shanipur', 'Shankargarh', 'Shankarpur', 'Shankerpur', 'Shankripada', 'Shantinagar', 'Shantipura', 'Shantisagar', 'Shantipur', 'Shapurpur', 'Shapur', 'Sharadpur', 'Sharaju', 'Sharan', 'Sharanpur', 'Sharapat'],
-    'Karnataka': ['Bagalkot', 'Ballari', 'Belagavi', 'Bengaluru', 'Bengaluru Rural', 'Bidar', 'Vijayapura', 'Chamarajanagar', 'Chikballapur', 'Chikmagalur', 'Chitradurga', 'Chittoor', 'Dakshina Kannada', 'Davanagere', 'Dharwad', 'Gadag', 'Gadag-Betageri', 'Gavhan', 'Gavipur', 'Gavundapalli', 'Gazipet', 'Geruguppe', 'Gharipur', 'Gharvi', 'Ghataprabha', 'Ghatnpur', 'Ghatkesar', 'Ghattarchanayapalya', 'Ghattari', 'Ghatyar', 'Ghatul', 'Ghaturpur', 'Ghaur', 'Ghavni', 'Ghawali', 'Ghayali', 'Ghayalpet', 'Ghayaspur', 'Ghbotthalli', 'Ghel', 'Gherghar', 'Ghers', 'Gherya', 'Ghiapur', 'Ghiaspur', 'Ghiladi', 'Ghiyabandi', 'Ghiyapada', 'Ghiyapalli', 'Ghiyas Nagar', 'Ghodi', 'Ghodipur', 'Gholak', 'Gholen', 'Gholkot', 'Ghommat', 'Ghonad', 'Ghonda', 'Ghone', 'Ghonela', 'Ghonia', 'Ghonid', 'Ghonopur', 'Ghor', 'Ghoradi', 'Ghoraipur', 'Ghoralavundi', 'Ghoraltava', 'Ghoraltavigi', 'Ghoraltavva', 'Ghoraman', 'Ghorani', 'Ghoranpur', 'Ghorari', 'Ghorasia', 'Ghorata', 'Ghoraya', 'Ghorban', 'Ghorband', 'Ghorbandi', 'Ghor Basti', 'Ghorberpur', 'Ghorbhand', 'Ghordhani', 'Ghordi', 'Ghordibhag', 'Ghordi Jagir', 'Ghordigaon', 'Ghordigaun', 'Ghordpur', 'Ghorean', 'Ghoreikeri', 'Ghorelu', 'Ghorerabad', 'Ghorergaon', 'Ghorerkhasa', 'Ghorerpilla', 'Ghorerputta', 'Ghorerpulta', 'Ghores', 'Ghoresia', 'Ghoreta', 'Ghoreton', 'Ghoretval', 'Ghoreva', 'Ghoriar', 'Ghoriba', 'Ghoriband', 'Ghoribandi', 'Ghoribasta', 'Ghoribastum', 'Ghoribastur', 'Ghoridih', 'Ghoridia', 'Ghorifa', 'Ghorifar', 'Ghorigeir', 'Ghoril', 'Ghorila', 'Ghorilandi', 'Ghoriland', 'Ghorile', 'Ghorima', 'Ghoriman', 'Ghoringar', 'Ghorinia', 'Ghoripai', 'Ghoripara', 'Ghoripda', 'Ghoripir', 'Ghoripla', 'Ghoripota', 'Ghoriqais', 'Ghoripur', 'Ghoris', 'Ghorisa', 'Ghorisbani', 'Ghorishan', 'Ghorishan Basti', 'Ghorisher', 'Ghorishere', 'Ghorisherri', 'Ghorishi', 'Ghorisher', 'Ghorisher', 'Ghorishkund', 'Ghoriska', 'Ghoriskola', 'Ghorism', 'Ghorismil', 'Ghorism', 'Ghorism', 'Ghorisome', 'Ghorison', 'Ghorispur', 'Ghorispura', 'Ghoriss', 'Ghorissbaria', 'Ghorisspur', 'Ghoristadha', 'Ghorita', 'Ghoritan', 'Ghoritand', 'Ghoriter', 'Ghoritola', 'Ghoritope', 'Ghoritori', 'Ghoritour', 'Ghoritra', 'Ghorivala', 'Ghorivali', 'Ghorivan', 'Ghorivana', 'Ghorivandhi', 'Ghorivandih', 'Ghorivandla', 'Ghorivane', 'Ghorivas', 'Ghoriwad', 'Ghoriwadi', 'Ghoriwali', 'Ghorixala', 'Ghoriya', 'Ghoriyabe', 'Ghoriyaberiyum', 'Ghoriyabund', 'Ghoriyacand', 'Ghoriyacara', 'Ghoriyachet', 'Ghoriyachetiya', 'Ghoriyachetra', 'Ghoriyachhal', 'Ghoriyadi', 'Ghoriyadi', 'Ghoriyaddih', 'Ghoriyade', 'Ghoriyadeha', 'Ghoriyadeshi', 'Ghoriya Devi', 'Ghoriyadeya', 'Ghoriyadi', 'Ghoriyadi', 'Ghoriyadih', 'Ghoriyadin', 'Ghoriadipur', 'Ghoriadisi', 'Ghoriadithi', 'Ghoriyadiyan', 'Ghoriyadi', 'Ghoriyadi', 'Ghoriyadi', 'Ghoriyadkhal', 'Ghoryadkhana', 'Ghoryadkhanda', 'Ghoryadohl', 'Ghoriyah', 'Ghoriyaha', 'Ghoriyal', 'Ghoriyala', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi', 'Ghoriyalandi'],
-    'Kerala': ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kottayam', 'Kozhikode', 'Malappuram', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'],
-    'Madhya Pradesh': ['Agar Malwa', 'Alirajpur', 'Anuppur', 'Ashoknagar', 'Balaghat', 'Balpur', 'Bandhavgarh', 'Bandimpur', 'Barwani', 'Basoda', 'Basni', 'Batiagarh', 'Bawaria', 'Begmpur', 'Behta', 'Beldahi', 'Belkheda', 'Bellkheda', 'Belpur', 'Beltada', 'Belu', 'Beluanshi', 'Benkhedi', 'Beora', 'Berapur', 'Berekheda', 'Bereli', 'Beremara', 'Berempalli', 'Berenkhedi', 'Berepalya', 'Bereppur', 'Bereshpur', 'Berethal', 'Berevari', 'Berevda', 'Berevri', 'Beriagarh', 'Beriavandh', 'Berikheda', 'Beripalli', 'Berir', 'Beriya', 'Berizari', 'Berja', 'Berjhaki'],
-    'Maharashtra': ['Ahmednagar', 'Akola', 'Amravati', 'Aurangabad', 'Beed', 'Bhandara', 'Bhir', 'Bid', 'Blg', 'Bm', 'Boka', 'Bolwan', 'Bombay', 'Bor', 'Boran', 'Boraon', 'Borawal', 'Bordepur', 'Bordghat', 'Bordgaun', 'Bordi', 'Bordkot', 'Borderpur', 'Bordepur', 'Bordewal', 'Bordupur', 'Bordepur', 'Bordwal', 'Boreral', 'Borenal', 'Borepada', 'Bordgaun', 'Borepatr', 'Borepat', 'Bordwada', 'Boredi', 'Boredikapar', 'Boredik', 'Bordikot', 'Bordikot', 'Bordikot', 'Bordekhana', 'Bordekhan', 'Boregaun', 'Bordegaun', 'Bordeg', 'Bordga', 'Bordgaun', 'Bordgana', 'Bordigal', 'Bordrigal', 'Bordeagal', 'Boredgal', 'Borderigal', 'Borderigal', 'Bordegal', 'Bordeigal', 'Bordegal', 'Bordetal', 'Bordeghal', 'Bor-Deghal', 'Bordegal', 'Bordeghal', 'Bordighal', 'Bordegel', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal', 'Bordegal'],
-    'Manipur': ['Bishnupur', 'Chandel', 'Churachandpur', 'Imphal', 'Imphal East', 'Imphal West', 'Jiribam', 'Kakching', 'Kamjong', 'Kangpokpi', 'Kanyamlal', 'Katulong', 'Keisambti', 'Keithelmanbi', 'Kharung', 'Khetrigaon', 'Khoirengbam', 'Khomendabi', 'Khomlang', 'Khopi', 'Khorlak', 'Khorsang', 'Khorvei', 'Khovelak', 'Khowai', 'Khunou', 'Khurasom'],
-    'Meghalaya': ['East Garo Hills', 'East Khasi Hills', 'East Jaintia Hills', 'Ri Bhoi', 'South Garo Hills', 'South West Garo Hills', 'South West Khasi Hills', 'West Garo Hills', 'West Jaintia Hills', 'West Khasi Hills'],
-    'Mizoram': ['Aizawl', 'Aizol', 'Champhai', 'Kolasib', 'Lawngtlai', 'Lunglei', 'Mamit', 'Saling', 'Saiha', 'Siaha', 'Serchhip'],
-    'Nagaland': ['Chokha', 'Dimapur', 'Kohima', 'Kiphire', 'Longleng', 'Mokokchung', 'Mon', 'Nagaon', 'Peren', 'Phek', 'Tuensang', 'Wokha', 'Zunheboto'],
-    'Odisha': ['Angul', 'Balangir', 'Balasore', 'Bargarh', 'Bhadrak', 'Boudh', 'Cuttack', 'Debagarh', 'Dhenkanal', 'Gajapati', 'Ganjam', 'Gariaband', 'Golaghat', 'Gonda', 'Gondla', 'Gondia', 'Gorakhpur', 'Gowalpara', 'Goye', 'Goyra', 'Gozbani', 'Guana', 'Guanapur', 'Guaneshan', 'Guapur', 'Guarda', 'Guardapur', 'Guardian', 'Guardhpur', 'Guaria', 'Guariakot', 'Guarla', 'Guarldi', 'Guarlik', 'Guarmada', 'Guarman', 'Guarmanda', 'Guarmapur', 'Guarni', 'Guarora', 'Guarpot', 'Guarpur', 'Guarua', 'Guaruapur', 'Guaruatola'],
-    'Punjab': ['Amritsar', 'Barnala', 'Bathinda', 'Faridkot', 'Fatehgarh Sahib', 'Gurdaspur', 'Hoshiarpur', 'Jalandhar', 'Kapurthala', 'Ludhiana', 'Mansa', 'Moga', 'Mohali', 'Muktsar', 'Nawanshahr', 'Pathankot', 'Patiala', 'Sangrur', 'Shaheed Bhagat Singh Nagar', 'Tarn Taran'],
-    'Rajasthan': ['Ajmer', 'Alwar', 'Banswara', 'Baran', 'Barmer', 'Beawar', 'Bharatpur', 'Bhilwara', 'Bhind', 'Bijaynagar', 'Bikaner', 'Bilara', 'Chomu', 'Chittorgarh', 'Churu', 'Dausa', 'Dholpur', 'Dhule', 'Dungarpur', 'Fatehpur', 'Ganganagar', 'Ganganpur', 'Gangapur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Ganganpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gangpur', 'Gara', 'Garabeli', 'Garadeuli', 'Garadeuli', 'Garadh', 'Garadih', 'Garadoul', 'Garadpol', 'Garadupur', 'Garagupur', 'Garahda', 'Garahda', 'Garakhaida', 'Garapur'],
-    'Sikkim': ['East Sikkim', 'North Sikkim', 'South Sikkim', 'West Sikkim'],
-    'Tamil Nadu': ['Ariyalur', 'Chengalpattu', 'Chinnidelur', 'Chinthalur', 'Chitradurga', 'Chitra', 'Chikmagalur', 'Coimbatore', 'Cuddalore', 'Cumbum', 'Dharmapuri', 'Dindigul', 'Erode', 'Gobichettipalayam', 'Gulbarga', 'Gurudinderganj', 'Haramangalam', 'Harijanagar', 'Hirekerur', 'Hosur', 'Idukki', 'Irodevalley', 'Irunogalai', 'Irupai', 'Isakkimandi', 'Isanakarai', 'Isnandha', 'Isnangudi', 'Itagudam', 'Itailigudi', 'Itaiselkudi', 'Itaiselkudi', 'Itaiselkudi', 'Itaiselkudi', 'Itaiturumpayakudi', 'Itakudisai', 'Itakudinangudi', 'Itakudinangudi', 'Itakudi', 'Itakudi', 'Itakudi', 'Itakudinagarisai', 'Itakudinagarisai', 'Itakudinagarisai', 'Itakudinagarisai', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi', 'Itakudinangudi'],
-    'Telangana': ['Adilabad', 'Bheemini', 'Boothkonda', 'Husnabad', 'Hyderabad', 'Jagtial', 'Jangaon', 'Karimnagar', 'Kasipet', 'Kaul', 'Khammam', 'Kinaripalli', 'Kondial', 'Koniamperdi', 'Kumaramangalam', 'Kuntloor', 'Lingampalli', 'Malkajgiri', 'Mandamarri', 'Maner', 'Mannalkonda', 'Mangalwedha', 'Manthani', 'Maredumilli', 'Marjapet', 'Marpalli', 'Marpet', 'Marwadkera', 'Mastipur', 'Matepalli', 'Matkondahalli', 'Mattapalli', 'Medak', 'Medchal', 'Medipally', 'Medhak', 'Mehabubnagar', 'Menhalkonda', 'Menhapalli', 'Merahira', 'Merala', 'Merhapalli', 'Merhera'],
-    'Tripura': ['Dhalai', 'Gomti', 'Khowai', 'North Tripura', 'Sepahijala', 'South Tripura', 'Unokoti', 'West Tripura'],
-    'Uttar Pradesh': ['Agra', 'Aligarh', 'Allahabad', 'Ambedkar Nagar', 'Amethi', 'Amroha', 'Auraiya', 'Azamgarh', 'Baghpat', 'Baharaich', 'Bahraich', 'Bajpur', 'Ballia', 'Balrampur', 'Banasthali', 'Banda', 'Bandharkura', 'Bandipur', 'Bandkura', 'Baniyakpur', 'Bankipur', 'Banmankpur', 'Banpura', 'Banpur', 'Bansdih', 'Bansgaon', 'Bangthandi', 'Bansikharpur', 'Bansipur', 'Bansokhpur', 'Banspat', 'Banspati', 'Banspatti', 'Bansputti', 'Bansrod', 'Bansrodi', 'Bansrur', 'Bansruri', 'Banssaganj', 'Banthi', 'Bantipur', 'Banz', 'Banzepur', 'Banzpur'],
-    'Uttarakhand': ['Almora', 'Bageshwar', 'Chamoli', 'Champawat', 'Charkoti', 'Chitrakoot', 'Chorikot', 'Dakota', 'Dehradun', 'Dhanaulti', 'Dhani', 'Gairsain', 'Garhwal', 'Gauchar', 'Ghumar', 'Gidgaon', 'Ginkota', 'Giri', 'Giribasti', 'Giridih', 'Girikot', 'Giripur', 'Giripur', 'Girisain', 'Girithal', 'Girivanti', 'Girivasan', 'Girivati', 'Girivattia', 'Girivetta', 'Girivhal', 'Girivika', 'Girivutti', 'Girivyasi', 'Girivyasini', 'Girod', 'Girodpur', 'Girohkot', 'Giroksh', 'Girolkhan', 'Gironi', 'Giropur', 'Girorpur', 'Girospur', 'Girothan', 'Girothanpur', 'Girovadi', 'Girovadini', 'Girovakot', 'Girovani', 'Girovari', 'Girovasa', 'Girovassa', 'Girovasta', 'Girovastani', 'Girovasti', 'Girovastini', 'Girovatu', 'Girovati', 'Girovatin', 'Girovati', 'Girovatu', 'Girovavani', 'Girovel', 'Girovela', 'Girovelani', 'Giroveli', 'Girovellah', 'Girovelu', 'Girovely', 'Girovel', 'Girovelpu', 'Girovena', 'Girovene', 'Girovenpur', 'Girovera', 'Girovin', 'Girovini', 'Girovinis', 'Girovnth', 'Girovond', 'Girovspur', 'Girovsur', 'Girovutti', 'Girovvuru', 'Girowaad', 'Girowadh', 'Girowali', 'Girowand', 'Girowani', 'Girowani', 'Girowanni', 'Girowanti', 'Girowapadi', 'Girowara', 'Girowari', 'Girowarn', 'Girowasani', 'Girowasini', 'Girowat', 'Girowath', 'Girowati', 'Girowatni', 'Girowatra', 'Girowatra', 'Girse', 'Girsihar', 'Girsoli', 'Girsol', 'Girsolia', 'Girsolpur', 'Girzarpur', 'Girzidpur', 'Girzimpur', 'Girzingpur', 'Girzinpur', 'Girzompur', 'Girzoupur'],
-    'West Bengal': ['Alipurduar', 'Bankura', 'Bardhaman', 'Birbhum', 'Cooch Behar', 'Darjeeling', 'Dinajpur', 'East Medinipur', 'Hooghly', 'Howrah', 'Jalpaiguri', 'Jhargram', 'Kalimpong', 'Kolkata', 'Malda', 'Murshidabad', 'Nadia', 'North 24 Parganas', 'North Dinajpur', 'Paschim Bardhaman', 'Paschim Medinipur', 'Purba Bardhaman', 'Purba Medinipur', 'Purulia', 'South 24 Parganas', 'South Dinajpur', 'Uttar Dinajpur'],
-    'Ladakh': ['Kargil', 'Leh'],
-    'Lakshadweep': ['Agatti', 'Amini', 'Androth', 'Kavaratti', 'Kilthan', 'Kodimundu', 'Laccadive', 'Minicoy'],
-    'Puducherry': ['Karaikal', 'Mahe', 'Pondicherry', 'Yanam'],
-    'Andaman and Nicobar Islands': ['Andaman', 'Nicobar'],
-    };
-
-    const stateSelect = document.getElementById('stateSelect');
-    const districtSelect = document.getElementById('districtSelect');
-
-    // 1. Populate the State Dropdown
-    Object.keys(locationData).forEach(state => {
-        stateSelect.add(new Option(state, state));
-    });
-
-    // 2. Listen for State changes
-    stateSelect.addEventListener('change', function() {
-        districtSelect.innerHTML = '<option value="" disabled selected>Select District</option>';
-        const selectedState = this.value;
-        
-        if (locationData[selectedState]) {
-            locationData[selectedState].forEach(district => {
-                districtSelect.add(new Option(district, district));
-            });
-            districtSelect.disabled = false; // Unlock the district field
-        } else {
-            districtSelect.disabled = true;
-        }
-    });
-  </script>
-
-  <script>
     document.addEventListener('DOMContentLoaded', function () {
         const submitBtn = document.getElementById('submitBtn');
         const form = document.getElementById('buyerRegForm');
         const termsCheckbox = document.getElementById('termsCheckbox');
         
-        // 🔬 THE FIX: Added phone field to strict Validation Rules
+        // 1. Define Strict Validation Rules
         const validationRules = {
             name: { regex: /^[A-Za-z\s]{3,}$/, errorMsg: "Username must be at least 3 letters (No numbers/special chars)." },
             password: { regex: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&]).{8,}$/, errorMsg: "Min 8 chars: 1 Upper, 1 Lower, 1 Number, 1 Special." },
             company_name: { regex: /^[A-Za-z0-9\s.,&'-]{2,}$/, errorMsg: "Company Name must be at least 2 characters." },
             iec_code: { regex: /^[A-Za-z0-9]{10}$/, errorMsg: "IEC Code must be exactly 10 alphanumeric characters." },
             village: { regex: /^[A-Za-z\s]{2,}$/, errorMsg: "City/Town must be at least 2 letters." },
-            pincode: { regex: /^\d{6}$/, errorMsg: "Pincode must be exactly 6 digits." },
-            phone: { regex: /^\d{10}$/, errorMsg: "Phone number must be exactly 10 digits." }
+            district: { regex: /^[A-Za-z\s]{2,}$/, errorMsg: "District must be at least 2 letters." },
+            pincode: { regex: /^\d{6}$/, errorMsg: "Pincode must be exactly 6 digits." }
         };
 
+        // 2. Helper Function to generate Error Tags securely
         function getOrCreateErrorNode(inputElement) {
             let errorNode = inputElement.parentNode.querySelector('.inline-error');
             if (!errorNode) {
@@ -406,10 +335,12 @@
             return errorNode;
         }
 
+        // 3. Central Function to Check Global Form Status & Checkbox
         function updateSubmitButtonState() {
             const invalidFields = document.querySelectorAll('[data-is-invalid="true"]');
             const isTermsChecked = termsCheckbox.checked;
 
+            // Enable only if 0 validation errors AND checkbox is checked
             if (invalidFields.length === 0 && isTermsChecked) {
                 submitBtn.disabled = false;
             } else {
@@ -417,8 +348,10 @@
             }
         }
 
+        // Listen for Checkbox clicks
         termsCheckbox.addEventListener('change', updateSubmitButtonState);
 
+        // 4. Attach Real-Time "Typing" Listeners
         Object.keys(validationRules).forEach(fieldName => {
             const input = document.querySelector(`input[name="${fieldName}"]`);
             if (input) {
@@ -441,15 +374,7 @@
             }
         });
 
-        // 🔬 THE FIX: Strict Phone Number enforcement (only allows typing numbers)
-        const phoneInput = document.querySelector('input[name="phone"]');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function(e) {
-                this.value = this.value.replace(/\D/g, ''); 
-            });
-        }
-
-        // Password Match
+        // 5. Real-Time Password Matching Validation
         const passInput = document.getElementById('passwordField');
         const confirmPassInput = document.getElementById('confirmPasswordField');
 
@@ -469,16 +394,19 @@
             }
             updateSubmitButtonState();
         }
+
         passInput.addEventListener('input', validatePasswordMatch);
         confirmPassInput.addEventListener('input', validatePasswordMatch);
 
-        // STRICT AJAX GST VALIDATION
+        // 6. STRICT AJAX GST FORMAT & DATABASE VALIDATION
         const gstInput = document.getElementById('gstField');
         if (gstInput) {
             const errorNode = getOrCreateErrorNode(gstInput);
             
+            // Format check while typing
             gstInput.addEventListener('input', function() {
                 const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i;
+                
                 if (this.value !== "" && !gstRegex.test(this.value)) {
                     errorNode.textContent = "Invalid Format. Must be: 2-State, 10-PAN, 1-Entity, Z, 1-Checksum.";
                     errorNode.style.display = 'block';
@@ -492,9 +420,11 @@
                 updateSubmitButtonState();
             });
 
+            // Database uniqueness check on blur
             gstInput.addEventListener('blur', function () {
                 const gst = this.value;
                 const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i;
+                
                 if (gst && gstRegex.test(gst)) {
                     fetch(`/check-gst/?gst=${gst}`)
                         .then(response => response.json())
@@ -516,7 +446,7 @@
             });
         }
 
-        // AJAX Email Validation
+        // 7. Existing AJAX Email Validation
         const emailInput = document.getElementById('emailField');
         if (emailInput) {
             const errorNode = getOrCreateErrorNode(emailInput);
@@ -539,6 +469,7 @@
             emailInput.addEventListener('blur', function () {
                 const email = this.value;
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
                 if (email && emailRegex.test(email)) {
                     fetch(`/check-email/?email=${email}`)
                         .then(response => response.json())
@@ -559,94 +490,95 @@
                 }
             });
         }
-
-        // ==========================================
-        // PINCODE AUTO-FILL LOGIC (Patched for Dropdowns)
-        // ==========================================
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
         const pincodeInput = document.querySelector('input[name="pincode"]');
-        const distSelectAuto = document.getElementById('districtSelect');
-        const stateSelectAuto = document.getElementById('stateSelect');
+        const districtInput = document.querySelector('input[name="district"]');
+        const stateSelect = document.querySelector('select[name="state"]');
 
-        if(pincodeInput) {
+        if (pincodeInput && districtInput && stateSelect) {
             pincodeInput.addEventListener('input', function() {
                 const pincode = this.value.trim();
 
+                // Only trigger the API if exactly 6 digits are typed
                 if (pincode.length === 6 && /^\d{6}$/.test(pincode)) {
+                    
+                    // Show a loading state in the district box
+                    districtInput.value = "Searching...";
+
                     fetch(`/api/pincode/${pincode}/`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                // 1. Set the State
+                                // 1. Auto-fill the District
+                                districtInput.value = data.district;
+                                districtInput.readOnly = true; 
+                                districtInput.style.backgroundColor = 'rgba(46, 125, 50, 0.05)';
+                                
+                                // 2. Auto-fill the State
                                 let stateFound = false;
-                                for (let i = 0; i < stateSelectAuto.options.length; i++) {
-                                    if (stateSelectAuto.options[i].value.toLowerCase() === data.state.toLowerCase()) {
-                                        stateSelectAuto.selectedIndex = i;
+                                for (let i = 0; i < stateSelect.options.length; i++) {
+                                    if (stateSelect.options[i].value.toLowerCase() === data.state.toLowerCase()) {
+                                        stateSelect.selectedIndex = i;
                                         stateFound = true;
                                         break;
                                     }
                                 }
-                                // If API returns a state not in our list, add it dynamically!
+                                
+                                // If the state isn't in your standard dropdown, add it dynamically
                                 if (!stateFound) {
-                                    stateSelectAuto.add(new Option(data.state, data.state, true, true));
-                                    locationData[data.state] = [data.district]; // Patch the dictionary
+                                    const newOption = document.createElement('option');
+                                    newOption.value = data.state;
+                                    newOption.text = data.state;
+                                    newOption.selected = true;
+                                    stateSelect.appendChild(newOption);
                                 }
                                 
-                                // Trigger change to populate districts
-                                stateSelectAuto.dispatchEvent(new Event('change'));
+                                stateSelect.style.pointerEvents = 'none'; 
+                                stateSelect.style.backgroundColor = 'rgba(46, 125, 50, 0.05)';
 
-                                // 2. Set the District
-                                let distFound = false;
-                                for (let i = 0; i < distSelectAuto.options.length; i++) {
-                                    if (distSelectAuto.options[i].value.toLowerCase() === data.district.toLowerCase()) {
-                                        distSelectAuto.selectedIndex = i;
-                                        distFound = true;
-                                        break;
-                                    }
-                                }
-                                // If API returns a district not in our list, add it dynamically!
-                                if (!distFound) {
-                                    distSelectAuto.add(new Option(data.district, data.district, true, true));
-                                }
-
-                                // 3. Lock UI to show success (Using pointer-events so it submits correctly)
-                                distSelectAuto.disabled = false;
-                                distSelectAuto.style.pointerEvents = 'none'; 
-                                distSelectAuto.style.backgroundColor = 'rgba(46, 125, 50, 0.05)';
-                                stateSelectAuto.style.pointerEvents = 'none'; 
-                                stateSelectAuto.style.backgroundColor = 'rgba(46, 125, 50, 0.05)';
+                                // 3. TRIGGER VALIDATION: This tells your existing script "Hey, I changed the data!"
+                                districtInput.dispatchEvent(new Event('input', { bubbles: true }));
                                 
-                                let errorNode = getOrCreateErrorNode(pincodeInput);
+                                // Force hide any "6-digit" error message and make border green
+                                let errorNode = pincodeInput.parentNode.querySelector('.inline-error');
                                 if (errorNode) errorNode.style.display = 'none';
                                 pincodeInput.style.borderBottom = '2px solid #2e7d32';
                                 pincodeInput.setAttribute('data-is-invalid', 'false');
 
+                                // Refresh the submit button status
+                                const termsCheckbox = document.getElementById('termsCheckbox');
                                 if(termsCheckbox) termsCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-                                updateSubmitButtonState();
 
                             } else {
+                                // Pincode not in DB: Revert to manual entry
                                 unlockFields();
-                                let errorNode = getOrCreateErrorNode(pincodeInput);
-                                errorNode.textContent = "Pincode not found. Please enter manually.";
-                                errorNode.style.display = 'block';
-                                pincodeInput.style.borderBottom = '2px solid #fbc02d'; 
+                                let errorNode = pincodeInput.parentNode.querySelector('.inline-error');
+                                if (errorNode) {
+                                    errorNode.textContent = "Pincode not found. Please type manually.";
+                                    errorNode.style.display = 'block';
+                                }
+                                pincodeInput.style.borderBottom = '2px solid #fbc02d';
                             }
                         })
                         .catch(error => {
-                            console.error('API Error:', error);
+                            console.error('Pincode API Error:', error);
                             unlockFields();
                         });
                 } else if (pincode.length < 6) {
                     unlockFields();
                 }
             });
+        }
 
-            function unlockFields() {
-                distSelectAuto.disabled = (stateSelectAuto.value === ""); // Keep disabled if no state
-                distSelectAuto.style.pointerEvents = 'auto';
-                distSelectAuto.style.backgroundColor = 'transparent';
-                stateSelectAuto.style.pointerEvents = 'auto';
-                stateSelectAuto.style.backgroundColor = 'transparent';
-            }
+        function unlockFields() {
+            if (districtInput.value === "Searching...") districtInput.value = "";
+            districtInput.readOnly = false;
+            districtInput.style.backgroundColor = 'transparent';
+            stateSelect.style.pointerEvents = 'auto';
+            stateSelect.style.backgroundColor = 'transparent';
         }
     });
   </script>

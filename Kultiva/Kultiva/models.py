@@ -11,7 +11,6 @@ class User(AbstractUser):
         ADMIN = 'ADMIN', 'Admin'
 
     user_id = models.AutoField(primary_key=True)
-    phone_number = models.CharField(max_length=15, null=True, blank=True)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.FARMER)
     is_verified = models.BooleanField(default=False)
     # date_joined is inherited from AbstractUser
@@ -32,7 +31,6 @@ class FarmerProfile(models.Model):
     fp_id = models.AutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='farmer_profile')
     aadhar_no = models.CharField(max_length=12, unique=True)
-    kissan_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     land_area = models.FloatField()
     soil_type = models.CharField(max_length=20)
     irrigation = models.CharField(max_length=20)
@@ -160,17 +158,11 @@ class GridSoilData(models.Model):
         return f"Grid [{self.grid_lat}, {self.grid_lon}] - pH: {self.ph}"
     
 # 9. MANUAL SOIL REPORTS (For Farmers outside the Grid)
-# 9. MANUAL SOIL REPORTS (For Farmers outside the Grid)
 class ManualSoilReport(models.Model):
-    farmer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='manual_soil_reports')
+    # Excellent choice: OneToOne ensures a clean 1-to-1 relationship per farmer
+    farmer = models.OneToOneField(User, on_delete=models.CASCADE, related_name='manual_soil_report')
     
-    # ==============================================================================
-    # 🔬 THE FIX: MULTI-FARM LOCATION LINK
-    # ==============================================================================
-    # Links directly to Table #2 (Address). We use SET_NULL so if an address 
-    # is deleted, the historical lab report data isn't destroyed.
-    farm_address = models.ForeignKey('Address', on_delete=models.SET_NULL, null=True, blank=True, related_name='lab_reports')
-
+    # Status tracking for the Admin Dashboard
     STATUS_CHOICES = (
         ('PENDING', 'Pending Lab Test'),
         ('COMPLETED', 'Test Completed / Data Uploaded')
@@ -178,13 +170,11 @@ class ManualSoilReport(models.Model):
     request_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     request_date = models.DateTimeField(auto_now_add=True)
 
-    # 🔬 ARCHITECTURE NOTE: 'land_area' has been REMOVED as requested.
+    # Context to help the Admin/Lab Tech understand the farm
+    land_area = models.FloatField(help_text="Area in Acres/Hectares", null=True, blank=True)
     previous_crop = models.CharField(max_length=100, help_text="Crop harvested last season", null=True, blank=True)
 
-    # --- THE FIX: Secure Storage for the PDF/Image Upload ---
-    report_file = models.FileField(upload_to='soil_reports/', null=True, blank=True)
-
-    # The Custom Data
+    # The Custom Data (Only filled when Admin approves/uploads, or farmer inputs manually)
     n = models.FloatField(null=True, blank=True)
     p = models.FloatField(null=True, blank=True)
     k = models.FloatField(null=True, blank=True)
@@ -204,19 +194,12 @@ class DirectTradeProposal(models.Model):
         ('PENDING', 'Pending Buyer Approval'),
         ('ACCEPTED', 'Accepted - QR Pending'),
         ('REJECTED', 'Rejected by Buyer'),
-        ('CANCELLED', 'Cancelled by Farmer'),
-        ('COMPLETED', 'Completed Trade') # Added to align with views
+        ('CANCELLED', 'Cancelled by Farmer')
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     
     # Trade specifics
     message = models.TextField(blank=True, null=True, help_text="Custom message to the buyer")
-    
-    # --- NEW: Explicit Math Fields for B2B Negotiations ---
-    requested_quantity = models.FloatField(default=1.0, help_text="Amount the buyer actually wants to buy")
-    proposed_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Custom negotiated price per unit")
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, help_text="Total value of the negotiated deal")
-    
     # --- SECURITY & ESCROW LOGIC ---
     security_token = models.CharField(max_length=100, blank=True, null=True, help_text="Unique cryptographic token for QR")
     qr_code = models.ImageField(upload_to='trade_qrs/', null=True, blank=True)
@@ -304,9 +287,6 @@ class InputOrder(models.Model):
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
-
 # 13. UNIFIED TRUST ECOSYSTEM (The Universal Feedback Table)
 class UnifiedReview(models.Model):
     # 1. The Core Network Links
@@ -316,9 +296,6 @@ class UnifiedReview(models.Model):
     # 2. The Feedback Data
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="1 to 5 Stars")
     comment = models.TextField(blank=True, null=True)
-    
-    # --- NEW: SECURE IMAGE UPLOAD FIELD ---
-    image = models.ImageField(upload_to='review_images/', null=True, blank=True)
 
     # 3. The Proof of Transaction (Nullable, because it will only link to ONE of these)
     # We use strings for model names to avoid circular import issues

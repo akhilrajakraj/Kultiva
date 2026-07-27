@@ -3,45 +3,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ seller.seller_profile.shop_name|default:seller.username }} Storefront | Kultiva</title>
+    <title>{{ seller.seller_profile.shop_name }} Storefront | Kultiva</title>
     <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
     <style>
-        body { padding-top: 110px; background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { padding-top: 110px; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border-top: 5px solid #0288d1; /* Seller Corporate Blue */
-        }
-        
-        .stat-box {
-            background: #f0f9ff;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #0288d1;
-            margin-bottom: 15px;
-        }
-        
-        .product-card {
-            background: white;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            transition: 0.3s;
+        .store-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 20px;
+            padding: 40px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            position: relative;
             overflow: hidden;
-            height: 100%;
-            display: flex; 
-            flex-direction: column;
         }
-        .product-card:hover {
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            transform: translateY(-3px);
-            border-color: #90caf9;
+        
+        .store-header::after {
+            content: '\f1ad'; /* Building icon */
+            font-family: 'FontAwesome';
+            position: absolute;
+            right: 20px;
+            bottom: -20px;
+            font-size: 150px;
+            opacity: 0.05;
         }
-        .product-img { height: 180px; object-fit: cover; width: 100%; border-bottom: 1px solid #eee; }
+
+        .stat-box { background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 12px; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
+        
+        .product-card { background: white; border: 1px solid #e2e8f0; border-radius: 15px; overflow: hidden; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #c5e1a5; }
+        .product-img { height: 200px; object-fit: cover; width: 100%; border-bottom: 1px solid #eee; }
+        
+        .review-card { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid #fbc02d; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .star-rating i { color: #fbc02d; }
+        .star-rating i.empty { color: #e2e8f0; }
     </style>
 </head>
 <body>
@@ -49,160 +47,130 @@
     {% include 'farmer_header.html' %}
 
     <div class="container mb-5">
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb" style="font-size: 14px; font-weight: bold;">
-                <li class="breadcrumb-item"><a href="{% url 'farmer_seller_list' %}" style="color: #0288d1; text-decoration: none;">Seller Directory</a></li>
-                <li class="breadcrumb-item active" aria-current="page" style="color: #888;">{{ seller.seller_profile.shop_name|default:seller.username }}</li>
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb fw-bold">
+                <li class="breadcrumb-item"><a href="{% url 'farmer_seller_list' %}" style="color: #1b5e20; text-decoration: none;">Seller Directory</a></li>
+                <li class="breadcrumb-item active" style="color: #888;">{{ seller.seller_profile.shop_name|default:seller.username }}</li>
             </ol>
         </nav>
 
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <div class="glass-panel">
-                    <div class="text-center mb-4">
-                        <div style="width: 80px; height: 80px; background: #0288d1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 0 auto 15px;">
-                            {{ seller.seller_profile.shop_name|default:seller.username|make_list|first|upper }}
+        <div class="store-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="fw-bold mb-2">{{ seller.seller_profile.shop_name|default:seller.username }}</h1>
+                    <p style="font-size: 16px; color: #cbd5e1; margin-bottom: 20px;">
+                        <i class="fa fa-map-marker text-danger"></i> {% if address %}{{ address.district }}, {{ address.state }}{% else %}Location Pending{% endif %}
+                        <span class="mx-3">|</span>
+                        <i class="fa fa-check-circle text-success"></i> Verified Kultiva Vendor
+                    </p>
+                    <p style="color: #f1f5f9; font-size: 15px; max-width: 90%;">
+                        {{ seller.seller_profile.description|default:"Providing high-quality agricultural inputs to the Kultiva network." }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                    <div class="d-inline-flex gap-3">
+                        <div class="stat-box text-center">
+                            <h3 class="fw-bold mb-0 text-warning"><i class="fa fa-star"></i> {{ seller.avg_rating|floatformat:1 }}</h3>
+                            <small class="text-uppercase" style="font-size: 10px; letter-spacing: 1px;">From {{ seller.total_reviews }} Reviews</small>
                         </div>
-                        <h4 style="color: #1e293b; font-weight: bold;">{{ seller.seller_profile.shop_name|default:seller.username }}</h4>
-                        <span class="badge bg-primary"><i class="fa fa-check-circle"></i> Verified Kultiva Vendor</span>
-                    </div>
-
-                    <div class="stat-box">
-                        <small style="color: #555; text-transform: uppercase; font-weight: bold;">Contact Details</small><br>
-                        <div style="margin-top: 10px;">
-                            <div style="font-size: 16px; color: #1e293b; margin-bottom: 6px; font-weight: bold;">
-                                <i class="fa fa-phone" style="color: #0288d1; width: 22px;"></i> 
-                                {% if seller.phone_number %}+91 {{ seller.phone_number }}{% else %}<span class="text-muted fw-normal">Not Available</span>{% endif %}
-                            </div>
-                            <div style="font-size: 14px; color: #555;">
-                                <i class="fa fa-envelope" style="color: #0288d1; width: 22px;"></i> 
-                                {{ seller.email }}
-                            </div>
+                        <div class="stat-box text-center">
+                            <h3 class="fw-bold mb-0 text-success"><i class="fa fa-shopping-bag"></i> {{ seller.total_sales }}</h3>
+                            <small class="text-uppercase" style="font-size: 10px; letter-spacing: 1px;">Orders Completed</small>
                         </div>
-                    </div>
-
-                    <div class="stat-box">
-                        <small style="color: #555; text-transform: uppercase; font-weight: bold;">Store Location</small><br>
-                        <span style="font-size: 16px; color: #1e293b;">
-                            {% if address %}{{ address.village }}, {{ address.district }}{% else %}Location Pending{% endif %}
-                        </span>
-                    </div>
-
-                    <div class="stat-box">
-                        <small style="color: #555; text-transform: uppercase; font-weight: bold;">Business Metrics</small><br>
-                        <ul style="list-style: none; padding: 0; margin: 10px 0 0 0; font-size: 14px; color: #444;">
-                            <li class="mb-2"><strong>Total Sales:</strong> {{ seller.total_sales }} Orders</li>
-                            <li class="mb-2"><strong>Store Rating:</strong> {{ seller.avg_rating|floatformat:1 }} / 5.0</li>
-                            <li><strong>About:</strong> {{ seller.seller_profile.description|truncatechars:60|default:"Trusted Kultiva supplier." }}</li>
-                        </ul>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="row">
             <div class="col-lg-8">
-                
-                <div class="glass-panel mb-4" style="border-top-color: #0288d1;">
-                    <h4 style="color: #1e293b; font-weight: bold; margin-bottom: 25px;"><i class="fa fa-box-open text-primary me-2"></i> Active Catalog</h4>
-                    
-                    <div class="row">
-                        {% for item in products %}
-                            <div class="col-md-6 mb-4">
-                                <div class="product-card">
-                                    {% if item.image %}
-                                        <img src="{{ item.image.url }}" class="product-img" alt="{{ item.title }}">
-                                    {% else %}
-                                        <div class="product-img d-flex align-items-center justify-content-center bg-light text-muted">
-                                            <i class="fa fa-image fa-3x"></i>
-                                        </div>
-                                    {% endif %}
-                                    <div class="p-3 d-flex flex-column flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="badge" style="background: #e3f2fd; color: #0288d1;">{{ item.get_category_display }}</span>
-                                        </div>
-                                        <h5 class="fw-bold" style="color: #1e293b; margin-bottom: 5px;">{{ item.title }}</h5>
-                                        <p class="text-muted" style="font-size: 13px; margin-bottom: 15px;">{{ item.variety_or_brand|default:"Standard Variety" }}</p>
-                                        
-                                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-                                            <div class="d-flex justify-content-between mb-1" style="font-size: 13px;">
-                                                <span class="text-muted">Available Stock:</span>
-                                                <strong>{{ item.available_stock }} {{ item.unit_of_measure }}</strong>
+                <h3 class="fw-bold mb-4" style="color: #1e293b;"><i class="fa fa-box-open text-primary me-2"></i> Catalog</h3>
+                <div class="row g-4">
+                    {% for item in products %}
+                        <div class="col-md-6">
+                            <div class="product-card">
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" class="product-img" alt="{{ item.title }}">
+                                {% else %}
+                                    <div class="product-img d-flex align-items-center justify-content-center bg-light text-muted">
+                                        <i class="fa fa-image fa-3x"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="p-3 d-flex flex-column flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge" style="background: #e3f2fd; color: #0288d1;">{{ item.get_category_display }}</span>
+                                    </div>
+                                    <h5 class="fw-bold" style="color: #1e293b;">{{ item.title }}</h5>
+                                    <p class="text-muted" style="font-size: 13px;">{{ item.variety_or_brand|default:"Standard Variety" }}</p>
+                                    
+                                    <div class="mt-auto pt-3 border-top" style="border-color: #eee !important;">
+                                        <div class="d-flex justify-content-between align-items-end mb-3">
+                                            <div>
+                                                <div style="font-size: 12px; color: #888;">Price</div>
+                                                <strong style="color: #1b5e20; font-size: 18px;">₹{{ item.price }}</strong><small class="text-muted">/{{ item.unit_of_measure }}</small>
                                             </div>
-                                            <div class="d-flex justify-content-between" style="font-size: 14px;">
-                                                <span class="text-muted">Price:</span>
-                                                <strong style="color: #0288d1;">₹{{ item.price }} / {{ item.unit_of_measure }}</strong>
+                                            <div class="text-end">
+                                                <div style="font-size: 12px; color: #888;">Stock</div>
+                                                <strong style="color: #333;">{{ item.available_stock }} {{ item.unit_of_measure }}</strong>
                                             </div>
                                         </div>
                                         
-                                        <a href="{% url 'farmer_input_detail' item.id %}" class="btn btn-outline-primary w-100 fw-bold" style="border-radius: 20px;">
+                                        <a href="{% url 'farmer_input_detail' item.id %}" class="btn btn-success w-100 fw-bold" style="border-radius: 8px;">
                                             <i class="fa fa-shopping-cart"></i> Buy Now
                                         </a>
                                     </div>
                                 </div>
                             </div>
-                        {% empty %}
-                            <div class="col-12 text-center py-5">
-                                <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
-                                <h5 class="text-muted">This vendor currently has no active stock.</h5>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="glass-panel" style="border-top-color: #fbc02d;">
-                    <h4 style="color: #1e293b; font-weight: bold; margin-bottom: 25px;"><i class="fa fa-star text-warning me-2"></i> Farmer Feedback</h4>
-                    
-                    <div class="row">
-                        <div class="col-md-4 border-end text-center pt-3">
-                            <div style="font-size: 60px; font-weight: 900; color: #1a1a1a; line-height: 1;">{{ seller.avg_rating|floatformat:1 }}</div>
-                            <div class="text-warning fs-5 mb-2">
-                                <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i>
-                            </div>
-                            <div class="text-muted fw-bold mb-4" style="font-size: 13px;">Based on {{ seller.total_reviews }} verified ratings</div>
                         </div>
-
-                        <div class="col-md-8 ps-md-4 pt-3">
-                            {% for review in reviews %}
-                                <div class="border-bottom pb-3 mb-3">
-                                    <div class="d-flex align-items-center mb-1">
-                                        <span class="badge bg-primary me-2 fs-6">{{ review.rating }} <i class="fa fa-star" style="font-size: 10px;"></i></span>
-                                        <span class="fw-bold text-dark">
-                                            {% if review.rating == 5 %}Excellent Vendor!
-                                            {% elif review.rating == 4 %}Very Good
-                                            {% elif review.rating == 3 %}Average Quality
-                                            {% elif review.rating == 2 %}Below Expectations
-                                            {% else %}Poor Experience{% endif %}
-                                        </span>
-                                    </div>
-                                    <p class="text-muted mb-2" style="font-size: 14px;">"{{ review.comment|default:'No written feedback provided.' }}"</p>
-                                    <div style="font-size: 12px; color: #888;">
-                                        <i class="fa fa-user text-success"></i> 
-                                        <strong>{{ review.reviewer.username|title }}</strong> 
-                                        <i class="fa fa-check-circle text-success" title="Verified Purchase"></i> • {{ review.created_at|date:"d M, Y" }}
-                                        
-                                        {% if review.input_order and review.input_order.product %}
-                                            <br><span class="text-muted" style="font-size: 11px; margin-top: 4px; display: inline-block;">
-                                                <i class="fa fa-shopping-bag"></i> Bought: {{ review.input_order.product.title }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% empty %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fa fa-commenting-o mb-3" style="font-size: 40px; opacity: 0.5;"></i>
-                                    <h5>No Store Feedback Yet</h5>
-                                    <p>This vendor hasn't received any reviews yet.</p>
-                                </div>
-                            {% endfor %}
+                    {% empty %}
+                        <div class="col-12 text-center py-5 bg-white shadow-sm rounded-3 border">
+                            <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">This vendor currently has no active stock.</h5>
                         </div>
-                    </div>
+                    {% endfor %}
                 </div>
+            </div>
 
+            <div class="col-lg-4 mt-5 mt-lg-0">
+                <h3 class="fw-bold mb-4" style="color: #1e293b;"><i class="fa fa-comments-o text-warning me-2"></i> Farmer Feedback</h3>
+                
+                <div style="max-height: 800px; overflow-y: auto; padding-right: 10px;">
+                    {% for review in reviews %}
+                        <div class="review-card">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong style="color: #333; font-size: 14px;">{{ review.reviewer.username }}</strong>
+                                <span class="text-muted" style="font-size: 12px;">{{ review.created_at|date:"M d, Y" }}</span>
+                            </div>
+                            
+                            <div class="star-rating mb-2" style="font-size: 12px;">
+                                <i class="fa fa-star {% if review.rating < 1 %}empty{% endif %}"></i>
+                                <i class="fa fa-star {% if review.rating < 2 %}empty{% endif %}"></i>
+                                <i class="fa fa-star {% if review.rating < 3 %}empty{% endif %}"></i>
+                                <i class="fa fa-star {% if review.rating < 4 %}empty{% endif %}"></i>
+                                <i class="fa fa-star {% if review.rating < 5 %}empty{% endif %}"></i>
+                            </div>
+
+                            <p style="font-size: 14px; color: #555; font-style: italic; margin-bottom: 10px;">
+                                "{{ review.comment|default:"No written review provided." }}"
+                            </p>
+                            
+                            {% if review.input_order %}
+                            <div style="background: #f8fafc; padding: 8px 12px; border-radius: 6px; font-size: 11px; color: #64748b;">
+                                <strong>Purchased:</strong> {{ review.input_order.product.title|default:"Item deleted" }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-4 bg-white shadow-sm rounded-3 border">
+                            <i class="fa fa-star-half-o fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0" style="font-size: 14px;">No reviews yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
 
-    {% include 'footer.html' %}
-    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

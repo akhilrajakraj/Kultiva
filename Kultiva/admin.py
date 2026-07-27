@@ -14,5 +14,3 @@ my_admin.save()
 
 # 5. Exit the shell
 exit()
-
-

@@ -46,7 +46,7 @@
         .status-badge { padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px; }
         .status-PENDING { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
         .status-ACCEPTED { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .status-COMPLETED { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .status-COMPLETED { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; } /* NEW: Deep Purple */
         .status-REJECTED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
         .status-CANCELLED { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
 
@@ -109,7 +109,7 @@
                             </td>
                             <td>
                                 <span style="font-weight: bold; color: #333;">{{ proposal.listing.title|default:"Deleted Listing" }}</span><br>
-                                <span style="font-size: 12px; color: #64748b;">Qty: {{ proposal.requested_quantity }} {{ proposal.listing.unit_of_measure }}</span>
+                                <span style="font-size: 12px; color: #64748b;">Qty: {{ proposal.quantity|floatformat:0 }} {{ proposal.listing.unit_of_measure }}</span>
                             </td>
                             <td>
                                 <span class="d-block fw-bold" style="color: #1b5e20;">{{ proposal.farmer.username }}</span>

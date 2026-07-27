@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Kultiva - My Digital Handshakes</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid #0288d1; /* Buyer Blue */
+        }
+
+        /* Enterprise Tab Styling */
+        .nav-tabs { border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #64748b;
+            font-weight: bold;
+            padding: 12px 25px;
+            font-size: 15px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            background: transparent;
+        }
+        .nav-tabs .nav-link:hover { color: #0288d1; }
+        .nav-tabs .nav-link.active {
+            color: #0288d1;
+            border-bottom: 3px solid #0288d1;
+            background: transparent;
+        }
+
+        /* Table Styling */
+        .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 13px; border-top: none; }
+        .table-custom td { vertical-align: middle; color: #555; }
+        .crop-title { font-weight: bold; color: #1b5e20; font-size: 15px; text-decoration: none; }
+        
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .bg-pending { background: rgba(251, 192, 45, 0.2); color: #f57f17; }
+        .bg-accepted { background: rgba(46, 125, 50, 0.2); color: #2e7d32; }
+        .bg-history { background: rgba(100, 116, 139, 0.2); color: #475569; }
+        
+        .msg-preview { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; font-size: 12px; color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    {% include 'buyer_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 style="color: #1e293b; font-weight: bold;"><i class="fa fa-handshake-o text-primary"></i> Trade Proposals & Contracts</h3>
+                <span class="text-muted"><i class="fa fa-folder-open"></i> Total Interactions: {{ pending.count|add:accepted.count|add:history.count }}</span>
+            </div>
+
+            <ul class="nav nav-tabs" id="proposalTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                        <i class="fa fa-clock-o"></i> Pending ({{ pending.count }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted" type="button" role="tab">
+                        <i class="fa fa-check-circle"></i> Accepted / Active ({{ accepted.count }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                        <i class="fa fa-history"></i> Cancelled / Rejected ({{ history.count }})
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="proposalTabsContent">
+                
+                <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover table-custom">
+                            <thead style="background: #f8f9fa;">
+                                <tr>
+                                    <th>Harvest / Crop</th>
+                                    <th>Farmer</th>
+                                    <th>Proposal Details</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in pending %}
+                                <tr>
+                                    <td><span class="crop-title">{{ p.listing.title }}</span><br><small class="text-muted">₹{{ p.listing.price }} / {{ p.listing.unit_of_measure }}</small></td>
+                                    <td><strong>{{ p.farmer.username }}</strong><br><small class="text-muted"><i class="fa fa-map-marker text-danger"></i> {{ p.farmer.addresses.first.district|default:"Verified" }}</small></td>
+                                    <td><span class="msg-preview">"{{ p.message|default:'No custom message attached.' }}"</span></td>
+                                    <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                    <td><span class="badge-status bg-pending">Review Pending</span></td>
+                                    <td class="text-center">
+                                        <a href="{% url 'buyer_proposal_detail' p.id %}" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 35px; height: 35px;" title="View Details">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa fa-inbox fa-3x mb-3" style="color: #ccc;"></i><br>No pending proposals.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="accepted" role="tabpanel">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover table-custom">
+                            <thead style="background: #f1f8e9;">
+                                <tr>
+                                    <th>Harvest / Crop</th>
+                                    <th>Farmer</th>
+                                    <th>Contract Date</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in accepted %}
+                                <tr>
+                                    <td><span class="crop-title">{{ p.listing.title }}</span></td>
+                                    <td><strong>{{ p.farmer.username }}</strong></td>
+                                    <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                    <td><span class="badge-status bg-accepted"><i class="fa fa-truck"></i> QR Pending Pickup</span></td>
+                                    <td class="text-center">
+                                        <a href="{% url 'buyer_proposal_detail' p.id %}" class="btn btn-sm btn-success rounded-pill fw-bold text-white shadow-sm">
+                                            <i class="fa fa-qrcode"></i> View Contract
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa fa-handshake-o fa-3x mb-3" style="color: #ccc;"></i><br>No active contracts.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="history" role="tabpanel">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover table-custom">
+                            <thead style="background: #f8f9fa;">
+                                <tr>
+                                    <th>Harvest / Crop</th>
+                                    <th>Farmer</th>
+                                    <th>Date</th>
+                                    <th>Final Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in history %}
+                                <tr>
+                                    <td><span class="crop-title" style="color: #555;">{{ p.listing.title }}</span></td>
+                                    <td><strong>{{ p.farmer.username }}</strong></td>
+                                    <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge-status bg-history">{{ p.status }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'buyer_proposal_detail' p.id %}" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 35px; height: 35px;">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted">No historical data found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

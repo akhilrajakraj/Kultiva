@@ -250,7 +250,6 @@
                                     <select name="new_status" class="form-control-custom" id="status-select" onchange="toggleTrackingFields()">
                                         <option value="PENDING" selected>Keep Processing</option>
                                         <option value="SHIPPED">Hand over to Courier (Ship)</option>
-                                        <option value="DELIVERED">Mark as Delivered Immediately</option> 
                                         <option value="CANCELLED">Cancel Order</option>
                                     </select>
 
@@ -281,33 +280,19 @@
                                     </div>
 
                                     <button type="submit" class="btn-update shadow-sm" id="save-btn">
-                                        <i class="fa fa-save"></i> Process Update
+                                        <i class="fa fa-save"></i> Process Dispatch
                                     </button>
                                 </form>
 
                             {% elif order.status == 'SHIPPED' %}
-                                <div class="dispatched-lock-box mb-3">
+                                <div class="dispatched-lock-box">
                                     <i class="fa fa-shipping-fast"></i>
                                     <h5>Order Dispatched</h5>
-                                    <p style="font-size: 13px;">This package has been successfully handed over to the logistics partner.</p>
-                                </div>
-                                
-                                <form action="{% url 'update_order_status' order.order_id %}" method="POST" id="statusFormDelivered">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="new_status" value="DELIVERED">
-                                    
-                                    <div class="mb-3 p-2 rounded" style="background: #e8f5e9; border: 1px solid #c5e1a5;">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <input type="checkbox" name="notify_customer" id="notify-delivered" checked style="width: 16px; height: 16px; accent-color: #2e7d32;">
-                                            <label for="notify-delivered" style="font-size: 13px; font-weight: bold; color: #1b5e20; margin: 0; cursor: pointer;">Email Delivery Receipt to Customer</label>
-                                        </div>
+                                    <p>This package has been successfully handed over to the logistics partner.</p>
+                                    <div style="background: #fff; border-left: 3px solid #f57f17; padding: 10px; font-size: 11px; text-align: left; color: #888; border-radius: 4px;">
+                                        <strong><i class="fa fa-info-circle"></i> Note:</strong> The tracking details have been emailed to the customer. The status will automatically update to <em>Delivered</em> once confirmed by the courier network or the buyer.
                                     </div>
-                                    
-                                    <button type="submit" class="btn-update shadow-sm" style="background-color: #2e7d32;" id="deliver-btn">
-                                        <i class="fa fa-check-circle"></i> Confirm Delivery
-                                    </button>
-                                </form>
-
+                                </div>
                             {% else %}
                                 <div class="text-center py-4">
                                     <i class="fa fa-lock text-muted mb-2" style="font-size: 30px;"></i>
@@ -451,14 +436,6 @@
         document.getElementById('statusForm')?.addEventListener('submit', function() {
             const btn = document.getElementById('save-btn');
             btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
-            btn.style.opacity = '0.8';
-            btn.style.cursor = 'not-allowed';
-        });
-        
-        // 🔬 THE FIX: Added JS listener for the new "Confirm Delivery" button
-        document.getElementById('statusFormDelivered')?.addEventListener('submit', function() {
-            const btn = document.getElementById('deliver-btn');
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Finalizing...';
             btn.style.opacity = '0.8';
             btn.style.cursor = 'not-allowed';
         });

@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tax Invoice | {{ order.order_id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root { --primary: #1b5e20; --primary-dark: #0d320f; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --bg-color: #f8fafc; --surface: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 40px 20px; font-size: 13px; }
+
+        .action-bar { max-width: 850px; margin: 0 auto 20px auto; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; border: none; transition: all 0.2s; text-decoration: none; }
+        .btn-outline { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); }
+        .btn-primary { background: var(--primary); color: white; }
+
+        .invoice-box { max-width: 850px; margin: 0 auto; background: var(--surface); padding: 48px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); position: relative; }
+        .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--primary); padding-bottom: 24px; margin-bottom: 32px; }
+        .brand-name { font-size: 24px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px; }
+        .invoice-title { font-size: 28px; font-weight: 700; color: var(--text-main); text-transform: uppercase; display: flex; align-items: center; gap: 15px; }
+        .invoice-meta { margin-top: 8px; font-size: 13px; color: var(--text-muted); line-height: 1.6; text-align: right; }
+        
+        .addresses { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+        .address-block h3 { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; font-weight: 700; }
+        .address-block p { line-height: 1.6; margin-bottom: 2px; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+        th { background-color: var(--bg-color); color: var(--text-muted); font-weight: 600; font-size: 12px; text-transform: uppercase; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        td { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .col-num { text-align: right; }
+        .item-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
+
+        .summary-wrapper { display: flex; justify-content: space-between; margin-bottom: 40px; }
+        .amount-in-words { background: var(--bg-color); padding: 16px; border-radius: 8px; margin-top: 16px; width: 100%; }
+        .summary-table { width: 300px; }
+        .summary-table td { padding: 8px 0; border: none; }
+        .grand-total td { font-size: 18px; color: var(--primary); font-weight: 700; border-top: 2px solid var(--border); padding-top: 16px; }
+
+        .signature { text-align: center; }
+        @media print { body { background: white; padding: 0; } .no-print { display: none !important; } .invoice-box { box-shadow: none; padding: 0; max-width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div class="action-bar no-print">
+        <a href="{% url 'farmer_orders' %}" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Back to Orders</a>
+        <div style="display: flex; gap: 12px;">
+            <button class="btn btn-primary" onclick="window.print()"><i class="ph ph-printer"></i> Print Invoice</button>
+        </div>
+    </div>
+
+    <div class="invoice-box">
+        <header class="invoice-header">
+            <div>
+                <div class="brand-name">KULTIVA MARKETPLACE</div>
+                <div style="color: var(--text-muted);">Empowering Agricultural Commerce</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="invoice-title">
+                    Tax Invoice
+                    {% if order.status == 'REFUNDED' %}
+                        <span style="font-size: 12px; background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 20px; border: 1px solid #ffcdd2; letter-spacing: 1px;">REFUNDED</span>
+                    {% endif %}
+                </div>
+                <div class="invoice-meta">
+                    Invoice No: <span>KUL-INV-{{ order.id }}</span><br>
+                    Order ID: <span>{{ order.order_id }}</span><br>
+                    Date of Issue: <span>{{ order.created_at|date:"d M Y" }}</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="addresses">
+            <div class="address-block">
+                <h3>Sold By (Supplier)</h3>
+                <p><strong>{{ seller_profile.shop_name|default:seller.username }}</strong></p>
+                <p>{{ seller.addresses.first.village }}, {{ seller.addresses.first.district }}</p>
+                <p>{{ seller.addresses.first.state }} - {{ seller.addresses.first.pincode }}</p>
+                <p>GSTIN: {{ seller_profile.gst_number|default:"Applied For" }}</p>
+            </div>
+            <div class="address-block">
+                <h3>Billed To (Buyer)</h3>
+                <p><strong>{{ order.farmer.username }}</strong></p>
+                <p>{{ farmer_address.village }}, {{ farmer_address.district }}</p>
+                <p>{{ farmer_address.state }} - {{ farmer_address.pincode }}</p>
+                
+                <p>Payment: <strong>{{ order.get_payment_method_display }} 
+                    {% if order.status == 'REFUNDED' %}
+                        <span style="color: #c62828;">(REFUNDED)</span>
+                    {% elif order.status == 'CANCELLED' %}
+                        <span style="color: #64748b;">(CANCELLED)</span>
+                    {% else %}
+                        <span style="color: var(--primary);">(PAID)</span>
+                    {% endif %}
+                </strong></p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="5%">#</th>
+                    <th>Item Description</th>
+                    <th class="col-num">Qty</th>
+                    <th class="col-num">Taxable Value</th>
+                    <th class="col-num">GST</th>
+                    <th class="col-num">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>
+                        <div class="item-title">{{ product.title }}</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">{{ product.variety_or_brand|default:"Standard Grade" }}</div>
+                    </td>
+                    <td class="col-num">{{ order.quantity|floatformat:0 }}</td>
+                    <td class="col-num">₹{{ taxable_value }}</td>
+                    <td class="col-num">₹{{ cgst|add:sgst }}</td>
+                    <td class="col-num">₹{{ order.total_amount|add:"-20" }}</td> 
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="summary-wrapper">
+            <div style="width: 50%;">
+                <div class="amount-in-words">
+                    <p style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Amount in Words</p>
+                    <p style="font-weight: 600; margin-top: 5px;">{{ amount_in_words }}</p>
+                </div>
+            </div>
+            <table class="summary-table">
+                <tr><td>Taxable Value</td><td class="col-num">₹{{ taxable_value }}</td></tr>
+                <tr><td>CGST ({{ gst_rate_half }}%)</td><td class="col-num">₹{{ cgst }}</td></tr>
+                <tr><td>SGST ({{ gst_rate_half }}%)</td><td class="col-num">₹{{ sgst }}</td></tr>
+                <tr><td>Packaging Fee</td><td class="col-num">₹{{ packaging_fee }}</td></tr>
+                <tr class="grand-total"><td>Total Payable</td><td class="col-num">₹{{ order.total_amount }}</td></tr>
+            </table>
+        </div>
+
+        <footer style="margin-top: 50px; border-top: 1px solid var(--border); padding-top: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div style="font-size: 11px; color: var(--text-muted); max-width: 60%;">
+                <p><strong>Terms & Conditions:</strong></p>
+                <p>1. This is a system-generated tax invoice for Kultiva Input Marketplace transactions.</p>
+                <p>2. Goods are insured under Kultiva Escrow Protection until successful delivery.</p>
+            </div>
+            <div class="signature">
+                <div style="font-family: 'Brush Script MT', cursive; font-size: 24px; color: var(--primary);">Kultiva Admin</div>
+                <p style="font-size: 10px; font-weight: bold; margin-top: 5px;">Authorized Signatory</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

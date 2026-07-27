@@ -1,0 +1,300 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order {{ order.order_id }} | Kultiva</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .section-title { font-size: 18px; font-weight: 900; color: #1b5e20; border-bottom: 2px solid #c5e1a5; padding-bottom: 10px; margin-bottom: 20px; }
+
+        .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+        .order-id { font-weight: 900; font-size: 20px; color: #1a1a1a; }
+        
+        .status-badge { padding: 6px 15px; border-radius: 50px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .status-PENDING { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .status-SHIPPED { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        .status-DELIVERED { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .status-CANCELLED, .status-REFUNDED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; color: #555; }
+        .detail-row strong { color: #1a1a1a; }
+        .order-total { border-top: 2px dashed #ddd; padding-top: 15px; margin-top: 15px; font-size: 18px; font-weight: 900; color: #1b5e20; }
+
+        .star-rating { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 5px; }
+        .star-rating input { display: none; }
+        .star-rating label { font-size: 30px; color: #ccc; cursor: pointer; transition: color 0.2s; margin: 0; }
+        .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: #fbc02d; }
+
+        .file-upload-wrapper { border: 2px dashed #1b5e20; border-radius: 8px; padding: 30px; text-align: center; background: #f1f8e9; cursor: pointer; transition: 0.3s; }
+        .file-upload-wrapper:hover { background: #e8f5e9; }
+        .image-preview-container { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .image-preview-container img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #c5e1a5; }
+
+        .form-control-custom { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container pb-5">
+        
+        <div class="mb-4 mt-3">
+            <a href="{% url 'farmer_orders' %}" style="color: #666; font-weight: bold; text-decoration: none;"><i class="fa fa-arrow-left"></i> Back to Orders</a>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} fw-bold shadow-sm"><i class="fa fa-info-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            
+            <div class="col-lg-5">
+                <div class="glass-widget">
+                    <h2 class="section-title"><i class="fa fa-box-open"></i> Order Breakdown</h2>
+                    
+                    <div class="order-header">
+                        <span class="order-id">{{ order.order_id }}</span>
+                        <span class="status-badge status-{{ order.status }}">
+                            {% if order.status == 'PENDING' %}Processing
+                            {% elif order.status == 'SHIPPED' %}In Transit
+                            {% elif order.status == 'DELIVERED' %}Delivered
+                            {% elif order.status == 'REFUNDED' %}Refunded
+                            {% else %}Cancelled{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        {% if order.product.image %}
+                            <img src="{{ order.product.image.url }}" style="width: 70px; height: 70px; border-radius: 8px; object-fit: cover;">
+                        {% endif %}
+                        <div>
+                            <h5 style="font-weight: bold; margin: 0;">{{ order.product.title }}</h5>
+                            <span style="font-size: 13px; color: #888; font-weight: bold;">Vendor: {{ order.product.listed_by.username }}</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-row"><span>Quantity</span> <strong>x{{ order.quantity|floatformat:0 }}</strong></div>
+                    <div class="detail-row"><span>Price per unit</span> <strong>₹{{ order.product.price }}</strong></div>
+                    <div class="detail-row"><span>Payment Method</span> <strong>{{ order.get_payment_method_display }}</strong></div>
+                    <div class="detail-row"><span>Date Ordered</span> <strong>{{ order.created_at|date:"d M, Y" }}</strong></div>
+                    
+                    <div class="detail-row order-total">
+                        <span>Total Paid</span>
+                        <span>₹{{ order.total_amount }}</span>
+                    </div>
+
+                    <div class="mt-4">
+                        {% if order.status == 'PENDING' %}
+                            {% if is_cancel_window_open %}
+                                <button type="button" class="btn btn-outline-danger w-100 fw-bold rounded-pill" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                    <i class="fa fa-times-circle"></i> 
+                                    {% if order.payment_method == 'COD' %}
+                                        Cancel Order
+                                    {% else %}
+                                        Cancel Order & Request Refund
+                                    {% endif %}
+                                </button>
+                                <p class="text-center text-muted mt-2" style="font-size: 11px;">
+                                    <i class="fa fa-clock-o"></i> You have 24 hours from purchase to cancel.
+                                </p>
+                            {% else %}
+                                <div class="alert alert-secondary mb-0 text-center" style="font-size: 13px; font-weight: bold; border-radius: 10px;">
+                                    <i class="fa fa-info-circle"></i> The 24-hour cancellation window has expired.
+                                </div>
+                            {% endif %}
+                            
+                        {% elif order.status == 'SHIPPED' %}
+                            <div class="alert alert-warning mb-0 text-center" style="font-size: 13px; font-weight: bold; border-radius: 10px; background-color: #fff8e1; color: #f57f17; border: 1px solid #ffecb3;">
+                                <i class="fa fa-truck"></i> This order has been dispatched and can no longer be cancelled.
+                            </div>
+                            
+                        {% elif order.status == 'DELIVERED' %}
+                            <a href="{% url 'farmer_invoice_detail' order.order_id %}" class="btn btn-outline-success w-100 fw-bold rounded-pill"><i class="fa fa-download"></i> View & Download Invoice</a>
+                            
+                        {% elif order.status == 'CANCELLED' or order.status == 'REFUNDED' %}
+                            <div class="alert alert-danger mb-0 text-center" style="font-size: 13px; font-weight: bold; border-radius: 10px;">
+                                <i class="fa fa-info-circle"></i> This order was {{ order.status|lower }}. 
+                                {% if order.payment_method != 'COD' and order.status == 'CANCELLED' %}
+                                    Awaiting Admin Refund Verification.
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="glass-widget">
+                    <h2 class="section-title"><i class="fa fa-star text-warning"></i> Vendor Feedback</h2>
+                    
+                    {% if order.status == 'SHIPPED' or order.status == 'DELIVERED' %}
+                        
+                        {% if existing_review %}
+                            <div class="alert alert-success shadow-sm mb-0" style="border-radius: 10px; border-left: 5px solid #2e7d32; background-color: #f1f8e9;">
+                                <h5 class="fw-bold mb-2" style="color: #1b5e20;"><i class="fa fa-heart text-danger me-2"></i> Thank you for your feedback!</h5>
+                                <p class="mb-0 text-muted" style="font-size: 15px;">
+                                    Your assessment of <strong>{{ order.product.listed_by.username }}</strong> has been successfully recorded.
+                                </p>
+                                <div class="mt-3 bg-white p-3" style="border-radius: 8px;">
+                                    <span class="fw-bold"><i class="fa fa-star text-warning"></i> {{ existing_review.rating }} / 5 Stars</span><br>
+                                    <span style="font-style: italic; color: #555;">"{{ existing_review.comment }}"</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <form action="{% url 'farmer_order_details' order.order_id %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="submit_feedback">
+
+                                <p class="text-muted" style="font-size: 14px; margin-bottom: 15px;">Your order is currently <strong>{{ order.status }}</strong>. How is your experience with the vendor so far?</p>
+
+                                <label style="font-weight: bold; color: #333; margin-bottom: 5px;">Rate the Vendor <span class="text-danger">*</span></label>
+                                <div class="star-rating mb-3">
+                                    <input type="radio" id="star5" name="rating" value="5" required />
+                                    <label for="star5" title="5 stars"><i class="fa fa-star"></i></label>
+                                    <input type="radio" id="star4" name="rating" value="4" />
+                                    <label for="star4" title="4 stars"><i class="fa fa-star"></i></label>
+                                    <input type="radio" id="star3" name="rating" value="3" />
+                                    <label for="star3" title="3 stars"><i class="fa fa-star"></i></label>
+                                    <input type="radio" id="star2" name="rating" value="2" />
+                                    <label for="star2" title="2 stars"><i class="fa fa-star"></i></label>
+                                    <input type="radio" id="star1" name="rating" value="1" />
+                                    <label for="star1" title="1 star"><i class="fa fa-star"></i></label>
+                                </div>
+
+                                <label style="font-weight: bold; color: #333; margin-bottom: 5px;">Detailed Description (Optional)</label>
+                                <textarea name="description" class="form-control-custom" rows="3" placeholder="Describe the seller's communication, dispatch speed, or packaging condition..."></textarea>
+
+                                <label style="font-weight: bold; color: #333; margin-bottom: 5px;">Upload Images (Optional)</label>
+                                <div class="file-upload-wrapper" onclick="document.getElementById('imageUpload').click()">
+                                    <i class="fa fa-cloud-upload text-success mb-2" style="font-size: 30px;"></i>
+                                    <p style="margin: 0; color: #1b5e20; font-weight: bold;">Click here to browse images from your device</p>
+                                    <input type="file" name="image" id="imageUpload" accept="image/*" style="display: none;">
+                                </div>
+                                <div class="image-preview-container" id="imagePreviewContainer"></div>
+
+                                <button type="submit" class="btn btn-success w-100 fw-bold mt-4" style="background-color: #1b5e20; border-radius: 8px; padding: 12px;">
+                                    <i class="fa fa-paper-plane"></i> Submit Feedback
+                                </button>
+                            </form>
+                        {% endif %}
+
+                    {% elif order.status == 'CANCELLED' or order.status == 'REFUNDED' %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa fa-ban mb-3" style="font-size: 40px; opacity: 0.5;"></i>
+                            <h5>Feedback Disabled</h5>
+                            <p>You cannot leave feedback for cancelled or refunded orders.</p>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa fa-lock mb-3" style="font-size: 40px; opacity: 0.5;"></i>
+                            <h5>Feedback Locked</h5>
+                            <p>You can rate this vendor once the product has been dispatched (<strong>Shipped</strong>).</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none;">
+                <div class="modal-header" style="background: #ffebee; color: #c62828; border-bottom: none; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title fw-bold"><i class="fa fa-exclamation-triangle"></i> Cancel Order Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'farmer_order_details' order.order_id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cancel_order">
+                    <div class="modal-body p-4">
+                        <p style="font-size: 14px; color: #555;">Are you sure you want to cancel <strong>{{ order.product.title }}</strong>? This action cannot be undone.</p>
+                        
+                        <p style="font-size: 13px; color: #888; background: #f8f9fa; padding: 10px; border-left: 3px solid #fbc02d; border-radius: 4px;">
+                            <strong>Note:</strong> 
+                            {% if order.payment_method == 'COD' %}
+                                This will cancel your Cash on Delivery order immediately. Both you and the seller will receive an email confirmation.
+                            {% else %}
+                                Since funds may have already been processed, an Admin will review this cancellation and initiate your refund within 3-5 business days. Both you and the seller will receive an email confirmation immediately.
+                            {% endif %}
+                        </p>
+                        
+                        <label style="font-weight: bold; color: #333; margin-top: 10px;">Reason for Cancellation <span class="text-danger">*</span></label>
+                        <select name="cancel_reason" class="form-control-custom mt-2" required>
+                            <option value="">Select a reason...</option>
+                            <option value="Ordered by mistake">Ordered by mistake</option>
+                            <option value="Found a better price elsewhere">Found a better price elsewhere</option>
+                            <option value="Delivery is taking too long">Delivery is taking too long</option>
+                            <option value="Product no longer needed">Product no longer needed</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer" style="border-top: none; padding-top: 0;">
+                        <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Keep Order</button>
+                        <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4">Confirm Cancellation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+        if(imageUpload) {
+            imageUpload.addEventListener('change', function() {
+                imagePreviewContainer.innerHTML = ''; 
+                
+                if (this.files) {
+                    Array.from(this.files).forEach(file => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                imagePreviewContainer.appendChild(img);
+                            }
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

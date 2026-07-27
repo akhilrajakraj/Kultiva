@@ -6,1235 +6,331 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="Kultiva Farmer Dashboard">
-  <title>Kultiva — Agronomy Engine</title>
+  <title>Kultiva - Farmer Dashboard</title>
 
   <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
   <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
   <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/owl.css' %}">
 
   <style>
-    /* ===================================================================
-       KULTIVA FARMER DASHBOARD — DESIGN SYSTEM
-       Aesthetic: Organic Precision — earthy warmth meets surgical clarity
-    =================================================================== */
-
-    :root {
-      --green-900: #14532d;
-      --green-700: #15803d;
-      --green-500: #22c55e;
-      --green-100: #dcfce7;
-      --green-50:  #f0fdf4;
-      --amber-500: #f59e0b;
-      --amber-100: #fef3c7;
-      --sky-500:   #0ea5e9;
-      --sky-100:   #e0f2fe;
-      --slate-900: #0f172a;
-      --slate-700: #334155;
-      --slate-500: #64748b;
-      --slate-200: #e2e8f0;
-      --slate-100: #f1f5f9;
-      --slate-50:  #f8fafc;
-      --red-600:   #dc2626;
-      --card-radius: 16px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-
-    body {
-      padding-top: 90px;
-      background-color: #f4f6f3; /* Warm off-white, not clinical */
-      background-image:
-        radial-gradient(ellipse 80% 60% at 100% 0%, rgba(34,197,94,0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 0% 100%, rgba(245,158,11,0.05) 0%, transparent 60%);
-      font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
-      color: var(--slate-900);
-      min-height: 100vh;
-    }
-
-    /* ── Section Header ── */
-    .page-header-eyebrow {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--green-700);
-    }
-    .page-header-title {
-      font-family: 'DM Serif Display', Georgia, serif;
-      font-size: clamp(26px, 4vw, 36px);
-      color: var(--slate-900);
-      line-height: 1.15;
-      letter-spacing: -0.5px;
-    }
-
-    /* ── Panel / Card ── */
-    .panel {
-      background: #ffffff;
-      border: 1px solid rgba(0,0,0,0.06);
-      border-radius: var(--card-radius);
-      box-shadow: var(--shadow-sm);
-      transition: box-shadow 0.25s ease, transform 0.25s ease;
-    }
-    .panel:hover { box-shadow: var(--shadow-md); }
-
-    .panel-accent-green  { border-left: 4px solid var(--green-500); }
-    .panel-accent-sky    { border-left: 4px solid var(--sky-500); }
-    .panel-accent-amber  { border-left: 4px solid var(--amber-500); }
-    .panel-accent-red    { border-left: 4px solid var(--red-600); }
-
-    /* ── Weather Card ── */
-    .weather-panel {
-      background: linear-gradient(145deg, #0c4a6e 0%, #0369a1 60%, #0ea5e9 100%);
-      border-radius: var(--card-radius);
-      color: #ffffff;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 8px 32px rgba(14,165,233,0.25);
-    }
-    .weather-panel::before {
-      content: '';
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 200px; height: 200px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.06);
-    }
-    .weather-panel::after {
-      content: '';
-      position: absolute;
-      bottom: -60px; left: -20px;
-      width: 250px; height: 250px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.04);
-    }
-    .weather-temp-display {
-      font-family: 'DM Serif Display', serif;
-      font-size: 72px;
-      line-height: 1;
-      color: #fff;
-      letter-spacing: -3px;
-    }
-    .weather-condition {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.75);
-    }
-    .weather-stat-pill {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 10px;
-      padding: 10px 14px;
-      flex: 1;
-    }
-    .weather-stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.1;
-    }
-    .weather-stat-label {
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,0.6);
-      margin-top: 2px;
-    }
-    .weather-source-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.8);
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    .weather-source-badge.live {
-      background: rgba(34,197,94,0.25);
-      border-color: rgba(34,197,94,0.5);
-      color: #86efac;
-    }
-
-    /* ── AI Hero Card ── */
-    .ai-hero {
-      background: linear-gradient(135deg, var(--green-900) 0%, #166534 50%, #15803d 100%);
-      color: #fff;
-      border-radius: var(--card-radius);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 12px 40px rgba(20,83,45,0.35);
-    }
-    .ai-hero::after {
-      content: '\f06c';
-      font-family: 'Font Awesome 5 Free';
-      font-weight: 900;
-      position: absolute;
-      right: -30px;
-      bottom: -40px;
-      font-size: 220px;
-      color: rgba(255,255,255,0.05);
-      transform: rotate(-20deg);
-      pointer-events: none;
-      line-height: 1;
-    }
-    .ai-hero-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      padding: 5px 12px;
-      border-radius: 20px;
-      background: rgba(253,224,71,0.2);
-      color: #fde047;
-      border: 1px solid rgba(253,224,71,0.35);
-      margin-bottom: 16px;
-    }
-    .ai-crop-name {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(40px, 7vw, 64px);
-      letter-spacing: -2px;
-      line-height: 1;
-      color: #ffffff;
-      text-transform: capitalize;
-      position: relative;
-      z-index: 2;
-    }
-    .ai-crop-name em {
-      font-style: italic;
-      color: #86efac;
-    }
-    .ai-confidence-orb {
-      background: rgba(0,0,0,0.2);
-      border: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(10px);
-      border-radius: 14px;
-      padding: 22px 18px;
-      text-align: center;
-      position: relative;
-      z-index: 2;
-    }
-
-    /* ── Soil Panel ── */
-    .soil-metric-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .soil-metric-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--slate-500);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      min-width: 90px;
-    }
-    .soil-metric-value {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--slate-900);
-      min-width: 70px;
-      text-align: right;
-    }
-    .soil-bar-track {
-      flex: 1;
-      height: 8px;
-      background: var(--slate-100);
-      border-radius: 99px;
-      margin: 0 12px;
-      overflow: hidden;
-    }
-    .soil-bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .ph-badge {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 3px solid var(--amber-500);
-      background: var(--amber-100);
-    }
-    .ph-value {
-      font-family: 'DM Serif Display', serif;
-      font-size: 28px;
-      line-height: 1;
-      color: var(--slate-900);
-    }
-    .ph-label {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: var(--amber-500);
-      text-transform: uppercase;
-    }
-
-    /* ── Farm Selector ── */
-    .location-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--green-50);
-      border: 1px solid #bbf7d0;
-      border-radius: 99px;
-      padding: 5px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--green-900);
-    }
-    .farm-select-btn {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 14px 18px;
-      background: white;
-      border: 1.5px solid var(--slate-200);
-      border-radius: 10px;
-      margin-bottom: 10px;
-      text-align: left;
-      transition: all 0.2s ease;
-      color: var(--slate-900);
-      cursor: pointer;
-    }
-    .farm-select-btn:hover {
-      border-color: var(--green-500);
-      background: var(--green-50);
-      box-shadow: 0 4px 12px rgba(34,197,94,0.1);
-    }
-    .farm-select-btn.active {
-      border-color: var(--green-700);
-      border-width: 2px;
-      background: var(--green-50);
-    }
-
-    /* ── Alternatives Chips ── */
-    .alt-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: var(--slate-100);
-      border: 1px solid var(--slate-200);
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--slate-700);
-      text-transform: capitalize;
-      transition: all 0.2s;
-    }
-    .alt-chip:hover {
-      background: var(--green-50);
-      border-color: var(--green-500);
-      color: var(--green-900);
-    }
-    .alt-chip .rank-num {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--slate-500);
-    }
-
-    /* ── Product Cards (Marketplace) ── */
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-    .product-card {
-      background: #fff;
-      border: 1px solid var(--slate-200);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    .product-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
-      border-color: #cbd5e1;
-    }
-    .product-img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      background: var(--slate-50);
-    }
-    .product-img-placeholder {
-      width: 100%;
-      height: 160px;
-      background: linear-gradient(135deg, var(--slate-100), var(--slate-50));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--slate-200);
-    }
-    .product-body { padding: 14px; flex: 1; display: flex; flex-direction: column; }
-    .product-category-tag {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--green-700);
-      margin-bottom: 6px;
-    }
-    .product-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--slate-900);
-      line-height: 1.3;
-      margin-bottom: 4px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .product-seller {
-      font-size: 11px;
-      color: var(--slate-500);
-      margin-bottom: 12px;
-    }
-    .product-price {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px;
-      color: var(--green-700);
-      line-height: 1;
-    }
-    .product-unit { font-size: 11px; font-family: 'DM Sans', sans-serif; color: var(--slate-500); font-weight: 500; }
-    .btn-buy {
-      display: block;
-      width: 100%;
-      padding: 9px;
-      background: #fbbf24;
-      color: #78350f;
-      font-weight: 700;
-      font-size: 13px;
-      border: none;
-      border-radius: 8px;
-      text-align: center;
-      text-decoration: none;
-      margin-top: 12px;
-      transition: background 0.2s;
-    }
-    .btn-buy:hover { background: #f59e0b; color: #451a03; text-decoration: none; }
-
-    /* ── Advisory Panel ── */
-    .advisory-section-title {
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--slate-500);
-      margin-bottom: 8px;
-    }
-    .advisory-tag {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 99px;
-      margin: 3px;
-    }
-
-    /* ── Stat Badge Strip ── */
-    .stat-strip {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .stat-strip-item {
-      flex: 1;
-      min-width: 90px;
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 10px;
-      padding: 12px;
-      text-align: center;
-    }
-    .stat-strip-value {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px;
-      color: var(--slate-900);
-      line-height: 1;
-    }
-    .stat-strip-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--slate-500);
-      margin-top: 4px;
-    }
-
-    /* ── Modals ── */
-    .modal-content { border-radius: 18px; border: none; box-shadow: var(--shadow-lg); overflow: hidden; }
-    .modal-header-green {
-      background: linear-gradient(135deg, var(--green-900), #15803d);
-      color: #fff;
-      padding: 20px 24px;
-    }
-    .file-upload-zone {
-      display: block; /* Make it block level label */
-      border: 2px dashed var(--slate-300);
-      border-radius: 10px;
-      padding: 28px;
-      text-align: center;
-      background: var(--slate-50);
-      transition: all 0.25s;
-      cursor: pointer;
-    }
-    .file-upload-zone:hover { border-color: var(--green-500); background: var(--green-50); }
-
-    /* ── Loading Overlay ── */
-    #aiLoadingOverlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(12px);
-      z-index: 9999;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-    .loading-leaf {
-      font-size: 48px;
-      animation: leafSpin 2s linear infinite;
-      display: block;
-      margin-bottom: 20px;
-    }
-    @keyframes leafSpin {
-      0%   { transform: rotate(0deg) scale(1); }
-      50%  { transform: rotate(180deg) scale(1.1); }
-      100% { transform: rotate(360deg) scale(1); }
-    }
-
-    /* ── Status Badges ── */
-    .status-live   { color: #16a34a; background: #dcfce7; border: 1px solid #86efac; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-    .status-offline { color: #92400e; background: #fef3c7; border: 1px solid #fde68a; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-
-    /* ── Alert Overrides ── */
-    .alert-success { background-color: var(--green-100); color: #166534; border: 1px solid #86efac; }
-    .alert-danger  { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    .alert-warning { background-color: var(--amber-100); color: #92400e; border: 1px solid #fde68a; }
-
-    /* ── Quick Nav Tabs ── */
-    .quick-nav {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-    .quick-nav::-webkit-scrollbar { height: 3px; }
-    .quick-nav::-webkit-scrollbar-track { background: transparent; }
-    .quick-nav::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 2px; }
-    .quick-nav-link {
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--slate-700);
-      background: #fff;
-      border: 1px solid var(--slate-200);
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .quick-nav-link:hover, .quick-nav-link.active {
-      background: var(--green-900);
-      color: #fff;
-      border-color: var(--green-900);
-      text-decoration: none;
-    }
-
-    /* ── Section divider ── */
-    .section-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 28px 0 18px;
-    }
-    .section-divider h6 {
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--slate-500);
-      margin: 0;
-      white-space: nowrap;
-    }
-    .section-divider::before, .section-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--slate-200);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .weather-temp-display { font-size: 56px; }
-      .ai-crop-name { font-size: 40px; }
-      .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-    }
-
-    /* Scroll reveal */
-    .reveal {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    body { padding-top: 100px; background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    /* Unified Glass & Dash Card Styling */
+    .glass-widget { background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(10px); border: 1px solid #e2e8f0; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); height: 100%; transition: all 0.3s ease; }
+    .glass-widget:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+    
+    .dash-title { color: #1e293b; font-weight: 800; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    
+    /* Weather Elements */
+    .weather-widget { border-top: 4px solid #fbc02d; display: flex; align-items: center; justify-content: space-between; }
+    .weather-temp { font-size: 42px; font-weight: 900; color: #1e293b; margin-right: 15px; line-height: 1; }
+    .weather-icon { font-size: 40px; color: #fbc02d; }
+    
+    /* Soil Elements */
+    .soil-widget { border-top: 4px solid #8d6e63; }
+    .soil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    .soil-item { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }
+    .soil-val { font-size: 22px; font-weight: 900; color: #1b5e20; }
+    .soil-label { font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+    .advisory-box { background: rgba(251, 192, 45, 0.1); padding: 15px; border-radius: 10px; font-size: 13px; color: #334155; margin-top: 20px; border-left: 4px solid #fbc02d; font-weight: 600; }
+    
+    /* AI Agronomist Elements */
+    .ai-widget { border-top: 4px solid #0288d1; }
+    
+    /* Masterclass Elements */
+    .masterclass-widget { border-top: 4px solid #1b5e20; }
+    
+    /* Buttons & Inputs */
+    .btn-outline-theme { width: 100%; background: transparent; color: #1b5e20; border: 2px solid #1b5e20; padding: 12px; border-radius: 10px; font-weight: 700; transition: 0.3s; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;}
+    .btn-outline-theme:hover { background: #1b5e20; color: #fff; }
+    .modal-input { width: 100%; padding: 10px 15px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; background: #f8fafc; transition: 0.3s; }
+    .modal-input:focus { border-color: #1b5e20; background: #fff; box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1); }
   </style>
 </head>
 
 <body>
+
   {% include 'farmer_header.html' %}
 
-  <div class="container-lg pb-5" style="margin-top: 28px; max-width: 1280px;">
+  <div class="container pb-5 wow fadeInDown" data-wow-duration="1s">
+    
+    <!-- HEADER ROW -->
+    <div class="row align-items-center mb-4 mt-4">
+        <div class="col-lg-7">
+            <h2 style="color: #1b5e20; font-weight: 900;">
+                <i class="fa fa-leaf text-success me-2"></i> Welcome back, {{ request.user.username }}
+            </h2>
+            <p class="text-muted fw-bold mb-0">Your intelligent farm overview. Active Grid: <span class="badge bg-white border text-success">{{ location }}</span></p>
+        </div>
 
-    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
-      <div>
-        <p class="page-header-eyebrow mb-1"><i class="fa fa-seedling me-2"></i> Kultiva Intelligence Platform</p>
-        <h1 class="page-header-title mb-1">Agronomy Engine</h1>
-        <p class="text-muted mb-0" style="font-size: 14px;">
-          Real-time soil, climate & crop intelligence for your land.
-        </p>
-      </div>
-      <div class="d-flex align-items-center gap-2 flex-wrap">
-        {% if weather %}
-          <span class="status-live"><i class="fa fa-circle me-1" style="font-size: 7px;"></i> System Online</span>
-        {% else %}
-          <span class="status-offline"><i class="fa fa-exclamation-circle me-1"></i> Limited Data</span>
-        {% endif %}
-        <a href="{% url 'farmer_profile' %}" class="quick-nav-link" style="font-size: 12px;">
-          <i class="fa fa-user-cog"></i> Profile
-        </a>
-      </div>
+        <div class="col-lg-5 mt-3 mt-lg-0">
+            <div class="glass-widget weather-widget p-3">
+                <div class="d-flex align-items-center">
+                    <div class="weather-icon mr-3">
+                        {% if weather.Rainfall_mm > 5.0 %}<i class="fa fa-cloud-rain text-primary"></i>{% else %}<i class="fa fa-sun text-warning"></i>{% endif %}
+                    </div>
+                    <div>
+                        <div class="weather-temp">{{ weather.Temperature_C }}°C</div>
+                        <span class="badge bg-light text-dark border mt-1">Micro-Climate</span>
+                    </div>
+                </div>
+                <div class="text-end" style="font-size: 13px; color: #64748b; font-weight: bold;">
+                    <p class="mb-1"><i class="fa fa-droplet text-info"></i> Hum: {{ weather.Humidity_Pct }}%</p>
+                    <p class="mb-0"><i class="fa fa-cloud-showers-heavy text-primary"></i> Rain: {{ weather.Rainfall_mm }} mm</p>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- MESSAGES -->
     {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} shadow-sm mb-4" style="border-radius: 10px; font-weight: 600;">
-          {{ message }}
-        </div>
-      {% endfor %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show fw-bold shadow-sm rounded-3 border-0" role="alert">
+                <i class="fa fa-info-circle me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
     {% endif %}
-<!--
-    <div class="quick-nav">
-      <a href="{% url 'farmer_home' %}" class="quick-nav-link active"><i class="fa fa-brain"></i> AI Analysis</a>
-      <a href="{% url 'farmer_manage_crops' %}" class="quick-nav-link"><i class="fa fa-leaf"></i> My Crops</a>
-      <a href="{% url 'farmer_input_market' %}" class="quick-nav-link"><i class="fa fa-store"></i> Input Market</a>
-      <a href="{% url 'farmer_proposals' %}" class="quick-nav-link"><i class="fa fa-handshake"></i> Contracts</a>
-      <a href="{% url 'farmer_orders' %}" class="quick-nav-link"><i class="fa fa-box"></i> My Orders</a>
-      <a href="{% url 'buyer_farmer_list' %}" class="quick-nav-link"><i class="fa fa-users"></i> Network</a>
+
+    <!-- DASHBOARD MAIN GRID -->
+    <div class="row g-4 mb-4">
+        
+        <!-- LEFT COLUMN: SOIL HEALTH -->
+        <div class="col-lg-4">
+            <div class="glass-widget soil-widget">
+                <h5 class="dash-title"><i class="fa fa-microscope text-secondary"></i> Digital Soil Health</h5>
+                
+                {% if not soil.found %}
+                    {% if manual_report and manual_report.request_status == 'PENDING' %}
+                        <div class="alert bg-light border-start border-info border-4 py-2" style="font-size: 12px; font-weight: bold;">
+                            <i class="fa fa-clock text-info"></i> Lab verification pending.
+                        </div>
+                    {% elif manual_report and manual_report.request_status == 'COMPLETED' %}
+                        <div class="alert bg-light border-start border-success border-4 py-2" style="font-size: 12px; font-weight: bold;">
+                            <i class="fa fa-check-circle text-success"></i> Verified manual lab data active.
+                        </div>
+                    {% else %}
+                        <div class="alert bg-light border-start border-warning border-4 py-2" style="font-size: 12px; font-weight: bold;">
+                            <i class="fa fa-satellite text-warning"></i> Using satellite fallback data.
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="soil-grid">
+                    <div class="soil-item"><div class="soil-val">{{ soil.pH|floatformat:1 }}</div><div class="soil-label">pH Level</div></div>
+                    <div class="soil-item"><div class="soil-val text-success">{{ soil.N|floatformat:1 }}</div><div class="soil-label">Nitrogen (N)</div></div>
+                    <div class="soil-item"><div class="soil-val text-warning">{{ soil.P|floatformat:1 }}</div><div class="soil-label">Phosphorus (P)</div></div>
+                    <div class="soil-item"><div class="soil-val text-primary">{{ soil.K|floatformat:1 }}</div><div class="soil-label">Potassium (K)</div></div>
+                </div>
+
+                <div class="advisory-box">
+                    <i class="fa fa-lightbulb text-warning"></i> {{ soil.Advisory }}
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: AI & MASTERCLASS -->
+        <div class="col-lg-8">
+            
+            <!-- AI PREDICTION ENGINE -->
+            <div class="glass-widget ai-widget mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="dash-title mb-0"><i class="fa fa-brain text-primary"></i> AI Agronomist Analysis</h5>
+                    {% if manual_report.request_status == 'COMPLETED' %}
+                        <span class="badge bg-success shadow-sm px-3 py-2"><i class="fa fa-flask"></i> Precision Mode</span>
+                    {% else %}
+                        <span class="badge bg-primary shadow-sm px-3 py-2"><i class="fa fa-satellite"></i> Standard Mode</span>
+                    {% endif %}
+                </div>
+
+                <div class="bg-light rounded-4 p-4 text-center border mb-4">
+                    <p style="font-size: 12px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Optimal Crop Match</p>
+                    
+                    {% if ranked_predictions %}
+                        <h1 style="font-size: 42px; font-weight: 900; color: #1b5e20; margin: 0; text-transform: capitalize;">{{ ranked_predictions.0.name }}</h1>
+                        
+                        <div class="progress mt-3 mx-auto" style="height: 8px; width: 60%; border-radius: 10px;">
+                            <div class="progress-bar bg-success" style="width: {{ ranked_predictions.0.confidence }}%;"></div>
+                        </div>
+                        <p class="mt-2 mb-0" style="font-size: 13px; font-weight: bold; color: #64748b;">{{ ranked_predictions.0.confidence }}% AI Confidence Level</p>
+                        
+                        {% if ranked_predictions|length > 1 %}
+                        <div class="mt-4 pt-3 border-top">
+                            <span style="font-size: 11px; color: #94a3b8; font-weight: bold; text-transform: uppercase; margin-right: 10px;">Viable Alternatives:</span>
+                            {% for alt in ranked_predictions|slice:"1:" %}
+                                <span class="badge bg-white text-dark border me-1 fw-bold">{{ alt.name }} ({{ alt.confidence }}%)</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <h3 class="text-danger fw-bold"><i class="fa fa-exclamation-triangle"></i> Analysis Failed</h3>
+                        <p class="text-muted text-sm mt-2">{{ ai_result.status }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- OVERRIDE CONTROLS -->
+                <div>
+                    {% if not manual_report %}
+                        <button type="button" class="btn-outline-theme" data-bs-toggle="modal" data-bs-target="#unifiedOverrideModal">
+                            <i class="fa fa-upload me-1"></i> Override AI with Local Lab Data
+                        </button>
+                    {% elif manual_report.request_status == 'PENDING' %}
+                        <button type="button" class="btn btn-light w-100 fw-bold border text-warning py-3" disabled>
+                            <i class="fa fa-hourglass-half me-1"></i> Lab Report Verification Processing...
+                        </button>
+                    {% elif manual_report.request_status == 'COMPLETED' %}
+                        <button type="button" class="btn btn-outline-success w-100 fw-bold border-2 py-3" data-bs-toggle="modal" data-bs-target="#unifiedOverrideModal">
+                            <i class="fa fa-pen me-1"></i> Update Lab Data
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- CROP CULTIVATION MASTERCLASS -->
+            {% if crop_guide %}
+            <div class="glass-widget masterclass-widget">
+                <h5 class="dash-title"><i class="fa fa-book-open text-success"></i> Cultivation Masterclass: {{ predicted_crop|title }}</h5>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12 mb-4">
+                        <h6 style="font-size: 12px; color: #64748b; font-weight: 800; text-transform: uppercase;">Step-by-Step Growth Stages</h6>
+                        <ul class="list-group list-group-flush mt-2 bg-transparent">
+                            {% for stage, desc in crop_guide.growth_stages.items %}
+                                <li class="list-group-item bg-transparent border-0 px-0 py-2 d-flex align-items-start">
+                                    <i class="fa fa-check-circle text-success mt-1 me-3 fs-5"></i> 
+                                    <span style="font-size: 14px; font-weight: 600; color: #334155;"><strong>{{ stage }}:</strong> {{ desc }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="bg-light p-4 rounded-3 h-100 border-start border-warning border-4 shadow-sm">
+                            <h6 style="font-size: 12px; font-weight: 900; color: #b45309; text-transform: uppercase;"><i class="fa fa-vial"></i> Fertilizer Advisory</h6>
+                            <ul class="small mb-0 mt-2 fw-bold text-secondary lh-lg ps-3">
+                                {% for type, instructions in crop_guide.fertilizer_schedule.items %}
+                                    <li class="mb-2"><strong>{{ type }}:</strong> {{ instructions }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="bg-light p-4 rounded-3 h-100 border-start border-success border-4 shadow-sm">
+                            <h6 style="font-size: 12px; font-weight: 900; color: #15803d; text-transform: uppercase;"><i class="fa fa-tractor"></i> Harvest Readiness</h6>
+                            <p class="small mb-0 mt-2 fw-bold text-secondary lh-lg">{{ crop_guide.harvest_indicators }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
     </div>
-    -->
-    <div class="row g-4">
 
-      <div class="col-xl-4 col-lg-5 d-flex flex-column gap-4">
-
-        <div class="panel panel-accent-green p-4 reveal">
-          <div class="d-flex align-items-center gap-3 mb-3">
-            <div style="width: 44px; height: 44px; background: var(--green-100); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <i class="fa fa-map-marker-alt text-success" style="font-size: 20px;"></i>
-            </div>
-            <div>
-              <div class="advisory-section-title mb-0">Active Plot</div>
-              <h5 class="fw-bold mb-0" style="font-size: 16px; color: var(--slate-900);">
-                {% if active_farm %}
-                  {{ active_farm.village }}, {{ active_farm.district }}
-                {% else %}
-                  {{ location|default:"Kerala Region" }}
-                {% endif %}
-              </h5>
-            </div>
-          </div>
-
-          {% if active_farm and active_farm.latitude and active_farm.longitude %}
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <span class="location-pill"><i class="fa fa-crosshairs" style="font-size: 10px;"></i> {{ active_farm.latitude|floatformat:4 }}, {{ active_farm.longitude|floatformat:4 }}</span>
-          </div>
-          {% endif %}
-
-          {% if all_farms|length > 1 %}
-          <button class="btn w-100 fw-bold" style="background: var(--slate-900); color: #fff; border-radius: 8px; font-size: 13px; padding: 10px;" data-bs-toggle="modal" data-bs-target="#farmSelectorModal">
-            <i class="fa fa-exchange-alt me-2"></i> Switch Land Plot
-          </button>
-          {% else %}
-          <a href="{% url 'farmer_profile' %}" class="btn btn-light w-100 border fw-bold" style="font-size: 13px; border-radius: 8px; color: var(--slate-500);">
-            <i class="fa fa-plus me-1"></i> Register multiple farms
-          </a>
-          {% endif %}
+    <!-- AI RECOMMENDED MARKETPLACE STARTER KITS -->
+    {% if recommended_products %}
+    <div class="row mt-5 mb-4 wow fadeInUp">
+        <div class="col-12">
+            <h4 class="mb-4" style="color: #1e293b; font-weight: 900;"><i class="fa fa-shopping-bag text-warning me-2"></i> Curated Starter Kits for {{ predicted_crop|title }}</h4>
         </div>
 
-        <div class="weather-panel p-4 reveal" style="transition-delay: 0.1s;">
-          <div class="d-flex justify-content-between align-items-start mb-1" style="position: relative; z-index: 2;">
-            <div>
-              <div class="weather-condition mb-1">
-                <i class="fa fa-satellite-dish me-1"></i> Micro-Climate
-              </div>
-              <div style="font-size: 13px; color: rgba(255,255,255,0.55);">
-                {% if active_farm %}{{ active_farm.district }}{% else %}{{ location }}{% endif %}
-              </div>
-            </div>
-            {% if weather %}
-              {% if weather.Source == "Live API" %}
-                <span class="weather-source-badge live"><i class="fa fa-circle" style="font-size: 7px;"></i> Live</span>
-              {% else %}
-                <span class="weather-source-badge"><i class="fa fa-database" style="font-size: 9px;"></i> {{ weather.Source|default:"Estimated" }}</span>
-              {% endif %}
-            {% endif %}
-          </div>
-
-          {% if weather %}
-            <div class="d-flex align-items-end gap-3 mt-3 mb-4" style="position: relative; z-index: 2;">
-              <div>
-                <div class="weather-temp-display">{{ weather.Temperature_C|floatformat:1 }}<span style="font-size: 36px; letter-spacing: 0;">°</span></div>
-                <div class="weather-condition mt-1">Celsius</div>
-              </div>
-              <div style="font-size: 60px; line-height: 1; opacity: 0.9; margin-bottom: 5px;">
-                {% if weather.Temperature_C >= 30 %}
-                  ☀️
-                {% elif weather.Temperature_C >= 20 %}
-                  ⛅
-                {% else %}
-                  🌥️
-                {% endif %}
-              </div>
-            </div>
-
-            <div class="d-flex gap-2" style="position: relative; z-index: 2;">
-              <div class="weather-stat-pill">
-                <div class="weather-stat-value">{{ weather.Humidity_Pct|floatformat:0 }}<span style="font-size: 12px; font-weight: 500;">%</span></div>
-                <div class="weather-stat-label"><i class="fa fa-tint me-1"></i>Humidity</div>
-              </div>
-              <div class="weather-stat-pill">
-                <div class="weather-stat-value">{{ weather.Rainfall_mm|floatformat:0 }}<span style="font-size: 12px; font-weight: 500;">mm</span></div>
-                <div class="weather-stat-label"><i class="fa fa-cloud-rain me-1"></i>Rainfall</div>
-              </div>
-            </div>
-
-            <div style="margin-top: 16px; padding: 10px 14px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 12px; color: rgba(255,255,255,0.75); position: relative; z-index: 2;">
-              <i class="fa fa-lightbulb me-1" style="color: #fde047;"></i>
-              {% if weather.Humidity_Pct >= 80 %}
-                High humidity — monitor for fungal disease pressure on crops.
-              {% elif weather.Humidity_Pct >= 60 %}
-                Moderate humidity — good irrigation conditions.
-              {% else %}
-                Low humidity — consider irrigation scheduling.
-              {% endif %}
-            </div>
-
-          {% else %}
-            <div class="text-center py-4" style="position: relative; z-index: 2;">
-              <i class="fa fa-exclamation-triangle mb-2" style="font-size: 28px; color: rgba(255,255,255,0.5);"></i>
-              <div style="font-size: 13px; color: rgba(255,255,255,0.6);">Weather telemetry unavailable.<br>Ensure farm GPS is set in your profile.</div>
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="panel panel-accent-amber p-4 reveal" style="transition-delay: 0.15s; position: relative;">
-          {% if manual_report and manual_report.request_status == 'COMPLETED' %}
-            <span style="position: absolute; top: 14px; right: 14px; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; background: var(--green-100); color: var(--green-700); border: 1px solid #86efac;">
-              <i class="fa fa-check-circle me-1"></i>Lab Verified
-            </span>
-          {% else %}
-            <span style="position: absolute; top: 14px; right: 14px; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; background: var(--slate-100); color: var(--slate-500); border: 1px solid var(--slate-200);">
-              <i class="fa fa-satellite me-1"></i>API Est.
-            </span>
-          {% endif %}
-
-          <div class="d-flex align-items-center gap-3 mb-4">
-            <div style="width: 44px; height: 44px; background: var(--amber-100); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <i class="fa fa-flask" style="font-size: 20px; color: var(--amber-500);"></i>
-            </div>
-            <div>
-              <div class="advisory-section-title mb-0">Soil Chemistry</div>
-              <h5 class="fw-bold mb-0" style="font-size: 16px;">NPK &amp; pH Analysis</h5>
-            </div>
-          </div>
-
-          {% if soil.found %}
-            <div class="d-flex align-items-center gap-3 mb-4">
-              <div class="ph-badge">
-                <span class="ph-value">{{ soil.pH|default:"7.0"|floatformat:1 }}</span>
-                <span class="ph-label">pH</span>
-              </div>
-              <div style="flex: 1; font-size: 12px; color: var(--slate-500);">
-                {% with ph=soil.pH|default:7.0 %}
-                  {% if ph < 5.5 %}
-                    <i class="fa fa-arrow-down text-danger me-1"></i> Strongly Acidic — consider liming
-                  {% elif ph < 6.5 %}
-                    <i class="fa fa-check text-warning me-1"></i> Mildly Acidic — suitable for most crops
-                  {% elif ph < 7.5 %}
-                    <i class="fa fa-check-circle text-success me-1"></i> Neutral — optimal for most crops
-                  {% else %}
-                    <i class="fa fa-arrow-up text-primary me-1"></i> Alkaline — may restrict micronutrients
-                  {% endif %}
-                {% endwith %}
-              </div>
-            </div>
-
-            <div class="soil-metric-row">
-              <span class="soil-metric-label">Nitrogen (N)</span>
-              <div class="soil-bar-track">
-                <div class="soil-bar-fill bg-success" style="width: min({{ soil.N|default:0 }}%, 100%);"></div>
-              </div>
-              <span class="soil-metric-value">{{ soil.N|default:"0"|floatformat:0 }} <small style="color:var(--slate-400); font-size:10px; font-weight:500;">mg/kg</small></span>
-            </div>
-
-            <div class="soil-metric-row">
-              <span class="soil-metric-label">Phosphorus (P)</span>
-              <div class="soil-bar-track">
-                <div class="soil-bar-fill" style="width: min({{ soil.P|default:0 }}%, 100%); background: var(--sky-500);"></div>
-              </div>
-              <span class="soil-metric-value">{{ soil.P|default:"0"|floatformat:0 }} <small style="color:var(--slate-400); font-size:10px; font-weight:500;">mg/kg</small></span>
-            </div>
-
-            <div class="soil-metric-row">
-              <span class="soil-metric-label">Potassium (K)</span>
-              <div class="soil-bar-track">
-                <div class="soil-bar-fill bg-warning" style="width: min({{ soil.K|default:0 }}%, 100%);"></div>
-              </div>
-              <span class="soil-metric-value">{{ soil.K|default:"0"|floatformat:0 }} <small style="color:var(--slate-400); font-size:10px; font-weight:500;">mg/kg</small></span>
-            </div>
-
-          {% else %}
-            <div class="alert alert-danger py-2 text-center fw-bold" style="font-size: 13px; border-radius: 8px;">
-              <i class="fa fa-times-circle me-1"></i> Soil data unavailable for this location.
-            </div>
-          {% endif %}
-
-          <button class="btn w-100 mt-3 fw-bold" data-bs-toggle="modal" data-bs-target="#manualSoilModal" style="background: var(--green-50); color: var(--green-900); border: 1px solid #bbf7d0; border-radius: 8px; font-size: 13px; padding: 10px;">
-            <i class="fa fa-upload me-2"></i> Upload Lab Report
-          </button>
-        </div>
-
-      </div>
-      <div class="col-xl-8 col-lg-7 d-flex flex-column gap-4">
-
-        {% if ai_result.success %}
-
-        <div class="ai-hero p-4 p-md-5 reveal">
-          <div class="row align-items-end">
-            <div class="col-md-8" style="position: relative; z-index: 2;">
-              <div class="ai-hero-tag">
-                <i class="fa fa-brain"></i> AI Recommendation
-              </div>
-              <div style="font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Best Crop for Your Conditions</div>
-              <div class="ai-crop-name">
-                {{ predicted_crop|capfirst }}
-              </div>
-              <p style="color: rgba(255,255,255,0.8); font-size: 14px; line-height: 1.65; margin-top: 16px; max-width: 90%;">
-                Based on your plot's soil chemistry
-                {% if weather %}({{ weather.Temperature_C|floatformat:0 }}°C, {{ weather.Humidity_Pct|floatformat:0 }}% humidity){% endif %}
-                and NPK profile, <strong style="color: #86efac;">{{ predicted_crop|capfirst }}</strong> is projected to deliver the highest yield and market return this season.
-              </p>
-            </div>
-            <div class="col-md-4 mt-4 mt-md-0 text-center" style="position: relative; z-index: 2;">
-              <div class="ai-confidence-orb">
-                <i class="fa fa-check-circle mb-2" style="font-size: 28px; color: #fde047; display: block;"></i>
-                <div style="font-family: 'DM Serif Display', serif; font-size: 42px; color: #fff; line-height: 1; letter-spacing: -1px;">98.4<span style="font-size: 22px;">%</span></div>
-                <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.5); margin-top: 4px;">Algorithm Match</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {% if weather and soil.found %}
-        <div class="panel p-4 reveal" style="transition-delay: 0.1s;">
-          <div class="advisory-section-title mb-3"><i class="fa fa-database me-2"></i>Prediction Inputs</div>
-          <div class="stat-strip">
-            <div class="stat-strip-item">
-              <div class="stat-strip-value">{{ weather.Temperature_C|floatformat:1 }}°</div>
-              <div class="stat-strip-label">Temp (°C)</div>
-            </div>
-            <div class="stat-strip-item">
-              <div class="stat-strip-value">{{ weather.Humidity_Pct|floatformat:0 }}%</div>
-              <div class="stat-strip-label">Humidity</div>
-            </div>
-            <div class="stat-strip-item">
-              <div class="stat-strip-value">{{ weather.Rainfall_mm|floatformat:0 }}</div>
-              <div class="stat-strip-label">Rain (mm)</div>
-            </div>
-            <div class="stat-strip-item">
-              <div class="stat-strip-value">{{ soil.pH|default:"7.0"|floatformat:1 }}</div>
-              <div class="stat-strip-label">Soil pH</div>
-            </div>
-            <div class="stat-strip-item">
-              <div class="stat-strip-value">{{ soil.N|default:"0"|floatformat:0 }}</div>
-              <div class="stat-strip-label">N mg/kg</div>
-            </div>
-            <div class="stat-strip-item">
-              <div class="stat-strip-value">{{ soil.P|default:"0"|floatformat:0 }}</div>
-              <div class="stat-strip-label">P mg/kg</div>
-            </div>
-            <div class="stat-strip-item">
-              <div class="stat-strip-value">{{ soil.K|default:"0"|floatformat:0 }}</div>
-              <div class="stat-strip-label">K mg/kg</div>
-            </div>
-          </div>
-        </div>
-        {% endif %}
-
-        {% if ranked_predictions %}
-        <div class="panel p-4 reveal" style="transition-delay: 0.15s;">
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <div class="advisory-section-title mb-0"><i class="fa fa-list-ol me-2"></i>Ranked Alternatives</div>
-          </div>
-          <div class="d-flex flex-wrap gap-2">
-            {% for crop in ranked_predictions|slice:"1:8" %}
-              <span class="alt-chip">
-                <span class="rank-num">#{{ forloop.counter|add:1 }}</span>
-                {{ crop|capfirst }}
-              </span>
-            {% empty %}
-              <span class="text-muted fw-bold" style="font-size: 13px;">No viable alternatives found for current conditions.</span>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-        {% if crop_guide %}
-        <div class="panel p-4 reveal" style="transition-delay: 0.2s;">
-          <div class="d-flex align-items-center gap-3 mb-4">
-            <div style="width: 44px; height: 44px; background: var(--green-50); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <i class="fa fa-book-open text-success" style="font-size: 18px;"></i>
-            </div>
-            <div>
-              <div class="advisory-section-title mb-0">Crop Advisory</div>
-              <h5 class="fw-bold mb-0" style="font-size: 16px;">{{ predicted_crop|capfirst }} Growing Guide</h5>
-            </div>
-          </div>
-
-          <div class="row g-3">
-            {% if crop_guide.season %}
-            <div class="col-md-6">
-              <div style="background: var(--slate-50); border-radius: 10px; padding: 14px;">
-                <div class="advisory-section-title"><i class="fa fa-calendar me-1"></i>Season</div>
-                <div style="font-size: 14px; font-weight: 600; color: var(--slate-700);">{{ crop_guide.season }}</div>
-              </div>
-            </div>
-            {% endif %}
-            {% if crop_guide.duration %}
-            <div class="col-md-6">
-              <div style="background: var(--slate-50); border-radius: 10px; padding: 14px;">
-                <div class="advisory-section-title"><i class="fa fa-clock me-1"></i>Duration</div>
-                <div style="font-size: 14px; font-weight: 600; color: var(--slate-700);">{{ crop_guide.duration }}</div>
-              </div>
-            </div>
-            {% endif %}
-            {% if crop_guide.water_requirement %}
-            <div class="col-md-6">
-              <div style="background: var(--sky-100); border-radius: 10px; padding: 14px; border: 1px solid #bae6fd;">
-                <div class="advisory-section-title" style="color: #0369a1;"><i class="fa fa-tint me-1"></i>Water Requirement</div>
-                <div style="font-size: 14px; font-weight: 600; color: var(--slate-700);">{{ crop_guide.water_requirement }}</div>
-              </div>
-            </div>
-            {% endif %}
-            {% if crop_guide.fertilizer %}
-            <div class="col-md-6">
-              <div style="background: var(--amber-100); border-radius: 10px; padding: 14px; border: 1px solid #fde68a;">
-                <div class="advisory-section-title" style="color: #92400e;"><i class="fa fa-flask me-1"></i>Fertilizer</div>
-                <div style="font-size: 14px; font-weight: 600; color: var(--slate-700);">{{ crop_guide.fertilizer }}</div>
-              </div>
-            </div>
-            {% endif %}
-          </div>
-
-          {% if crop_guide.diseases %}
-          <div class="mt-3">
-            <div class="advisory-section-title"><i class="fa fa-bug me-1"></i>Common Diseases / Pests</div>
-            <div class="d-flex flex-wrap">
-              {% for disease in crop_guide.diseases %}
-                <span class="advisory-tag" style="background: #fee2e2; color: #991b1b;">{{ disease }}</span>
-              {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          {% if crop_guide.tips %}
-          <div class="mt-3 p-3 rounded" style="background: var(--green-50); border: 1px solid #bbf7d0;">
-            <div class="advisory-section-title" style="color: var(--green-700);"><i class="fa fa-lightbulb me-1"></i>Expert Tips</div>
-            <p style="font-size: 13px; color: var(--green-900); margin: 0; line-height: 1.6;">{{ crop_guide.tips }}</p>
-          </div>
-          {% endif %}
-        </div>
-        {% endif %}
-
-        {% if recommended_products %}
-        <div class="reveal" style="transition-delay: 0.25s;">
-          <div class="section-divider">
-            <h6><i class="fa fa-shopping-bag me-2"></i>Marketplace Matches for {{ predicted_crop|capfirst }}</h6>
-          </div>
-          <div class="d-flex justify-content-end mb-3">
-            <a href="{% url 'farmer_seller_list' %}" class="text-decoration-none" style="font-size: 13px; font-weight: 700; color: var(--green-700);">
-              View All Sellers <i class="fa fa-arrow-right ms-1"></i>
-            </a>
-          </div>
-          <div class="product-grid">
+        <div class="row g-4">
             {% for product in recommended_products %}
-            <div class="product-card">
-              {% if product.image %}
-                <img src="{{ product.image.url }}" class="product-img" alt="{{ product.title }}">
-              {% else %}
-                <div class="product-img-placeholder">
-                  <i class="fa fa-box-open fa-2x"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-widget p-0 overflow-hidden d-flex flex-column" style="cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform='translateY(0)'">
+                    
+                    <div class="position-relative" style="height: 180px; background: #f1f5f9;">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                                <i class="fa fa-seedling text-success opacity-50" style="font-size: 40px;"></i>
+                            </div>
+                        {% endif %}
+                        <span class="position-absolute top-0 end-0 bg-warning text-dark fw-bold badge m-3 shadow-sm px-3 py-2 rounded-pill"><i class="fa fa-bolt"></i> AI Match</span>
+                    </div>
+
+                    <div class="card-body p-4 d-flex flex-column flex-grow-1">
+                        <h6 class="fw-bolder text-dark mb-1 fs-5">{{ product.title|truncatechars:25 }}</h6>
+                        <small class="text-muted fw-bold mb-3"><i class="fa fa-store me-1"></i> {{ product.listed_by.username }}</small>
+                        
+                        <div class="mt-auto d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                            <span class="fs-4 fw-black text-success" style="font-weight: 900;">₹{{ product.price }}</span>
+                            <span class="badge bg-light text-secondary border px-2 py-1">{{ product.get_unit_display }}</span>
+                        </div>
+
+                        <a href="{% url 'farmer_checkout' product.id %}" class="btn btn-success w-100 fw-bold rounded-3 py-2 text-uppercase" style="letter-spacing: 1px;">Buy Now</a>
+                    </div>
                 </div>
-              {% endif %}
-              <div class="product-body">
-                <div class="product-category-tag">{{ product.get_category_display }}</div>
-                <div class="product-title" title="{{ product.title }}">{{ product.title }}</div>
-                <div class="product-seller">
-                  <i class="fa fa-store text-success me-1"></i>
-                  {{ product.listed_by.seller_profile.shop_name|default:product.listed_by.username }}
-                </div>
-                <div class="mt-auto">
-                  <div class="product-price">₹{{ product.price }}
-                    <span class="product-unit">/{{ product.unit_of_measure }}</span>
-                  </div>
-                  <a href="{% url 'farmer_input_detail' product.id %}" class="btn-buy">
-                    Buy Now
-                  </a>
-                </div>
-              </div>
             </div>
             {% endfor %}
-          </div>
         </div>
-        {% endif %}
-
-        {% else %}
-        <div class="panel panel-accent-red p-5 text-center reveal">
-          <div style="font-size: 56px; margin-bottom: 16px;">⚠️</div>
-          <h3 class="fw-bold mb-2" style="font-family: 'DM Serif Display', serif; color: var(--slate-900);">Analysis Unavailable</h3>
-          <p class="text-muted mb-4" style="max-width: 420px; margin: 0 auto 20px;">{{ ai_result.status|default:"Please ensure your farm's GPS coordinates are set in your profile and try again." }}</p>
-          <a href="{% url 'farmer_profile' %}" class="btn btn-success fw-bold px-4">
-            <i class="fa fa-map-marked-alt me-2"></i> Update Farm Location
-          </a>
-        </div>
-        {% endif %}
-
-      </div>
-      </div>
     </div>
-  <div class="modal fade" id="farmSelectorModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header-green">
-          <h5 class="fw-bold m-0"><i class="fa fa-map-marked-alt me-2"></i> Select Target Plot</h5>
-          <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4" style="background: var(--slate-50);">
-          <p class="text-muted mb-3" style="font-size: 13px;">
-            Selecting a plot recalibrates the AI with that location's exact coordinates.
-          </p>
-          {% for farm in all_farms %}
-            <button class="farm-select-btn {% if active_farm.addr_id == farm.addr_id %}active{% endif %}" onclick="triggerFarmRecalibration('{{ farm.addr_id }}')">
-              <div>
-                <div class="fw-bold" style="font-size: 15px;">{{ farm.village }}, {{ farm.district }}</div>
-                <div class="text-muted" style="font-size: 11px; margin-top: 2px;">
-                  <i class="fa fa-crosshairs me-1"></i> {{ farm.latitude|floatformat:4 }}, {{ farm.longitude|floatformat:4 }}
-                </div>
-              </div>
-              {% if active_farm.addr_id == farm.addr_id %}
-                <i class="fa fa-check-circle text-success fa-lg"></i>
-              {% else %}
-                <i class="fa fa-chevron-right text-muted"></i>
-              {% endif %}
-            </button>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
+    {% endif %}
 
+  </div> 
 
-  <div id="aiLoadingOverlay">
-    <span class="loading-leaf">🌿</span>
-    <h3 class="fw-bold mb-2" style="font-family: 'DM Serif Display', serif; color: var(--green-900);">Recalibrating AI Models</h3>
-    <p class="text-muted" style="max-width: 380px; font-size: 14px;">
-      Fetching real-time meteorological telemetry and establishing localized soil parameters for your selected plot…
-    </p>
-  </div>
-
-
-  <div class="modal fade" id="manualSoilModal" tabindex="-1" aria-hidden="true">
+  <!-- UNIFIED MANUAL OVERRIDE MODAL -->
+  <div class="modal fade" id="unifiedOverrideModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header-green d-flex align-items-center justify-content-between">
-          <h5 class="fw-bold m-0"><i class="fa fa-flask me-2"></i> Submit Official Soil Data</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header bg-success text-white py-3">
+          <h5 class="modal-title fw-bold"><i class="fa fa-flask me-2"></i> Submit Physical Lab Test</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-
         <form action="{% url 'submit_manual_soil' %}" method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          <div class="modal-body p-4 bg-white">
-            <div class="alert alert-warning fw-bold mb-4" style="font-size: 13px; border-radius: 8px;">
-              <i class="fa fa-info-circle me-1"></i> Submitted lab data requires Admin approval before it overrides the AI models.
-            </div>
-
-            <div class="row g-4">
-              
-              <div class="col-md-12">
-                <label class="fw-bold text-dark mb-2" style="font-size: 14px;">
-                  <i class="fa fa-map-marker-alt text-success me-2"></i> 1. Select Farm Location <span class="text-danger">*</span>
-                </label>
-                <div class="bg-light p-2 border rounded-3" style="border-color: #1b5e20 !important;">
-                    <select name="address_id" class="form-select form-select-sm border-0 bg-transparent fw-bold text-dark shadow-none" required style="cursor: pointer;">
-                        <option value="" disabled selected>-- Click to choose a registered farm plot --</option>
-                        {% for farm in all_farms %}
-                            <option value="{{ farm.addr_id }}">
-                                📍 {{ farm.village|title }}, {{ farm.district|title }} [PIN: {{ farm.pincode }}]
-                            </option>
-                        {% empty %}
-                            <option value="" disabled>⚠️ No farms registered. Please add a farm profile first.</option>
-                        {% endfor %}
-                    </select>
+            {% csrf_token %}
+            <div class="modal-body p-4 bg-light">
+                <div class="alert alert-warning fw-bold py-2 shadow-sm border-0" style="font-size: 13px;">
+                    <i class="fa fa-shield-alt me-1"></i> Requires admin validation before overriding active AI datasets.
                 </div>
-              </div>
-
-              <div class="col-md-12 border-top pt-4">
-                <label class="fw-bold text-dark mb-2" style="font-size: 14px;">
-                  <i class="fa fa-file-pdf text-danger me-2"></i> 2. Upload Official Lab Report (PDF / Image) <span class="text-danger">*</span>
-                </label>
                 
-                <label class="file-upload-zone w-100" for="fileInput" style="margin: 0; cursor: pointer;">
-                  <i class="fa fa-cloud-upload-alt text-success mb-2" style="font-size: 36px; display: block;"></i>
-                  <h6 class="fw-bold text-dark mb-1">Click to browse or drag file here</h6>
-                  <p class="text-muted mb-3" style="font-size: 13px;">Attach the official report from your soil testing facility.</p>
-                  
-                  <input type="file" id="fileInput" name="report_file" class="form-control form-control-sm mx-auto" accept=".pdf,.jpg,.jpeg,.png" style="max-width: 300px;" required onclick="event.stopPropagation();">
-                </label>
-              </div>
+                <div class="row g-4 mt-1">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Land Area (Acres) *</label>
+                        <input type="number" step="0.1" name="land_area" class="modal-input" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Previous Crop *</label>
+                        <input type="text" name="previous_crop" class="modal-input" placeholder="e.g. Maize" required>
+                    </div>
+                    
+                    <div class="col-12 mt-4">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Upload Official PDF/Image Report *</label>
+                        <input type="file" name="report_file" class="modal-input bg-white" required accept=".pdf,.jpg,.jpeg,.png">
+                    </div>
 
-              <div class="col-md-12 border-top pt-4">
-                <label class="fw-bold text-dark mb-3" style="font-size: 14px;">
-                  <i class="fa fa-keyboard text-primary me-2"></i> 3. Manual Data Entry <span class="text-muted fw-normal">(Optional)</span>
-                </label>
-                
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Previous Crop Cultivated</label>
-                        <input type="text" name="previous_crop" class="form-control form-control-sm" placeholder="e.g., Rice, Wheat (Optional)">
+                    <div class="col-12 mt-4">
+                        <div class="p-4 bg-white rounded-3 border">
+                            <label class="form-label fw-bold text-success small text-uppercase mb-3"><i class="fa fa-keyboard"></i> Digitize Test Results (Optional)</label>
+                            <div class="row g-3">
+                                <div class="col-md-3 col-6"><label style="font-size: 11px; font-weight:bold; color: #64748b;">pH Level</label><input type="number" step="0.1" name="ph" class="modal-input"></div>
+                                <div class="col-md-3 col-6"><label style="font-size: 11px; font-weight:bold; color: #64748b;">Nitrogen (N)</label><input type="number" step="0.1" name="n" class="modal-input"></div>
+                                <div class="col-md-3 col-6"><label style="font-size: 11px; font-weight:bold; color: #64748b;">Phosphorus (P)</label><input type="number" step="0.1" name="p" class="modal-input"></div>
+                                <div class="col-md-3 col-6"><label style="font-size: 11px; font-weight:bold; color: #64748b;">Potassium (K)</label><input type="number" step="0.1" name="k" class="modal-input"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="bg-light p-3 border rounded-3">
-                  <div class="row g-3">
-                    <div class="col-md-3 col-6">
-                      <label style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">pH</label>
-                      <input type="number" step="0.1" name="ph" class="form-control" placeholder="e.g. 6.5">
-                    </div>
-                    <div class="col-md-3 col-6">
-                      <label style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Nitrogen (N)</label>
-                      <input type="number" step="0.1" name="n" class="form-control" placeholder="mg/kg">
-                    </div>
-                    <div class="col-md-3 col-6">
-                      <label style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Phosphorus (P)</label>
-                      <input type="number" step="0.1" name="p" class="form-control" placeholder="mg/kg">
-                    </div>
-                    <div class="col-md-3 col-6">
-                      <label style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Potassium (K)</label>
-                      <input type="number" step="0.1" name="k" class="form-control" placeholder="mg/kg">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
             </div>
-          </div>
-          <div class="modal-footer border-0 p-4 bg-light" style="border-bottom-left-radius: 18px; border-bottom-right-radius: 18px;">
-            <button type="button" class="btn btn-light fw-bold px-4 border" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success fw-bold px-5 shadow-sm">
-              <i class="fa fa-paper-plane me-2"></i> Submit for Review
-            </button>
-          </div>
+            <div class="modal-footer border-0 p-4 bg-light">
+                <button type="button" class="btn btn-secondary fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success rounded-pill fw-bold px-5 shadow-sm">Submit to Laboratory</button>
+            </div>
         </form>
       </div>
     </div>
-</div>
-
+  </div>
 
   {% include 'footer.html' %}
 
   <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
   <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-
-  <script>
-    /* ── Farm Plot Recalibration ── */
-    function triggerFarmRecalibration(farmId) {
-      const modalEl = document.getElementById('farmSelectorModal');
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
-
-      document.getElementById('aiLoadingOverlay').style.display = 'flex';
-
-      setTimeout(function() {
-        window.location.href = "?farm_id=" + farmId;
-      }, 300);
-    }
-
-    /* ── Scroll Reveal ── */
-    (function() {
-      const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(e) {
-          if (e.isIntersecting) {
-            e.target.classList.add('visible');
-            observer.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.08 });
-
-      document.querySelectorAll('.reveal').forEach(function(el) {
-        observer.observe(el);
-      });
-    })();
-
-    /* ── Auto-dismiss alerts after 6s ── */
-    setTimeout(function() {
-      document.querySelectorAll('.alert').forEach(function(el) {
-        el.style.transition = 'opacity 0.6s';
-        el.style.opacity = '0';
-        setTimeout(function() { el.remove(); }, 600);
-      });
-    }, 6000);
-
-    /* ── Soil bars animate on load ── */
-    window.addEventListener('load', function() {
-      document.querySelectorAll('.soil-bar-fill').forEach(function(bar) {
-        const target = bar.style.width;
-        bar.style.width = '0%';
-        setTimeout(function() { bar.style.width = target; }, 200);
-      });
-    });
-  </script>
+  <script src="{% static 'assets/js/owl-carousel.js' %}"></script>
+  <script src="{% static 'assets/js/animation.js' %}"></script>
+  <script src="{% static 'assets/js/templatemo-custom.js' %}"></script>
+  
 </body>
 </html>

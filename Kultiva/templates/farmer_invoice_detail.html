@@ -19,7 +19,7 @@
         .invoice-box { max-width: 850px; margin: 0 auto; background: var(--surface); padding: 48px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); position: relative; }
         .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--primary); padding-bottom: 24px; margin-bottom: 32px; }
         .brand-name { font-size: 24px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px; }
-        .invoice-title { font-size: 28px; font-weight: 700; color: var(--text-main); text-transform: uppercase; display: flex; align-items: center; gap: 15px; }
+        .invoice-title { font-size: 28px; font-weight: 700; color: var(--text-main); text-transform: uppercase; }
         .invoice-meta { margin-top: 8px; font-size: 13px; color: var(--text-muted); line-height: 1.6; text-align: right; }
         
         .addresses { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
@@ -58,12 +58,7 @@
                 <div style="color: var(--text-muted);">Empowering Agricultural Commerce</div>
             </div>
             <div style="text-align: right;">
-                <div class="invoice-title">
-                    Tax Invoice
-                    {% if order.status == 'REFUNDED' %}
-                        <span style="font-size: 12px; background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 20px; border: 1px solid #ffcdd2; letter-spacing: 1px;">REFUNDED</span>
-                    {% endif %}
-                </div>
+                <div class="invoice-title">Tax Invoice</div>
                 <div class="invoice-meta">
                     Invoice No: <span>KUL-INV-{{ order.id }}</span><br>
                     Order ID: <span>{{ order.order_id }}</span><br>
@@ -85,16 +80,7 @@
                 <p><strong>{{ order.farmer.username }}</strong></p>
                 <p>{{ farmer_address.village }}, {{ farmer_address.district }}</p>
                 <p>{{ farmer_address.state }} - {{ farmer_address.pincode }}</p>
-                
-                <p>Payment: <strong>{{ order.get_payment_method_display }} 
-                    {% if order.status == 'REFUNDED' %}
-                        <span style="color: #c62828;">(REFUNDED)</span>
-                    {% elif order.status == 'CANCELLED' %}
-                        <span style="color: #64748b;">(CANCELLED)</span>
-                    {% else %}
-                        <span style="color: var(--primary);">(PAID)</span>
-                    {% endif %}
-                </strong></p>
+                <p>Payment: <strong>{{ order.get_payment_method_display }} (PAID)</strong></p>
             </div>
         </div>
 
@@ -119,8 +105,7 @@
                     <td class="col-num">{{ order.quantity|floatformat:0 }}</td>
                     <td class="col-num">₹{{ taxable_value }}</td>
                     <td class="col-num">₹{{ cgst|add:sgst }}</td>
-                    <td class="col-num">₹{{ order.total_amount|add:"-20" }}</td> 
-                </tr>
+                    <td class="col-num">₹{{ order.total_amount|add:"-20" }}</td> </tr>
             </tbody>
         </table>
 

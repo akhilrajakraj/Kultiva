@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Kultiva - My Bids & Negotiations</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid #0288d1; /* Buyer Blue */
+        }
+
+        /* Enterprise Tab Styling */
+        .nav-tabs { border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #64748b;
+            font-weight: bold;
+            padding: 12px 25px;
+            font-size: 15px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            background: transparent;
+        }
+        .nav-tabs .nav-link:hover { color: #0288d1; }
+        .nav-tabs .nav-link.active {
+            color: #0288d1;
+            border-bottom: 3px solid #0288d1;
+            background: transparent;
+        }
+
+        /* Table Styling */
+        .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 13px; border-top: none; }
+        .table-custom td { vertical-align: middle; color: #555; }
+        .crop-title { font-weight: bold; color: #0288d1; font-size: 15px; text-decoration: none; }
+        
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .bg-pending { background: rgba(251, 192, 45, 0.2); color: #f57f17; border: 1px solid #ffecb3; }
+        .bg-accepted { background: rgba(46, 125, 50, 0.2); color: #2e7d32; border: 1px solid #c5e1a5; }
+        .bg-rejected { background: rgba(211, 47, 47, 0.1); color: #d32f2f; border: 1px solid #ffcdd2; }
+    </style>
+</head>
+<body>
+
+    {% include 'buyer_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 style="color: #1e293b; font-weight: bold;"><i class="fa fa-briefcase text-primary"></i> Negotiation Hub</h3>
+                <span class="text-muted"><i class="fa fa-line-chart"></i> Active Trades: {{ sent_bids.count|add:received_offers.count }}</span>
+            </div>
+
+            <ul class="nav nav-tabs" id="negotiationTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="sent-tab" data-bs-toggle="tab" data-bs-target="#sent" type="button" role="tab">
+                        <i class="fa fa-paper-plane"></i> Bids I Sent ({{ sent_bids.count }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="received-tab" data-bs-toggle="tab" data-bs-target="#received" type="button" role="tab">
+                        <i class="fa fa-inbox"></i> Offers Received ({{ received_offers.count }})
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="negotiationTabsContent">
+                
+                <div class="tab-pane fade show active" id="sent" role="tabpanel">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover table-custom">
+                            <thead style="background: #f8f9fa;">
+                                <tr>
+                                    <th>Commodity</th>
+                                    <th>Target Vendor (Farmer)</th>
+                                    <th>My Proposed Rate</th>
+                                    <th>Date Sent</th>
+                                    <th>Current Status</th>
+                                    <th class="text-center">View</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bid in sent_bids %}
+                                <tr>
+                                    <td><span class="crop-title">{{ bid.listing.title }}</span><br><small class="text-muted">Qty: {{ bid.requested_quantity }} {{ bid.listing.unit_of_measure }}</small></td>
+                                    <td><strong>{{ bid.farmer.username }}</strong></td>
+                                    <td style="font-weight: bold; color: #1b5e20;">₹{{ bid.proposed_price }}</td>
+                                    <td>{{ bid.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if bid.status == 'PENDING' %}
+                                            <span class="badge-status bg-pending"><i class="fa fa-clock-o"></i> Awaiting Farmer</span>
+                                        {% elif bid.status == 'ACCEPTED' %}
+                                            <span class="badge-status bg-accepted"><i class="fa fa-check"></i> Accepted</span>
+                                        {% else %}
+                                            <span class="badge-status bg-rejected"><i class="fa fa-times"></i> {{ bid.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'buyer_proposal_detail' bid.id %}" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 35px; height: 35px;" title="View Details">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa fa-paper-plane-o fa-3x mb-3" style="color: #ccc;"></i><br>You haven't sent any active bids.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="received" role="tabpanel">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover table-custom">
+                            <thead style="background: #e3f2fd;">
+                                <tr>
+                                    <th>Commodity</th>
+                                    <th>Offering Farmer</th>
+                                    <th>Asking Rate</th>
+                                    <th>Date Received</th>
+                                    <th>Action Required</th>
+                                    <th class="text-center">View</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for offer in received_offers %}
+                                <tr>
+                                    <td><span class="crop-title">{{ offer.listing.title }}</span></td>
+                                    <td><strong>{{ offer.farmer.username }}</strong></td>
+                                    <td style="font-weight: bold; color: #1b5e20;">₹{{ offer.proposed_price }}</td>
+                                    <td>{{ offer.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if offer.status == 'PENDING' %}
+                                            <span class="badge-status bg-pending"><i class="fa fa-exclamation-circle"></i> Needs Your Review</span>
+                                        {% else %}
+                                            <span class="badge-status bg-accepted">{{ offer.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'buyer_proposal_detail' offer.id %}" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 35px; height: 35px;" title="Review Offer">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa fa-inbox fa-3x mb-3" style="color: #ccc;"></i><br>No inbound offers from farmers.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

@@ -13,9 +13,9 @@
 
     <style>
         :root {
-            --primary: #1b5e20;
-            --secondary: #2e7d32;
-            --accent: #f9a825;
+            --primary: #1b5e20; /* Dark Green */
+            --secondary: #2e7d32; /* Medium Green */
+            --accent: #f9a825; /* Harvest Gold */
             --bg-gray: #f3f4f6;
             --text-dark: #1f2937;
             --text-muted: #6b7280;
@@ -29,13 +29,13 @@
             color: var(--text-dark);
         }
 
+        /* --- Sidebar Styles --- */
         .sidebar-card {
             background: #fff;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
         .filter-group-title {
             font-size: 0.85rem;
@@ -43,19 +43,18 @@
             letter-spacing: 0.05em;
             color: var(--text-muted);
             font-weight: 700;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
+            margin-bottom: 12px;
         }
         .custom-checkbox .form-check-input:checked {
             background-color: var(--primary);
             border-color: var(--primary);
         }
 
+        /* --- Product Card Industrial Style --- */
         .product-card {
             background: #fff;
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 8px;
             transition: transform 0.2s, box-shadow 0.2s;
             height: 100%;
             display: flex;
@@ -66,51 +65,54 @@
             color: inherit;
         }
         .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             border-color: #a3d9a5;
         }
 
+        /* Image Section */
         .img-container {
-            height: 220px;
+            height: 200px;
             background: #f9fafb;
             position: relative;
             overflow: hidden;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
         }
         .img-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s ease;
+            transition: transform 0.4s;
         }
         .product-card:hover .img-container img {
-            transform: scale(1.08);
+            transform: scale(1.05);
         }
 
+        /* Badges */
         .badge-overlay {
             position: absolute;
-            top: 12px;
-            left: 12px;
+            top: 10px;
+            left: 10px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
             z-index: 10;
         }
         .badge-custom {
             font-size: 0.7rem;
-            font-weight: 700;
-            padding: 5px 10px;
-            border-radius: 6px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .badge-organic { background: var(--primary); color: white; }
         .badge-grade { background: var(--accent); color: #000; }
 
+        /* Card Content */
         .card-body-custom {
-            padding: 20px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
@@ -120,51 +122,55 @@
             justify-content: space-between;
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-bottom: 8px;
-            font-weight: 600;
+            margin-bottom: 6px;
         }
         .product-title {
-            font-size: 1.1rem;
-            font-weight: 800;
+            font-size: 1rem;
+            font-weight: 700;
             color: var(--text-dark);
-            margin-bottom: 6px;
-            line-height: 1.3;
+            margin-bottom: 4px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         .farm-location {
             font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
+        /* Specs Grid within Card */
         .specs-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
             background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #f1f1f1;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 12px;
         }
-        .spec-item { font-size: 0.8rem; }
-        .spec-label { color: #888; display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;}
-        .spec-val { font-weight: 700; color: var(--primary); }
+        .spec-item { font-size: 0.75rem; }
+        .spec-label { color: var(--text-muted); display: block; font-size: 0.65rem; }
+        .spec-val { font-weight: 600; color: var(--text-dark); }
 
+        /* Price Section */
         .price-section {
             margin-top: auto;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
         }
         .price-main {
-            font-size: 1.4rem;
-            font-weight: 900;
-            color: var(--text-dark);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
         }
         .unit-label {
             font-size: 0.85rem;
@@ -173,16 +179,17 @@
         }
         .stock-tag {
             font-size: 0.75rem;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 50px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
-        .stock-ok { color: #155724; background: #c3e6cb; }
-        .stock-low { color: #721c24; background: #f5c6cb; }
+        .stock-ok { color: var(--primary); background: #e8f5e9; }
+        .stock-low { color: #c62828; background: #ffebee; }
 
+        /* Pagination & Search */
         .search-container { position: relative; }
-        .search-container input { padding-left: 45px; border-radius: 50px; font-weight: 500; }
-        .search-icon { position: absolute; left: 18px; top: 12px; color: #888; }
+        .search-container input { padding-left: 40px; border-radius: 50px; }
+        .search-icon { position: absolute; left: 15px; top: 12px; color: #aaa; }
     </style>
 </head>
 <body>
@@ -193,23 +200,23 @@
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <h2 class="fw-bold text-dark mb-1">Procurement Marketplace</h2>
-                <p class="text-muted mb-0 small fw-bold">
-                    <i class="fa fa-globe text-success"></i> Direct B2B Procurement &bull; 
-                    <span class="text-dark">{{ products.paginator.count }} Active Harvests</span>
+                <p class="text-muted mb-0 small">
+                    <i class="fa fa-globe"></i> Direct from verified Kultiva farmers &bull; 
+                    <span class="text-success">{{ products.paginator.count }} Active Harvests</span>
                 </p>
             </div>
             <div class="col-lg-6 mt-3 mt-lg-0">
                 <form method="GET" action="{% url 'buyer_marketplace' %}" class="d-flex gap-2">
                     <div class="search-container flex-grow-1">
                         <i class="fa fa-search search-icon"></i>
-                        <input type="text" name="q" class="form-control border-success" placeholder="Search crop name, variety, or origin..." value="{{ request.GET.q }}">
+                        <input type="text" name="q" class="form-control" placeholder="Search crop name, variety, or origin district..." value="{{ request.GET.q }}">
                     </div>
-                    <select class="form-select w-auto fw-bold text-success border-success" name="sort" style="border-radius: 50px;">
-                        <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                    <select class="form-select w-auto" name="sort">
+                        <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest First</option>
                         <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
                         <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
                     </select>
-                    <button type="submit" class="btn btn-success fw-bold" style="border-radius: 50px; padding: 0 25px;">Search</button>
+                    <button type="submit" class="btn btn-success fw-bold">Go</button>
                 </form>
             </div>
         </div>
@@ -221,17 +228,16 @@
             <div class="col-lg-3">
                 <form method="GET" id="filterForm">
                     <input type="hidden" name="q" value="{{ request.GET.q }}">
-                    <input type="hidden" name="sort" value="{{ request.GET.sort }}">
 
                     <div class="sidebar-card">
-                        <div class="filter-group-title"><i class="fa fa-list"></i> Harvest Categories</div>
-                        <div class="overflow-auto" style="max-height: 350px; padding-right: 10px;">
+                        <div class="filter-group-title">Harvest Categories</div>
+                        <div class="overflow-auto" style="max-height: 350px;">
                             {% for cat_code, cat_name in category_choices %}
                                 {% if cat_code in 'GRAINS,VEGETABLES,FRUITS,CASH_CROPS,SPICES' %}
-                                <div class="form-check custom-checkbox mb-3">
+                                <div class="form-check custom-checkbox mb-2">
                                     <input class="form-check-input" type="checkbox" name="category" value="{{ cat_code }}" id="cat_{{ cat_code }}" 
-                                        {% if cat_code in selected_categories %}checked{% endif %} onchange="document.getElementById('filterForm').submit();">
-                                    <label class="form-check-label fw-bold text-dark" style="font-size: 0.9rem;" for="cat_{{ cat_code }}">
+                                        {% if cat_code in selected_categories %}checked{% endif %}>
+                                    <label class="form-check-label small fw-bold text-dark" for="cat_{{ cat_code }}">
                                         {{ cat_name }}
                                     </label>
                                 </div>
@@ -241,17 +247,16 @@
                     </div>
 
                     <div class="sidebar-card">
-                        <div class="filter-group-title"><i class="fa fa-shield"></i> Quality Assurance</div>
-                        <div class="form-check form-switch mt-3">
-                            <input class="form-check-input" type="checkbox" name="organic" id="organicCheck" value="true" {% if request.GET.organic %}checked{% endif %} onchange="document.getElementById('filterForm').submit();" style="transform: scale(1.2); margin-top: 5px;">
-                            <label class="form-check-label fw-bold text-success ms-2" for="organicCheck" style="font-size: 0.9rem;">Organic Certified Only</label>
+                        <div class="filter-group-title">Quality Assurance</div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="organic" id="organicCheck" value="true" {% if request.GET.organic %}checked{% endif %}>
+                            <label class="form-check-label small fw-bold text-success" for="organicCheck">Organic Certified Only</label>
                         </div>
                     </div>
 
+                    <button type="submit" class="btn btn-outline-dark w-100 btn-sm fw-bold"><i class="fa fa-filter"></i> Apply Filters</button>
                     {% if request.GET %}
-                        <a href="{% url 'buyer_marketplace' %}" class="btn btn-outline-danger w-100 btn-sm mt-2 fw-bold" style="border-radius: 50px;">
-                            <i class="fa fa-times"></i> Clear All Filters
-                        </a>
+                        <a href="{% url 'buyer_marketplace' %}" class="btn btn-link text-danger w-100 btn-sm mt-2" style="text-decoration: none;">Clear All</a>
                     {% endif %}
                 </form>
             </div>
@@ -278,7 +283,7 @@
                                     <div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
                                         <div class="text-center">
                                             <i class="fa fa-camera fa-2x mb-2 opacity-25"></i>
-                                            <div class="small fw-bold">No Image</div>
+                                            <div class="small">No Image</div>
                                         </div>
                                     </div>
                                 {% endif %}
@@ -292,7 +297,7 @@
 
                                 <h3 class="product-title">{{ item.title }}</h3>
                                 {% if item.variety_or_brand %}
-                                    <div class="small text-muted mb-2 fw-bold"><i class="fa fa-tag text-success"></i> {{ item.variety_or_brand }}</div>
+                                    <div class="small text-muted mb-2">Variety: {{ item.variety_or_brand }}</div>
                                 {% endif %}
 
                                 <div class="farm-location">
@@ -309,11 +314,11 @@
                                 <div class="specs-grid">
                                     <div class="spec-item">
                                         <span class="spec-label">MOQ</span>
-                                        <span class="spec-val text-dark">{{ item.min_order_quantity|floatformat:0 }} {{ item.unit_of_measure }}</span>
+                                        <span class="spec-val">{{ item.min_order_quantity|floatformat:0 }} {{ item.unit_of_measure }}</span>
                                     </div>
                                     <div class="spec-item">
-                                        <span class="spec-label">Unreserved</span>
-                                        <span class="spec-val">{{ item.unreserved_stock|floatformat:0 }} {{ item.unit_of_measure }}</span>
+                                        <span class="spec-label">Available</span>
+                                        <span class="spec-val">{{ item.available_stock|floatformat:0 }} {{ item.unit_of_measure }}</span>
                                     </div>
                                 </div>
 
@@ -322,21 +327,21 @@
                                         <div class="price-main">₹{{ item.price }}</div>
                                         <span class="unit-label">per {{ item.unit_of_measure }}</span>
                                     </div>
-                                    {% if item.unreserved_stock > 0 %}
-                                        <span class="stock-tag stock-ok">Available</span>
+                                    {% if item.available_stock > 0 %}
+                                        <span class="stock-tag stock-ok">In Stock</span>
                                     {% else %}
-                                        <span class="stock-tag stock-low">Fully Reserved</span>
+                                        <span class="stock-tag stock-low">Sold Out</span>
                                     {% endif %}
                                 </div>
                             </div>
                         </a>
                     </div>
                     {% empty %}
-                    <div class="col-12 text-center py-5 bg-white rounded border shadow-sm">
-                        <i class="fa fa-search fa-3x mb-3 text-muted opacity-50"></i>
+                    <div class="col-12 text-center py-5 bg-white rounded border">
+                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty" width="80" class="mb-3 opacity-50">
                         <h4 class="text-dark fw-bold">No Harvests Found</h4>
-                        <p class="text-muted">Try adjusting your filters or searching for a different crop.</p>
-                        <a href="{% url 'buyer_marketplace' %}" class="btn btn-outline-success fw-bold rounded-pill mt-2 px-4">Clear All Filters</a>
+                        <p class="text-muted">Try adjusting your filters or search for a different crop.</p>
+                        <a href="{% url 'buyer_marketplace' %}" class="btn btn-primary btn-sm mt-2">Clear Filters</a>
                     </div>
                     {% endfor %}
                 </div>
@@ -345,13 +350,13 @@
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         {% if products.has_previous %}
-                            <li class="page-item"><a class="page-link text-success fw-bold" href="?page={{ products.previous_page_number }}&q={{ request.GET.q }}&sort={{ request.GET.sort }}">&laquo; Prev</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}&q={{ request.GET.q }}&sort={{ request.GET.sort }}">&laquo;</a></li>
                         {% endif %}
                         
-                        <li class="page-item disabled"><span class="page-link text-dark fw-bold">Page {{ products.number }} of {{ products.paginator.num_pages }}</span></li>
+                        <li class="page-item disabled"><span class="page-link">Page {{ products.number }} of {{ products.paginator.num_pages }}</span></li>
                         
                         {% if products.has_next %}
-                            <li class="page-item"><a class="page-link text-success fw-bold" href="?page={{ products.next_page_number }}&q={{ request.GET.q }}&sort={{ request.GET.sort }}">Next &raquo;</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}&q={{ request.GET.q }}&sort={{ request.GET.sort }}">&raquo;</a></li>
                         {% endif %}
                     </ul>
                 </nav>

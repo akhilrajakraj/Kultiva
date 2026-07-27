@@ -1,0 +1,442 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva - My Profile</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid #2e7d32;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #1b5e20;
+            font-weight: bold;
+            border-bottom: 2px solid #fbc02d;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            background: transparent;
+            padding: 10px 0;
+            outline: none;
+            transition: 0.3s;
+        }
+        .form-control-custom:focus { border-bottom-color: #fbc02d; }
+        
+        .form-control-custom[readonly] {
+            color: #888;
+            border-bottom: 2px dashed #ddd;
+            background-color: rgba(0,0,0,0.02);
+            cursor: not-allowed;
+        }
+
+        .btn-submit {
+            background-color: #1b5e20;
+            color: white;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-submit:hover { background-color: #fbc02d; color: #1b5e20; }
+        
+        .farm-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            background: #ffffff;
+            transition: 0.3s;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .farm-card:hover {
+            border-color: #2e7d32;
+            box-shadow: 0 5px 15px rgba(46,125,50,0.1);
+            transform: translateY(-3px);
+        }
+        
+        .add-farm-card {
+            border: 2px dashed #2e7d32;
+            background: rgba(46, 125, 50, 0.05);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #2e7d32;
+            text-align: center;
+        }
+        .add-farm-card:hover { background: rgba(46, 125, 50, 0.1); }
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container pb-5 wow fadeInUp">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3">
+                            <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="form-card mt-4">
+                    <h5 class="section-title"><i class="fa fa-user"></i> Personal Account Details</h5>
+                    
+                    <form action="{% url 'farmer_profile' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_profile">
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="fw-bold text-muted">Full Name</label>
+                                <input type="text" name="username" class="form-control-custom" value="{{ request.user.username }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="fw-bold text-muted">Phone Number</label>
+                                <input type="tel" name="phone" class="form-control-custom numeric-only" value="{{ request.user.phone_number }}" required pattern="[0-9]{10}" maxlength="10">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="fw-bold text-muted">Email Address <i class="fa fa-lock" title="Cannot be changed"></i></label>
+                                <input type="email" class="form-control-custom" value="{{ request.user.email }}" readonly>
+                            </div>
+                        </div>
+                        <div class="text-end mt-2">
+                            <button type="submit" class="btn-submit"><i class="fa fa-save"></i> Save Profile</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="form-card">
+                    <h5 class="section-title"><i class="fa fa-map-marker-alt"></i> My Registered Farms</h5>
+                    
+                    <div class="row g-4">
+                        {% for farm in all_addresses %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="farm-card">
+                                <h6 class="fw-bold" style="color: #1b5e20;"><i class="fa fa-tractor me-1"></i> Plot #{{ forloop.counter }}</h6>
+                                <hr style="margin: 10px 0; opacity: 0.1;">
+                                <p class="mb-1 fw-bold text-dark" style="font-size: 15px;">{{ farm.village }}</p>
+                                <p class="mb-2 text-muted" style="font-size: 13px;">{{ farm.district }}, {{ farm.state }} - {{ farm.pincode }}</p>
+                                <p class="mb-3 text-muted" style="font-size: 11px;"><i class="fa fa-location-arrow text-success"></i> GPS: {{ farm.latitude|floatformat:3 }}, {{ farm.longitude|floatformat:3 }}</p>
+                                
+                                <div class="d-flex gap-2 mt-auto pt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-success w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#editFarmModal_{{ farm.addr_id }}">Edit</button>
+                                    
+                                    <button type="button" class="btn btn-sm btn-outline-danger px-3" data-bs-toggle="modal" data-bs-target="#deleteFarmModal_{{ farm.addr_id }}" {% if all_addresses.count == 1 %}disabled title="You must have at least 1 farm"{% endif %}>
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="farm-card add-farm-card" data-bs-toggle="modal" data-bs-target="#addFarmModal">
+                                <i class="fa fa-plus-circle fa-3x mb-2"></i>
+                                <h6 class="fw-bold m-0">Add New Farm</h6>
+                                <p class="text-muted mt-2 mb-0" style="font-size: 12px;">Register another land plot for AI predictions.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h5 class="section-title"><i class="fa fa-id-card"></i> Regulatory & Base Data <i class="fa fa-lock float-end text-muted" style="font-size: 14px; margin-top: 5px;"></i></h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="fw-bold text-muted" style="font-size: 12px;">Aadhar Number</label>
+                            <input type="text" class="form-control-custom" value="{{ masked_aadhar }}" readonly>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="fw-bold text-muted" style="font-size: 12px;">Kissan ID (KID)</label>
+                            <input type="text" class="form-control-custom" value="{{ masked_kid }}" readonly>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="fw-bold text-muted" style="font-size: 12px;">Total Area</label>
+                            <input type="text" class="form-control-custom" value="{{ profile.land_area }} Acres" readonly>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="fw-bold text-muted" style="font-size: 12px;">Primary Soil Type</label>
+                            <input type="text" class="form-control-custom" value="{{ profile.soil_type }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <!---
+                <div class="form-card" style="border-top: 5px solid #d32f2f;">
+                    <h5 class="section-title" style="color: #d32f2f; border-color: #d32f2f;"><i class="fa fa-exclamation-triangle"></i> Danger Zone</h5>
+                    <p class="text-muted mb-4" style="font-size: 14px;">If you no longer wish to use Kultiva, you can formally request an account deactivation. <strong>Note:</strong> Initiating this will trigger a mandatory 2-week grace period before your profile is taken offline.</p>
+                    <button type="button" class="btn btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#deactivateModal">
+                        Initiate Account Deactivation
+                    </button>
+                </div>
+            ---->
+            </div>
+        </div>
+
+    <div class="modal fade" id="addFarmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px;">
+                <div class="modal-header bg-success text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="fa fa-plus-circle"></i> Register New Farm</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form action="{% url 'farmer_profile' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_farm">
+                        
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="fw-bold text-muted" style="font-size: 12px;">Pincode</label>
+                                <input type="text" name="pincode" class="form-control-custom pincode-input numeric-only" required maxlength="6" placeholder="Ex: 682001">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="fw-bold text-muted" style="font-size: 12px;">Village/Town</label>
+                                <input type="text" name="village" class="form-control-custom" required placeholder="Ex: Munnar">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="fw-bold text-muted" style="font-size: 12px;">District</label>
+                                <input type="text" name="district" class="form-control-custom district-input" required placeholder="District">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="fw-bold text-muted" style="font-size: 12px;">State</label>
+                                <input type="text" name="state" class="form-control-custom state-input" required placeholder="State">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <div style="background: rgba(251, 192, 45, 0.1); border-left: 3px solid #fbc02d; padding: 10px; border-radius: 5px; font-size: 12px; color: #1b5e20; font-weight: bold;">
+                                    <i class="fa fa-magic"></i> GPS Coordinates will auto-generate based on your District if left blank.
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit w-100">Register Farm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deactivateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px;">
+                <div class="modal-header text-white border-0" style="background-color: #d32f2f;">
+                    <h5 class="modal-title fw-bold"><i class="fa fa-warning"></i> Confirm Deactivation</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-danger border-0 p-3 mb-4" style="background-color: #ffebee; border-radius: 8px;">
+                        <h6 class="fw-bold text-danger m-0" style="font-size: 13px;">
+                            <i class="fa fa-clock"></i> 2-Week Protocol Will Initiate
+                        </h6>
+                        <p class="mb-0 mt-1" style="font-size: 12px; color: #b71c1c;">Your profile and data will remain active for 14 days to clear pending contracts. Afterwards, it will be automatically hidden.</p>
+                    </div>
+
+                    <form action="{% url 'farmer_profile' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="request_deactivation">
+                        
+                        <div class="mb-3">
+                            <label class="fw-bold text-muted mb-2" style="font-size: 13px;">Deactivation Duration:</label>
+                            <select name="duration" class="form-select shadow-sm" style="border-radius: 8px; cursor: pointer;">
+                                <option value="6 Months">6 Months (Temporary Break)</option>
+                                <option value="1 Year">1 Year</option>
+                                <option value="2 Years">2 Years</option>
+                                <option value="Permanent" selected>Permanent / Delete Forever</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold text-muted mb-2" style="font-size: 13px;">Reason for Leaving:</label>
+                            <select name="reason_dropdown" id="reasonDropdown" class="form-select shadow-sm" style="border-radius: 8px; cursor: pointer;" onchange="toggleReasonText()">
+                                <option value="Taking a break from farming">Taking a break from farming</option>
+                                <option value="Switching to a different platform">Switching to a different platform</option>
+                                <option value="Retiring / Sold Land">Retiring / Sold Land</option>
+                                <option value="Privacy concerns">Privacy concerns</option>
+                                <option value="Other">Other (Please specify)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4 d-none" id="reasonTextBoxContainer">
+                            <textarea name="reason_text" class="form-control shadow-sm" rows="3" style="border-radius: 8px;" placeholder="Please tell us more..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100 fw-bold" style="border-radius: 30px; padding: 12px;">Initiate 2-Week Protocol</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for farm in all_addresses %}
+        
+        <div class="modal fade" id="editFarmModal_{{ farm.addr_id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header bg-success text-white border-0">
+                        <h5 class="modal-title fw-bold"><i class="fa fa-edit"></i> Edit Plot #{{ forloop.counter }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form action="{% url 'farmer_profile' %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_farm">
+                            <input type="hidden" name="addr_id" value="{{ farm.addr_id }}">
+                            
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="fw-bold text-muted" style="font-size: 12px;">Pincode</label>
+                                    <input type="text" name="pincode" class="form-control-custom pincode-input numeric-only" value="{{ farm.pincode }}" required maxlength="6">
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="fw-bold text-muted" style="font-size: 12px;">Village/Town</label>
+                                    <input type="text" name="village" class="form-control-custom" value="{{ farm.village }}" required>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="fw-bold text-muted" style="font-size: 12px;">District</label>
+                                    <input type="text" name="district" class="form-control-custom district-input" value="{{ farm.district }}" required>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="fw-bold text-muted" style="font-size: 12px;">State</label>
+                                    <input type="text" name="state" class="form-control-custom state-input" value="{{ farm.state }}" required>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="fw-bold text-muted" style="font-size: 12px;">Latitude</label>
+                                    <input type="number" name="latitude" class="form-control-custom" step="0.000001" value="{{ farm.latitude }}">
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="fw-bold text-muted" style="font-size: 12px;">Longitude</label>
+                                    <input type="number" name="longitude" class="form-control-custom" step="0.000001" value="{{ farm.longitude }}">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-submit w-100 mt-2">Save & Send Alert</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteFarmModal_{{ farm.addr_id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header border-0 text-white" style="background-color: #d32f2f;">
+                        <h5 class="modal-title fw-bold"><i class="fa fa-trash"></i> Delete Plot #{{ forloop.counter }}?</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <i class="fa fa-exclamation-circle text-danger mb-3" style="font-size: 50px;"></i>
+                        <h5 class="fw-bold text-dark">Are you completely sure?</h5>
+                        <p class="text-muted">You are about to delete your farm located in <strong>{{ farm.village }}, {{ farm.district }}</strong>. This will remove it from AI predictions.</p>
+                        
+                        <form action="{% url 'farmer_profile' %}" method="POST" class="mt-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_farm">
+                            <input type="hidden" name="addr_id" value="{{ farm.addr_id }}">
+                            <div class="d-flex gap-3 justify-content-center">
+                                <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-danger fw-bold px-4">Yes, Delete Farm</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endfor %}
+
+
+    {% include 'footer.html' %}
+    
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+    // 🔬 TOGGLE REASON TEXT BOX SCRIPT
+    function toggleReasonText() {
+        var dropdown = document.getElementById("reasonDropdown");
+        var textBoxContainer = document.getElementById("reasonTextBoxContainer");
+        
+        if (dropdown.value === "Other") {
+            textBoxContainer.classList.remove("d-none");
+        } else {
+            textBoxContainer.classList.add("d-none");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Enforce numeric only inputs for phone and pincode
+        document.querySelectorAll('.numeric-only').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, ''); 
+            });
+        });
+
+        // Decentralized Pincode API
+        document.querySelectorAll('.pincode-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const pincode = this.value.trim();
+                
+                if (pincode.length === 6 && /^\d{6}$/.test(pincode)) {
+                    const form = this.closest('form');
+                    const districtInput = form.querySelector('.district-input');
+                    const stateInput = form.querySelector('.state-input');
+                    const originalDistrict = districtInput.value;
+                    
+                    districtInput.value = "Fetching...";
+
+                    fetch(`/api/pincode/${pincode}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                districtInput.value = data.district;
+                                stateInput.value = data.state;
+                                
+                                districtInput.style.borderBottom = '2px solid #2e7d32'; 
+                                stateInput.style.borderBottom = '2px solid #2e7d32';
+                            } else {
+                                districtInput.value = originalDistrict;
+                            }
+                        })
+                        .catch(error => {
+                            districtInput.value = originalDistrict;
+                        });
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva - Secure Escrow Checkout</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        .checkout-card { background: #fff; border-radius: 15px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .invoice-box { background: #f1f8e9; border: 1px dashed #c5e1a5; padding: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    {% include 'buyer_header.html' %}
+
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="checkout-card" style="border-top: 5px solid #2e7d32;">
+                    <div class="text-center mb-4">
+                        <i class="fa fa-shield fa-3x text-success mb-2"></i>
+                        <h2 style="color: #1b5e20; font-weight: bold;">Secure Escrow Release</h2>
+                        <p class="text-muted">QR Code successfully validated. Review your final invoice before authorizing the release of funds to the farmer.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h5 class="fw-bold mb-3">Order Summary</h5>
+                            <div class="invoice-box">
+                                <h6 class="fw-bold text-dark">{{ listing.title }}</h6>
+                                <p class="text-muted mb-2" style="font-size: 13px;">Farmer: {{ listing.listed_by.username }}</p>
+                                <hr>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span style="font-size: 14px;">Quantity Secured</span>
+                                    <span class="fw-bold">{{ proposal.requested_quantity }} {{ listing.unit_of_measure }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span style="font-size: 14px;">Price per Unit</span>
+                                    <span class="fw-bold">₹{% if proposal.proposed_price > 0 %}{{ proposal.proposed_price }}{% else %}{{ listing.price }}{% endif %}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 text-muted">
+                                    <span style="font-size: 14px;">Platform Escrow Fee</span>
+                                    <span>₹0.00 (Waived)</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold text-dark" style="font-size: 18px;">Total Value</span>
+                                    <span class="fw-bold" style="color: #1b5e20; font-size: 22px;">₹{{ total_amount|floatformat:2 }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="fw-bold mb-3">Release Authorization</h5>
+                            
+                            <div class="alert mb-4" style="background: #e8f5e9; border: 1px solid #c5e1a5; border-radius: 10px; color: #1b5e20;">
+                                <h6 class="fw-bold mb-2"><i class="fa fa-lock"></i> Funds Secured in Vault</h6>
+                                <p style="font-size: 13px; margin: 0; color: #333;">You have successfully verified the delivery via QR scan. By clicking the button below, you authorize Kultiva to release the locked funds to the farmer.</p>
+                            </div>
+
+                            <form action="{% url 'process_payment' proposal.id %}" method="POST" class="mt-4">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold" style="background: #1b5e20; font-size: 17px; box-shadow: 0 5px 15px rgba(46,125,50,0.3);">
+                                    <i class="fa fa-paper-plane"></i> Authorize Release of ₹{{ total_amount|floatformat:2 }}
+                                </button>
+                                <p class="text-center text-muted mt-3" style="font-size: 11px;"><i class="fa fa-info-circle"></i> This action is irreversible. Funds will be instantly transferred to the farmer's registered account.</p>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

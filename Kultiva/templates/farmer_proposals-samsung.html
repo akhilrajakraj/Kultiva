@@ -1,0 +1,332 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Kultiva - Trade Contracts</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid #1b5e20; /* Farm Green */
+        }
+
+        /* Enterprise Main Tab Styling */
+        .nav-tabs { border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #64748b;
+            font-weight: bold;
+            padding: 12px 25px;
+            font-size: 15px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            background: transparent;
+        }
+        .nav-tabs .nav-link:hover { color: #2e7d32; }
+        .nav-tabs .nav-link.active {
+            color: #1b5e20;
+            border-bottom: 3px solid #1b5e20;
+            background: transparent;
+        }
+
+        /* --- NEW: Sub-Tab (Pill) Styling for Pending Section --- */
+        .nav-pills .nav-link {
+            color: #555;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .nav-pills .nav-link:hover { background: #e9ecef; }
+        .pill-inbound.active { background-color: #2e7d32 !important; color: white !important; border-color: #1b5e20 !important; }
+        .pill-outbound.active { background-color: #f57f17 !important; color: white !important; border-color: #e65100 !important; }
+
+        /* Table Styling */
+        .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 13px; border-top: none; }
+        .table-custom td { vertical-align: middle; color: #555; }
+        .crop-title { font-weight: bold; color: #1b5e20; font-size: 15px; text-decoration: none; }
+        
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .bg-pending { background: rgba(251, 192, 45, 0.2); color: #f57f17; border: 1px solid #ffecb3;}
+        .bg-accepted { background: rgba(46, 125, 50, 0.2); color: #2e7d32; border: 1px solid #c5e1a5;}
+        .bg-completed { background: #1b5e20; color: #ffffff; border: 1px solid #1b5e20;} 
+        .bg-history { background: rgba(100, 116, 139, 0.2); color: #475569; border: 1px solid #cbd5e1;}
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 style="color: #1b5e20; font-weight: bold;"><i class="fa fa-file-text-o text-success"></i> Trade Contracts & Offers</h3>
+                <span class="text-muted"><i class="fa fa-exchange"></i> Total Interactions: {{ total_interactions }}</span>
+            </div>
+
+            <ul class="nav nav-tabs" id="proposalTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                        <i class="fa fa-clock-o"></i> Pending ({{ pending_count }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted" type="button" role="tab">
+                        <i class="fa fa-handshake-o"></i> Active Contracts ({{ accepted|length }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+                        <i class="fa fa-check-circle"></i> Completed ({{ completed|length }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                        <i class="fa fa-history"></i> History ({{ history|length }})
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="proposalTabsContent">
+                
+                <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                    
+                    <div class="d-flex justify-content-center mb-4 mt-3">
+                        <ul class="nav nav-pills" id="pendingSubTabs" role="tablist" style="gap: 15px;">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link pill-inbound active" id="inbound-tab" data-bs-toggle="pill" data-bs-target="#inbound" type="button" role="tab">
+                                    <i class="fa fa-inbox"></i> Inbound Offers 
+                                    {% if pending_received|length > 0 %}
+                                        <span class="badge bg-danger rounded-circle ms-1">{{ pending_received|length }}</span>
+                                    {% endif %}
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link pill-outbound" id="outbound-tab" data-bs-toggle="pill" data-bs-target="#outbound" type="button" role="tab">
+                                    <i class="fa fa-paper-plane"></i> Outbound Proposals
+                                    <span class="badge bg-secondary rounded-circle ms-1">{{ pending_sent|length }}</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content" id="pendingSubTabsContent">
+                        
+                        <div class="tab-pane fade show active" id="inbound" role="tabpanel">
+                            <div class="table-responsive mb-2">
+                                <table class="table table-hover table-custom">
+                                    <thead style="background: #e8f5e9;">
+                                        <tr>
+                                            <th>Harvest / Crop</th>
+                                            <th>Buyer Partner</th>
+                                            <th>Proposed Rate</th>
+                                            <th>Date</th>
+                                            <th class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for p in pending_received %}
+                                        <tr>
+                                            <td><span class="crop-title">{{ p.listing.title }}</span><br><small class="text-muted">Req Qty: {{ p.requested_quantity }} {{ p.listing.unit_of_measure }}</small></td>
+                                            <td><strong>{{ p.buyer.username }}</strong><br><small class="text-muted"><i class="fa fa-shield text-success"></i> Verified</small></td>
+                                            <td style="font-weight: bold; color: #1b5e20;">₹{{ p.display_price }}</td>
+                                            <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center align-items-center" style="gap: 8px;">
+                                                    <a href="{% url 'farmer_proposal_detail' p.id %}" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 35px; height: 35px;" title="View Details">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                    <form method="POST" action="{% url 'farmer_respond_proposal' p.id %}" class="m-0 p-0">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="ACCEPT">
+                                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-circle" style="width: 35px; height: 35px;" title="Accept Offer">
+                                                            <i class="fa fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                    <form method="POST" action="{% url 'farmer_respond_proposal' p.id %}" class="m-0 p-0">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="REJECT">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" style="width: 35px; height: 35px;" title="Reject Offer">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa fa-inbox fa-3x mb-3" style="color: #ccc;"></i><br>No inbound offers at the moment.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="outbound" role="tabpanel">
+                            <div class="table-responsive mb-2">
+                                <table class="table table-hover table-custom">
+                                    <thead style="background: #fff8e1;">
+                                        <tr>
+                                            <th>Harvest / Crop</th>
+                                            <th>Target Buyer</th>
+                                            <th>Your Asking Rate</th>
+                                            <th>Date</th>
+                                            <th class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for p in pending_sent %}
+                                        <tr>
+                                            <td><span class="crop-title" style="color: #f57f17;">{{ p.listing.title }}</span><br><small class="text-muted">Offered Qty: {{ p.requested_quantity }} {{ p.listing.unit_of_measure }}</small></td>
+                                            <td><strong>{{ p.buyer.username }}</strong></td>
+                                            <td style="font-weight: bold; color: #1b5e20;">₹{{ p.display_price }}</td>
+                                            <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                            <td class="text-center">
+                                                <a href="{% url 'farmer_proposal_detail' p.id %}" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 35px; height: 35px;" title="View Details">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa fa-paper-plane-o fa-3x mb-3" style="color: #ccc;"></i><br>You have no outbound proposals pending.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="accepted" role="tabpanel">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover table-custom">
+                            <thead style="background: #f1f8e9;">
+                                <tr>
+                                    <th>Harvest / Crop</th>
+                                    <th>Buyer Partner</th>
+                                    <th>Agreed Volume</th>
+                                    <th>Security Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in accepted %}
+                                <tr>
+                                    <td><span class="crop-title">{{ p.listing.title }}</span></td>
+                                    <td><strong>{{ p.buyer.username }}</strong></td>
+                                    <td>{{ p.requested_quantity }} {{ p.listing.unit_of_measure }}</td>
+                                    <td><span class="badge-status bg-accepted"><i class="fa fa-lock"></i> Deal Locked</span></td>
+                                    <td class="text-center">
+                                        <a href="{% url 'farmer_proposal_detail' p.id %}" class="btn btn-sm btn-warning rounded-pill fw-bold text-dark shadow-sm">
+                                            <i class="fa fa-qrcode"></i> Generate QR Code
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa fa-handshake-o fa-3x mb-3" style="color: #ccc;"></i><br>No active contracts.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="completed" role="tabpanel">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover table-custom">
+                            <thead style="background: #f8f9fa;">
+                                <tr>
+                                    <th>Harvest / Crop</th>
+                                    <th>Buyer Partner</th>
+                                    <th>Completion Date</th>
+                                    <th>Settled Amount</th>
+                                    <th class="text-center">Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in completed %}
+                                <tr>
+                                    <td><span class="crop-title">{{ p.listing.title }}</span><br><small class="text-muted">Vol: {{ p.requested_quantity }} {{ p.listing.unit_of_measure }}</small></td>
+                                    <td><strong>{{ p.buyer.username }}</strong></td>
+                                    <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                    <td style="font-weight: bold; color: #1b5e20;">₹{{ p.total_amount|floatformat:2 }}</td>
+                                    <td class="text-center">
+                                        <a href="{% url 'farmer_proposal_detail' p.id %}" class="btn btn-sm btn-outline-success rounded-circle" style="width: 35px; height: 35px;" title="View Digital Receipt">
+                                            <i class="fa fa-file-text-o"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa fa-check-circle-o fa-3x mb-3" style="color: #ccc;"></i><br>No completed deals yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="history" role="tabpanel">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover table-custom">
+                            <thead style="background: #f8f9fa;">
+                                <tr>
+                                    <th>Harvest / Crop</th>
+                                    <th>Buyer Partner</th>
+                                    <th>Date</th>
+                                    <th>Final Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in history %}
+                                <tr>
+                                    <td><span class="crop-title" style="color: #555;">{{ p.listing.title }}</span></td>
+                                    <td><strong>{{ p.buyer.username }}</strong></td>
+                                    <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge-status bg-history">{{ p.status }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'farmer_proposal_detail' p.id %}" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 35px; height: 35px;">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted">No historical data found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

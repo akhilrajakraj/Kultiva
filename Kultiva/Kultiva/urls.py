@@ -2,12 +2,11 @@
 from django.contrib import admin
 from django.urls import path
 from . import views
- # from django.conf.urls import url
- # from django.conf import settings
- # from django.conf.urls.static import static
-
+from django.conf.urls import url
 from django.conf import settings
 from django.conf.urls.static import static
+
+
 
 urlpatterns = [
     # 1. Public Pages
@@ -71,14 +70,13 @@ urlpatterns = [
     path('seller/reports/receipt/<str:order_id>/', views.seller_receipt_detail, name='seller_receipt_detail'),
     path('seller/orders/update/<str:order_id>/', views.update_order_status, name='update_order_status'),
     path('seller/orders/<str:order_id>/', views.seller_order_detail, name='seller_order_detail'),
-    path('seller/feedback/', views.seller_feedback, name='seller_feedback'),
     
     
     path('farmer/profile/', views.farmer_profile_view, name='farmer_profile'),
     path('farmer/submit-soil-report/', views.submit_manual_soil, name='submit_manual_soil'),
     path('farmer/add-listing/', views.add_farmer_listing, name='add_farmer_listing'),
     path('farmer/my-crops/', views.farmer_manage_crops, name='farmer_manage_crops'),
-    path('farmer/edit-listing/<int:listing_id>/', views.edit_farmer_listing, name='edit_farmer_listing'),
+    path('farmer/edit-listing/', views.edit_farmer_listing, name='edit_farmer_listing'),
     path('farmer/delete-listing/<int:listing_id>/', views.delete_farmer_listing, name='delete_farmer_listing'),
     path('farmer/send-proposal/', views.send_trade_proposal, name='send_trade_proposal'),
     path('farmer/trade-contracts/', views.farmer_proposals, name='farmer_proposals'),
@@ -96,9 +94,7 @@ urlpatterns = [
     # --- FARMER'S NETWORK (Discovering Verified Input Sellers) ---
     path('farmer/network/sellers/', views.farmer_seller_list, name='farmer_seller_list'),
     path('farmer/network/seller/<int:seller_id>/', views.farmer_view_seller_profile, name='farmer_view_seller_profile'),
-    # --- FARMER: FEEDBACK & REPLIES ---
-    path('farmer/feedbacks/', views.farmer_feedback_view, name='farmer_feedback_view'),
-    path('farmer/reply-feedback/', views.farmer_reply_feedback, name='farmer_reply_feedback'),
+    
     
     
     path('buyer/marketplace/', views.buyer_marketplace, name='buyer_marketplace'),
@@ -197,8 +193,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('custom-admin/manage-soil-reports/', views.manage_soil_reports, name='manage_soil_reports'),
     path('custom-admin/update-soil-report/', views.update_soil_report, name='update_soil_report'),
-    # 4. Platform Feedback Management
-    path('custom-admin/feedbacks/', views.admin_manage_feedbacks, name='admin_manage_feedbacks'),
 ]
 
 if settings.DEBUG:

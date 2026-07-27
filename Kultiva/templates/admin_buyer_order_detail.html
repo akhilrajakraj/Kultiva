@@ -11,7 +11,7 @@
     
     <style>
         :root {
-            --theme-main: #1565c0;
+            --theme-main: #1565c0; /* B2B Corporate Blue Theme */
             --theme-light: #e3f2fd;
             --theme-border: #bbdefb;
         }
@@ -43,7 +43,6 @@
         .status-ACCEPTED { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .status-REJECTED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
         .status-CANCELLED { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
-        .status-COMPLETED { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
     </style>
 </head>
 <body>
@@ -79,7 +78,6 @@
                         <span class="status-badge status-{{ proposal.status }}">
                             {% if proposal.status == 'PENDING' %}<i class="ph ph-clock"></i> Pending
                             {% elif proposal.status == 'ACCEPTED' %}<i class="ph ph-check-circle"></i> Accepted
-                            {% elif proposal.status == 'COMPLETED' %}<i class="ph ph-flag-checkered"></i> Completed
                             {% elif proposal.status == 'REJECTED' %}<i class="ph ph-x-circle"></i> Rejected
                             {% else %}<i class="ph ph-prohibit"></i> Cancelled{% endif %}
                         </span>
@@ -109,25 +107,14 @@
                             <div class="col-md-8">
                                 <div class="info-label">Harvest Listing</div>
                                 <div class="info-value mb-2" style="font-size: 18px;">{{ proposal.listing.title|default:"Listing Deleted" }}</div>
-                                <span class="badge bg-light text-dark border">Bulk Qty: {{ proposal.requested_quantity }} {{ proposal.listing.unit_of_measure }}</span>
-                                <span class="badge bg-light text-dark border ms-2">
-                                    Contract Rate: ₹{% if proposal.proposed_price > 0 %}{{ proposal.proposed_price }}{% else %}{{ proposal.listing.price }}{% endif %} / {{ proposal.listing.unit_of_measure }}
-                                </span>
+                                <span class="badge bg-light text-dark border">Bulk Qty: {{ proposal.quantity|floatformat:0 }} {{ proposal.listing.unit_of_measure }}</span>
+                                <span class="badge bg-light text-dark border ms-2">Contract Rate: ₹{{ proposal.proposed_price }} / {{ proposal.listing.unit_of_measure }}</span>
                             </div>
                             <div class="col-md-4 text-md-end mt-3 mt-md-0 border-start">
                                 <div class="info-label">Total Contract Value</div>
                                 <div style="font-size: 32px; font-weight: 900; color: #1e293b;">
                                     <script>
-                                        // Hardened math logic with smart fallback
-                                        var qty = parseFloat("{{ proposal.requested_quantity|default:'0' }}");
-                                        var negotiatedPrice = parseFloat("{{ proposal.proposed_price|default:'0' }}");
-                                        var basePrice = parseFloat("{{ proposal.listing.price|default:'0' }}");
-                                        
-                                        // If negotiation hasn't happened (price is 0), fall back to the listing's base price
-                                        var activePrice = negotiatedPrice > 0 ? negotiatedPrice : basePrice;
-                                        var total = qty * activePrice;
-                                        
-                                        document.write('₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                        document.write('₹' + ({{ proposal.quantity }} * {{ proposal.proposed_price }}).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                                     </script>
                                 </div>
                                 <span class="badge mt-1" style="background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb;">

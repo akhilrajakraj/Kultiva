@@ -160,10 +160,8 @@ def get_weather(latitude, longitude, location_name):
     }
 
 
-import random
-
 # ==========================================
-# 2. SOIL DATA RETRIEVAL (Upgraded with Grid Snapping & ML Guards)
+# 2. SOIL DATA RETRIEVAL (Upgraded with Grid Snapping)
 # ==========================================
 def get_soil_for_location(exact_lat, exact_lon):
     """Snaps precise GPS coordinates to the 0.05 spatial grid and fetches SHC data."""
@@ -175,46 +173,10 @@ def get_soil_for_location(exact_lat, exact_lon):
         soil_data = GridSoilData.objects.filter(grid_lat=grid_lat, grid_lon=grid_lon).first()
         
         if soil_data:
-            # --- THE FIX: DATABASE INTERCEPTOR & SCALER ---
-            # The SQLite database holds raw kg/ha values (e.g., N=232.1).
-            # We must intercept and scale them strictly between 15 and 95 for the UI and AI.
-            
-            raw_n = float(soil_data.avg_n)
-            raw_p = float(soil_data.avg_p)
-            raw_k = float(soil_data.avg_k)
-            
-            # 1. Scale Nitrogen (Keep strictly between 40 and 95)
-            safe_n = raw_n
-            if safe_n > 95.0:
-                safe_n = 50.0 + (raw_n % 45.0) # Modulo math creates organic variance
-            elif safe_n < 20.0:
-                safe_n += 30.0
-                
-            # 2. Scale Phosphorus (Keep strictly between 20 and 85)
-            safe_p = raw_p
-            if safe_p > 85.0:
-                safe_p = 30.0 + (raw_p % 50.0)
-            elif safe_p < 15.0:
-                safe_p += 25.0 
-                
-            # 3. Scale Potassium (Keep strictly between 20 and 90)
-            safe_k = raw_k
-            if safe_k > 90.0:
-                safe_k = 30.0 + (raw_k % 55.0)
-            elif safe_k < 15.0:
-                safe_k += 20.0
-
             return {
                 "found": True, "lat_used": grid_lat, "lon_used": grid_lon,
-                "pH": round(float(soil_data.ph), 1), 
-                "EC": round(float(soil_data.ec), 2), "OC": round(float(soil_data.oc), 2),
-                
-                # Push the safe, bounded numbers to the frontend and AI
-                "N": round(safe_n, 1), 
-                "P": round(safe_p, 1), 
-                "K": round(safe_k, 1), 
-                
-                "S": soil_data.avg_s,
+                "pH": soil_data.ph, "EC": soil_data.ec, "OC": soil_data.oc,
+                "N": soil_data.avg_n, "P": soil_data.avg_p, "K": soil_data.avg_k, "S": soil_data.avg_s,
                 "Zn": soil_data.avg_zn, "Fe": soil_data.avg_fe, "Cu": soil_data.avg_cu,
                 "Mn": soil_data.avg_mn, "B":  soil_data.avg_b,
                 "Advisory": soil_data.recommendation_text,
@@ -222,30 +184,19 @@ def get_soil_for_location(exact_lat, exact_lon):
             }
         else:
             return get_safe_defaults()
-    except Exception as e:
-        logger.error(f"Soil Fetch Error: {e}")
+    except Exception:
         return get_safe_defaults()
 
-
 def get_safe_defaults():
-    """
-    Generates mathematically bounded organic fallback data to prevent AI Out-Of-Distribution (OOD) errors.
-    N, P, K values are strictly restricted to < 100 to match the ML training dataset.
-    """
-    # Algorithmic Randomization: Simulates real organic soil tests within strict ML training bounds
-    safe_N = round(random.uniform(60.0, 95.0), 1)  # Strictly < 100
-    safe_P = round(random.uniform(35.0, 65.0), 1)  # Strictly < 90
-    safe_K = round(random.uniform(30.0, 70.0), 1)  # Strictly < 85
-    safe_pH = round(random.uniform(6.0, 7.5), 1)   # Normal soil pH range
-
     return {
         "found": False, "lat_used": 0.0, "lon_used": 0.0,
-        "pH": safe_pH, "EC": 0.5, "OC": 0.5,
-        "N": safe_N, "P": safe_P, "K": safe_K, "S": 15.0,
+        "pH": 6.5, "EC": 0.5, "OC": 0.5,
+        "N": 280.0, "P": 25.0, "K": 150.0, "S": 15.0,
         "Zn": 1.0, "Fe": 10.0, "Cu": 1.0, "Mn": 5.0, "B": 0.5,
-        "Advisory": "Location outside mapped grid. Using verified algorithmic fallback data.",
+        "Advisory": "Location outside mapped grid. Showing Standard Regional Recommendations.",
         "Status": "Regional Fallback Used"
     }
+
 # ==========================================
 # CACHED ML ARTIFACTS (In-Memory Singleton)
 # ==========================================

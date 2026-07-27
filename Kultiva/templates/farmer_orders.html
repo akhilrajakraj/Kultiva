@@ -214,17 +214,10 @@
                                     
                                     <div class="d-grid gap-2">
                                         {% if order.status != 'CANCELLED' %}
-                                            
-                                            {% if order.payment_method != 'COD' or order.status == 'DELIVERED' %}
-                                                <a href="{% url 'farmer_invoice_detail' order.order_id %}" class="btn btn-sm fw-bold" style="background: #f1f8e9; color: #1b5e20; border: 1px solid #c5e1a5; border-radius: 10px;">
-                                                    <i class="ph ph-receipt me-1"></i> Invoice
-                                                </a>
-                                            {% else %}
-                                                <button class="btn btn-sm fw-bold" style="background: #fffde7; color: #f57f17; border: 1px dashed #fbc02d; border-radius: 10px; cursor: not-allowed;" disabled title="Invoice will be generated once cash is paid on delivery">
-                                                    <i class="ph ph-clock-countdown me-1"></i> Bill Pending
-                                                </button>
-                                            {% endif %}
-                                            {% endif %}
+                                            <a href="{% url 'farmer_invoice_detail' order.order_id %}" class="btn btn-sm fw-bold" style="background: #f1f8e9; color: #1b5e20; border: 1px solid #c5e1a5; border-radius: 10px;">
+                                                <i class="ph ph-receipt me-1"></i> Invoice
+                                            </a>
+                                        {% endif %}
 
                                         <a href="{% url 'farmer_order_details' order.order_id %}" class="btn btn-sm fw-bold" style="background: #1b5e20; color: #fff; border-radius: 10px;">
                                             <i class="ph ph-eye me-1"></i> View Details

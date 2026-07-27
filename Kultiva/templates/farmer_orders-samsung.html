@@ -1,0 +1,262 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders | Kultiva</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* Tabs Styling - Locked to original Style */
+        .tab-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .tab-scroll::-webkit-scrollbar { display: none; }
+
+        .order-tab {
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid #c5e1a5;
+            background: #fff;
+            color: #666;
+            transition: 0.3s;
+            text-decoration: none !important;
+        }
+        .order-tab.active {
+            background: #1b5e20;
+            color: white;
+            border-color: #1b5e20;
+            box-shadow: 0 4px 10px rgba(27, 94, 32, 0.2);
+        }
+
+        /* Order Cards - Preserving the "Farmer" Left Accent */
+        .order-card {
+            transition: transform 0.2s ease;
+            border-left: 6px solid #fbc02d;
+            border-radius: 15px;
+        }
+        .order-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .status-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-PENDING { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .status-SHIPPED { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        .status-DELIVERED { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .status-CANCELLED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        .product-img-box {
+            width: 90px;
+            height: 90px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .product-img-box img { max-height: 100%; max-width: 100%; object-fit: cover; }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        .search-container input {
+            padding-left: 45px;
+            border-radius: 15px;
+            border: 2px solid #c5e1a5;
+            height: 50px;
+        }
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            font-size: 20px;
+            color: #1b5e20;
+        }
+        
+        .cod-badge {
+            background: #fff8e1; 
+            color: #f57f17; 
+            border: 1px solid #ffecb3; 
+            font-size: 11px; 
+            font-weight: bold; 
+            border-radius: 8px;
+            padding: 4px 8px;
+        }
+
+        .status-REFUNDED { background: #e0e7ff; color: #0288d1; border: 1px solid #bae6fd; }
+
+
+    </style>
+</head>
+<body>
+
+    {% include 'farmer_header.html' %}
+
+    <div class="container pb-5 wow fadeIn">
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+                
+                <div class="d-flex justify-content-between align-items-end mb-4">
+                    <div>
+                        <h2 style="color: #1b5e20; font-weight: 800; margin-bottom: 5px;">
+                            <i class="ph ph-package text-warning"></i> My Purchase History
+                        </h2>
+                        <p class="text-muted fw-bold mb-0">Track your agricultural inputs and manage invoices.</p>
+                    </div>
+                    <a href="{% url 'farmer_input_market' %}" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3 d-none d-md-block">
+                        <i class="ph ph-storefront"></i> Market
+                    </a>
+                </div>
+
+                <form method="GET" class="search-container">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" name="q" class="form-control glass-widget" placeholder="Search by Order ID or Product Name..." value="{{ search_query }}">
+                    <input type="hidden" name="status" value="{{ current_status }}">
+                </form>
+
+                <div class="tab-scroll mb-4">
+                    <a href="?status=all{% if search_query %}&q={{ search_query }}{% endif %}" class="order-tab {% if current_status == 'all' or not current_status %}active{% endif %}">All Orders</a>
+                    <a href="?status=pending{% if search_query %}&q={{ search_query }}{% endif %}" class="order-tab {% if current_status == 'pending' %}active{% endif %}">Processing</a>
+                    <a href="?status=transit{% if search_query %}&q={{ search_query }}{% endif %}" class="order-tab {% if current_status == 'transit' %}active{% endif %}">Shipped</a>
+                    <a href="?status=delivered{% if search_query %}&q={{ search_query }}{% endif %}" class="order-tab {% if current_status == 'delivered' %}active{% endif %}">Delivered</a>
+                    <a href="?status=refunded{% if search_query %}&q={{ search_query }}{% endif %}" class="order-tab {% if current_status == 'refunded' %}active{% endif %}">Refunded</a>
+                    <a href="?status=cancelled{% if search_query %}&q={{ search_query }}{% endif %}" class="order-tab {% if current_status == 'cancelled' %}active{% endif %}">Cancelled</a>
+                </div>
+
+                <div class="order-list">
+                    {% for order in orders %}
+                        <div class="glass-widget order-card p-4 mb-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 border-end">
+                                    <div class="text-muted" style="font-size: 11px; font-weight: bold; text-transform: uppercase;">Order ID</div>
+                                    <div style="font-weight: 800; color: #1b5e20; font-size: 14px;">#{{ order.order_id }}</div>
+                                    <div class="mt-2 text-muted" style="font-size: 11px; font-weight: bold; text-transform: uppercase;">Placed On</div>
+                                    <div style="font-weight: bold; font-size: 13px;">{{ order.created_at|date:"d M Y" }}</div>
+                                </div>
+
+                                <div class="col-md-7 py-3 py-md-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="product-img-box me-3">
+                                            {% if order.product.image %}
+                                                <img src="{{ order.product.image.url }}" alt="{{ order.product.title }}">
+                                            {% else %}
+                                                <i class="ph ph-cube text-muted fs-1"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <span class="status-badge status-{{ order.status }}">
+                                                    {% if order.status == 'PENDING' %}<i class="ph ph-clock-counter-clockwise"></i> Processing
+                                                    {% elif order.status == 'SHIPPED' %}<i class="ph ph-truck"></i> Shipped
+                                                    {% elif order.status == 'DELIVERED' %}<i class="ph ph-check-circle"></i> Delivered
+                                                    {% elif order.status == 'REFUNDED' %}<i class="ph ph-arrow-u-up-left"></i> Refunded
+                                                    {% else %}<i class="ph ph-x-circle"></i> Cancelled{% endif %}
+                                                </span>
+                                                {% if order.payment_method == 'COD' and order.status != 'DELIVERED' and order.status != 'CANCELLED' %}
+                                                    <span class="cod-badge"><i class="ph ph-money"></i> COD</span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <h5 class="mb-1" style="font-weight: bold; color: #333;">{{ order.product.title }}</h5>
+                                            <p class="mb-0 text-muted" style="font-size: 13px;">
+                                                <strong>Sold By:</strong> {{ order.product.listed_by.username }} &nbsp;|&nbsp; 
+                                                <strong>Qty:</strong> {{ order.quantity|floatformat:0 }} {{ order.product.unit_of_measure }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 text-md-end border-start">
+                                    <h4 class="fw-bold mb-3" style="color: #1b5e20;">₹{{ order.total_amount }}</h4>
+                                    
+                                    <div class="d-grid gap-2">
+                                        {% if order.status != 'CANCELLED' %}
+                                            
+                                            {% if order.payment_method != 'COD' or order.status == 'DELIVERED' %}
+                                                <a href="{% url 'farmer_invoice_detail' order.order_id %}" class="btn btn-sm fw-bold" style="background: #f1f8e9; color: #1b5e20; border: 1px solid #c5e1a5; border-radius: 10px;">
+                                                    <i class="ph ph-receipt me-1"></i> Invoice
+                                                </a>
+                                            {% else %}
+                                                <button class="btn btn-sm fw-bold" style="background: #fffde7; color: #f57f17; border: 1px dashed #fbc02d; border-radius: 10px; cursor: not-allowed;" disabled title="Invoice will be generated once cash is paid on delivery">
+                                                    <i class="ph ph-clock-countdown me-1"></i> Bill Pending
+                                                </button>
+                                            {% endif %}
+                                            {% endif %}
+
+                                        <a href="{% url 'farmer_order_details' order.order_id %}" class="btn btn-sm fw-bold" style="background: #1b5e20; color: #fff; border-radius: 10px;">
+                                            <i class="ph ph-eye me-1"></i> View Details
+                                        </a>
+
+                                        {% if order.status == 'DELIVERED' %}
+                                            <a href="{% url 'farmer_input_detail' order.product.id %}" class="btn btn-sm fw-bold" style="background: #fbc02d; color: #1b5e20; border-radius: 10px;">
+                                                <i class="ph ph-arrows-clockwise me-1"></i> Buy Again
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="glass-widget p-5 text-center">
+                            <i class="ph ph-shopping-bag-open text-muted" style="font-size: 80px;"></i>
+                            <h4 class="mt-3" style="color: #1b5e20;">No orders found</h4>
+                            <p class="text-muted">We couldn't find any orders matching your selection.</p>
+                            <a href="{% url 'farmer_input_market' %}" class="btn btn-success mt-2 fw-bold px-4 rounded-pill shadow">Start Shopping</a>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/animation.js' %}"></script>
+</body>
+</html>

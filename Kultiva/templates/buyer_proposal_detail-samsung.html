@@ -1,0 +1,263 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kultiva - Trade Proposal Details</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        
+        /* Enterprise Glassmorphism Cards */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 15px; 
+            padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            height: 100%; 
+        }
+        
+        /* Status Banner Styling */
+        .status-banner { padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 25px; font-size: 14px; }
+        .banner-pending { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        .banner-accepted { background: #e8f5e9; color: #2e7d32; border: 1px solid #c5e1a5; }
+        .banner-rejected { background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; }
+
+        /* Dynamic Specification Table */
+        .spec-table th, .spec-table td { padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .spec-table th { color: #888; width: 40%; font-weight: 500; }
+        .spec-table td { font-weight: 700; color: #1e293b; text-align: right; }
+        
+        .message-box { background: #f8f9fa; border-left: 4px solid #0288d1; padding: 20px; border-radius: 5px; font-style: italic; color: #555; }
+    </style>
+</head>
+<body>
+
+    {% include 'buyer_header.html' %}
+
+    <div class="container mb-5">
+        
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb" style="font-size: 13px; font-weight: bold;">
+                <li class="breadcrumb-item"><a href="{% url 'buyer_negotiations' %}" style="color: #0288d1; text-decoration: none;">Negotiation Hub</a></li>
+                <li class="breadcrumb-item active" aria-current="page" style="color: #888;">Trade Reference #{{ proposal.id }}</li>
+            </ol>
+        </nav>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="glass-card" style="border-top: 5px solid #1e293b;">
+                    
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h2 style="color: #0288d1; font-weight: bold; margin: 0;">{{ listing.title }}</h2>
+                            <span class="badge bg-secondary mt-2"><i class="fa fa-tag"></i> {{ listing.get_category_display }}</span>
+                        </div>
+                        <div class="text-end">
+                            <h4 style="color: #1b5e20; font-weight: 900; margin: 0;">₹{{ proposal.proposed_price }}</h4>
+                            <small class="text-muted fw-bold">per {{ listing.unit_of_measure }}</small>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 style="font-weight: bold; color: #1e293b; border-bottom: 2px solid #eee; padding-bottom: 10px;">Vendor Information</h5>
+                            <table class="spec-table w-100">
+                                <tr><th>Farmer Name</th><td>{{ farmer.username }}</td></tr>
+                                <tr><th>Verification</th><td class="text-success"><i class="fa fa-check-circle"></i> Verified</td></tr>
+                                <tr><th>Origin District</th><td>{{ farmer.addresses.first.district|default:"Not Provided" }}</td></tr>
+                                <tr><th>State</th><td>{{ farmer.addresses.first.state|default:"Not Provided" }}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 style="font-weight: bold; color: #1e293b; border-bottom: 2px solid #eee; padding-bottom: 10px;">Commodity Specs</h5>
+                            <table class="spec-table w-100">
+                                <tr><th>Requested Quantity</th><td style="color: #f57f17; font-size: 16px;"><i class="fa fa-shopping-basket"></i> {{ proposal.requested_quantity }} {{ listing.unit_of_measure }}</td></tr>
+                                
+                                <tr style="background: #f1f8e9;">
+                                    <th style="color: #1b5e20; padding-left: 10px;"><i class="fa fa-money"></i> Total Escrow Value</th>
+                                    <td style="color: #1b5e20; font-size: 18px; font-weight: 900; padding-right: 10px;">₹{{ proposal.total_amount|floatformat:2 }}</td>
+                                </tr>
+
+                                {% if listing.is_organic %}
+                                <tr><th>Certification</th><td class="text-success"><i class="fa fa-leaf"></i> Organic</td></tr>
+                                {% endif %}
+                                {% if listing.grade %}
+                                <tr><th>Quality Grade</th><td>{{ listing.grade }}</td></tr>
+                                {% endif %}
+                                {% for key, value in formatted_specs.items %}
+                                <tr><th style="text-transform: capitalize;">{{ key }}</th><td>{{ value }}</td></tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 pt-3 fw-bold" style="color: #1e293b;">Negotiation Notes</h5>
+                    <div class="message-box mt-2">
+                        "{{ proposal.message|default:'No custom notes were attached to this proposal.' }}"
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-4">
+                <div class="glass-card text-center" style="border-top: 5px solid #0288d1;">
+                    
+                    {% if proposal.status == 'PENDING' %}
+                        
+                        {% if is_buyer_initiated %}
+                            <div class="status-banner banner-pending"><i class="fa fa-paper-plane"></i> Outbound Bid Sent</div>
+                            <div style="width: 80px; height: 80px; background: #f57f17; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 15px;">
+                                <i class="fa fa-hourglass-half"></i>
+                            </div>
+                            <h4 style="font-weight: bold; color: #f57f17; margin: 0;">Awaiting Farmer</h4>
+                            <p class="text-muted mt-3" style="font-size: 13px;">You have proposed this deal to <strong>{{ farmer.username }}</strong>. You will be notified via email once they review your offer.</p>
+                            
+                            {% if can_revoke %}
+                                <form action="{% url 'respond_to_proposal' proposal.id %}" method="POST" class="mt-3">
+                                    {% csrf_token %}
+                                    <button type="submit" name="action" value="CANCEL" class="btn btn-outline-warning w-100 py-2 rounded-pill fw-bold shadow-sm" style="border-width: 2px;">
+                                        <i class="fa fa-undo"></i> Revoke Offer
+                                    </button>
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted" style="font-size: 11px;"><i class="fa fa-info-circle"></i> You can cancel this offer within 24 hours of sending.</small>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-outline-secondary w-100 mt-3 rounded-pill" disabled>Bid Locked</button>
+                            {% endif %}
+                        
+                        {% else %}
+                            <div class="status-banner banner-pending" style="background: #e3f2fd; color: #0288d1; border-color: #bbdefb;"><i class="fa fa-inbox"></i> Inbound Offer Received</div>
+                            <h4 style="font-weight: bold; color: #0288d1;">Action Required</h4>
+                            <p class="text-muted mt-2" style="font-size: 13px;">Review the terms carefully. Accepting this will securely lock the contract for <strong class="text-success">₹{{ proposal.total_amount|floatformat:2 }}</strong>.</p>
+                            
+                            <button type="button" class="btn btn-success w-100 py-3 rounded-pill fw-bold mb-2 shadow-sm mt-4" style="background: #2e7d32; font-size: 16px;" data-bs-toggle="modal" data-bs-target="#acceptModal">
+                                <i class="fa fa-check"></i> Accept Proposal
+                            </button>
+                            
+                            <button type="button" class="btn btn-outline-danger w-100 py-2 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <i class="fa fa-times"></i> Reject & Close
+                            </button>
+                        {% endif %}
+
+                    {% elif proposal.status == 'ACCEPTED' %}
+                        
+                        {% if not proposal.is_paid %}
+                            <div class="status-banner banner-pending" style="background: #fff8e1; color: #f57f17; border-color: #ffecb3;"><i class="fa fa-shield"></i> Escrow Funding Required</div>
+                            <div style="width: 80px; height: 80px; background: #fbc02d; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; margin: 0 auto 15px;">
+                                <i class="fa fa-lock"></i>
+                            </div>
+                            <h4 style="color: #f57f17; font-weight: bold;">Action Required</h4>
+                            <p class="text-muted mt-3" style="font-size: 13px;">The contract is agreed! To generate the farmer's delivery QR code and trigger dispatch, you must securely lock the funds.</p>
+                            
+                            <a href="{% url 'buyer_escrow_detail' proposal.id %}" class="btn btn-warning w-100 py-3 rounded-pill fw-bold text-dark mt-3 shadow-sm" style="font-size: 16px;">
+                                <i class="fa fa-shield"></i> Fund Escrow Vault
+                            </a>
+                        
+                        {% else %}
+                            <div class="status-banner banner-accepted"><i class="fa fa-handshake-o"></i> Contract Secured</div>
+                            <div style="width: 80px; height: 80px; background: #2e7d32; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; margin: 0 auto 15px;">
+                                <i class="fa fa-check"></i>
+                            </div>
+                            <h4 style="color: #2e7d32; font-weight: bold;">Vault Funded</h4>
+                            <p class="text-muted mt-3" style="font-size: 13px;">Funds are securely locked in Escrow. The farmer has received the dispatch QR code. Please prepare for physical delivery.</p>
+                            
+                            <a href="{% url 'buyer_escrow_detail' proposal.id %}" class="btn btn-outline-success w-100 py-3 rounded-pill fw-bold mt-3 shadow-sm" style="border-width: 2px; font-size: 16px;">
+                                <i class="fa fa-truck"></i> Track Delivery
+                            </a>
+                        {% endif %}
+
+                    {% elif proposal.status == 'COMPLETED' %}
+                        <div class="status-banner banner-accepted" style="background: #e8f5e9; color: #1b5e20; border-color: #c5e1a5;"><i class="fa fa-check-circle"></i> Deal Completed</div>
+                        <div style="width: 80px; height: 80px; background: #1b5e20; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; margin: 0 auto 15px;">
+                            <i class="fa fa-flag-checkered"></i>
+                        </div>
+                        <h4 style="color: #1b5e20; font-weight: bold;">Delivery Successful</h4>
+                        <p class="text-muted mt-3" style="font-size: 13px;">The crops have been received and the escrow funds have been successfully released to the farmer.</p>
+                        
+                        <a href="{% url 'buyer_escrow_detail' proposal.id %}" class="btn btn-success w-100 py-3 rounded-pill fw-bold mt-3 shadow-sm" style="background: #1b5e20; font-size: 16px;">
+                            <i class="fa fa-file-text-o"></i> View Digital Receipt
+                        </a>
+                    {% else %}
+                        <div class="status-banner banner-rejected"><i class="fa fa-ban"></i> Deal Closed</div>
+                        <i class="fa fa-times-circle fa-5x mb-3" style="color: #ef9a9a;"></i>
+                        <h4 style="color: #d32f2f; font-weight: bold;">{{ proposal.status }}</h4>
+                        <p class="text-muted mt-2" style="font-size: 13px;">This negotiation was closed and is no longer active.</p>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="acceptModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border-top: 5px solid #2e7d32;">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color: #2e7d32;"><i class="fa fa-check-circle"></i> Accept Offer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{% url 'respond_to_proposal' proposal.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ACCEPT">
+                    <div class="modal-body">
+                        <p class="text-muted" style="font-size: 13px;">You are accepting the proposal for <strong>{{ proposal.requested_quantity }} {{ listing.unit_of_measure }}</strong> at <strong>₹{{ proposal.total_amount|floatformat:2 }}</strong>.</p>
+                        <div class="mt-3">
+                            <label class="fw-bold" style="font-size: 13px;">Message to Farmer (Optional)</label>
+                            <textarea name="buyer_message" class="form-control" rows="3" placeholder="e.g. Great! I will fund the escrow shortly." style="border-radius: 10px;"></textarea>
+                            <small class="text-muted" style="font-size: 11px;">This will be included in the automated acceptance email.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background: #f9f9f9; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn text-white rounded-pill fw-bold" style="background: #2e7d32;">Confirm Acceptance</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="rejectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border-top: 5px solid #d32f2f;">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color: #d32f2f;"><i class="fa fa-times-circle"></i> Reject Offer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{% url 'respond_to_proposal' proposal.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="REJECT">
+                    <div class="modal-body">
+                        <div class="mt-2">
+                            <label class="fw-bold" style="font-size: 13px;">Reason for Rejection <span class="text-danger">*</span></label>
+                            <textarea name="buyer_message" class="form-control" rows="3" placeholder="e.g. The price is slightly too high for my current budget." required style="border-radius: 10px;"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background: #f9f9f9; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn text-white rounded-pill fw-bold" style="background: #d32f2f;">Confirm Rejection</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

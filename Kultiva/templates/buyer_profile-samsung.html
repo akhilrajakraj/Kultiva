@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Kultiva - Buyer Business Profile</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+
+    <style>
+        body { 
+            padding-top: 110px; 
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid #0288d1; /* Corporate Blue */
+        }
+
+        .section-title {
+            color: #01579b;
+            font-weight: bold;
+            border-bottom: 2px solid #fbc02d;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            margin-top: 20px;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            background: transparent;
+            padding: 10px 0;
+            outline: none;
+            transition: 0.3s;
+        }
+        .form-control-custom:focus { border-bottom-color: #0288d1; }
+        
+        .form-control-custom[readonly] {
+            color: #888;
+            border-bottom: 2px dashed #ddd;
+            background-color: rgba(0,0,0,0.02);
+            cursor: not-allowed;
+        }
+
+        .btn-submit {
+            background-color: #0288d1;
+            color: white;
+            font-weight: bold;
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: none;
+            transition: 0.3s;
+            width: 100%;
+            margin-top: 20px;
+            text-transform: uppercase;
+        }
+        .btn-submit:hover { background-color: #fbc02d; color: #1b5e20; }
+        
+        .corporate-badge {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #b3e5fc;
+            display: inline-block;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'buyer_header.html' %}
+
+    <div class="container pb-5 wow fadeInUp">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3">
+                            <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="form-card mt-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: #0288d1; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-right: 15px; border: 2px solid #b3e5fc;">
+                            <i class="fa fa-building"></i>
+                        </div>
+                        <div>
+                            <h3 style="color: #01579b; font-weight: bold; margin: 0;">Enterprise Settings</h3>
+                            <div class="corporate-badge"><i class="fa fa-shield-alt"></i> Verified Buyer</div>
+                        </div>
+                    </div>
+                    
+                    <form action="{% url 'buyer_profile' %}" method="POST">
+                        {% csrf_token %}
+
+                        <h5 class="section-title"><i class="fa fa-user-tie"></i> Account Details</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">Username</label>
+                                <input type="text" name="username" class="form-control-custom" value="{{ request.user.username }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">Email Address <i class="fa fa-lock" title="Cannot be changed"></i></label>
+                                <input type="email" class="form-control-custom" value="{{ request.user.email }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">Phone Number</label>
+                                <input type="tel" name="phone" id="phoneInput" class="form-control-custom" value="{{ request.user.phone_number }}" required pattern="[0-9]{10}" maxlength="10">
+                            </div>
+                        </div>
+
+                        <h5 class="section-title"><i class="fa fa-briefcase"></i> Enterprise Profile</h5>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="fw-bold text-muted">Company Name</label>
+                                <input type="text" name="company_name" class="form-control-custom" value="{{ profile.company_name|default:'' }}" required>
+                            </div>
+                        </div>
+
+                        <h5 class="section-title"><i class="fa fa-map-marked-alt"></i> Shipping & Billing Hub</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">City / Town</label>
+                                <input type="text" name="village" class="form-control-custom" value="{{ address.village|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">District</label>
+                                <input type="text" name="district" class="form-control-custom" value="{{ address.district|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">State</label>
+                                <input type="text" name="state" class="form-control-custom" value="{{ address.state|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">Pincode</label>
+                                <input type="text" name="pincode" class="form-control-custom" value="{{ address.pincode|default:'' }}" required pattern="[0-9]{6}">
+                            </div>
+                        </div>
+
+                        <h5 class="section-title"><i class="fa fa-file-invoice-dollar"></i> Verified Corporate Credentials <i class="fa fa-lock float-right text-muted" style="font-size: 14px; margin-top: 5px;"></i></h5>
+                        <p class="text-muted" style="font-size: 12px; margin-top: -15px; margin-bottom: 20px;">These credentials have been verified by Kultiva Admin for B2B trading and cannot be altered.</p>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">Corporate GST Number</label>
+                                <input type="text" class="form-control-custom" value="{{ masked_gst }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-bold text-muted">Import/Export Code (IEC)</label>
+                                <input type="text" class="form-control-custom" value="{{ masked_iec }}" readonly>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="fa fa-save"></i> Save Profile Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 🔬 THE FIX: Strict Phone Number format enforcer
+        const phoneInput = document.getElementById('phoneInput');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, ''); 
+            });
+        }
+
+        // Pincode Automation Logic
+        const pincodeInput = document.querySelector('input[name="pincode"]');
+        const districtInput = document.querySelector('input[name="district"]');
+        const stateInput = document.querySelector('input[name="state"]');
+
+        if (pincodeInput && districtInput && stateInput) {
+            pincodeInput.addEventListener('input', function() {
+                const pincode = this.value.trim();
+
+                if (pincode.length === 6 && /^\d{6}$/.test(pincode)) {
+                    
+                    const originalDistrict = districtInput.value;
+                    districtInput.value = "Validating Location...";
+
+                    fetch(`/api/pincode/${pincode}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                districtInput.value = data.district;
+                                districtInput.style.borderBottom = '2px solid #0288d1'; 
+                                
+                                stateInput.value = data.state;
+                                stateInput.style.borderBottom = '2px solid #0288d1';
+                                
+                                districtInput.style.backgroundColor = 'rgba(2, 136, 209, 0.05)';
+                                stateInput.style.backgroundColor = 'rgba(2, 136, 209, 0.05)';
+                                setTimeout(() => {
+                                    districtInput.style.backgroundColor = 'transparent';
+                                    stateInput.style.backgroundColor = 'transparent';
+                                }, 800);
+
+                            } else {
+                                if (districtInput.value === "Validating Location...") {
+                                    districtInput.value = originalDistrict;
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Buyer Profile Pincode API Error:', error);
+                            if (districtInput.value === "Validating Location...") {
+                                districtInput.value = originalDistrict;
+                            }
+                        });
+                }
+            });
+        }
+    });
+  </script>
+
+</body>
+</html>

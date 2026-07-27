@@ -1,0 +1,351 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva - Escrow Details</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: 100%; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; color: #555; }
+        .spec-table th, .spec-table td { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .spec-table th { color: #888; width: 50%; font-weight: 500; }
+        .spec-table td { font-weight: 700; color: #1e293b; text-align: right; }
+        
+        .form-floating-custom { position: relative; margin-bottom: 20px; }
+        .form-floating-custom input, .form-floating-custom select, .form-floating-custom textarea { width: 100%; padding: 15px 20px 15px 50px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; background: #fafafa; transition: 0.3s; }
+        .form-floating-custom input:focus, .form-floating-custom select:focus, .form-floating-custom textarea:focus { border-color: #0288d1; background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(2, 136, 209, 0.1); }
+        .form-floating-custom i { position: absolute; left: 20px; top: 18px; color: #888; font-size: 18px; }
+        
+        input[type="month"], input[type="datetime-local"] { padding-left: 50px !important; font-family: 'Times New Roman', Times, serif; }
+        
+        .pay-btn { background: #0288d1; color: #fff; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 10px; width: 100%; transition: 0.3s; }
+        .pay-btn:hover:not(:disabled) { background: #fbc02d; color: #1e293b; cursor: pointer; }
+        .pay-btn:disabled { background: #b0bec5; color: #ffffff; cursor: not-allowed; opacity: 0.7; }
+        
+        .error-msg { color: #d32f2f; font-size: 12px; font-weight: bold; display: none; margin-top: 5px; margin-left: 10px; }
+        
+        /* Review Image Preview Styles */
+        .file-upload-wrapper { border: 2px dashed #1b5e20; border-radius: 8px; padding: 30px; text-align: center; background: #f1f8e9; cursor: pointer; transition: 0.3s; }
+        .file-upload-wrapper:hover { background: #e8f5e9; }
+        .image-preview-container { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .image-preview-container img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #c5e1a5; }
+    </style>
+</head>
+<body>
+    {% include 'buyer_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb" style="font-size: 13px; font-weight: bold;">
+                <li class="breadcrumb-item"><a href="{% url 'buyer_escrow_list' %}" style="color: #0288d1; text-decoration: none;">Escrow Tracking</a></li>
+                <li class="breadcrumb-item active" aria-current="page" style="color: #888;">Contract #KUL-{{ proposal.id }}</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="glass-card" style="border-top: 5px solid #1e293b;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 style="color: #1e293b; font-weight: bold; margin: 0;">Contract Details</h4>
+                        <span class="badge bg-secondary">Ref: #KUL-{{ proposal.id }}</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span><strong>Vendor (Farmer)</strong></span>
+                        <span>{{ listing.listed_by.username }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span><strong>Commodity</strong></span>
+                        <span style="color: #1b5e20; font-weight: bold;">{{ listing.title }}</span>
+                    </div>
+
+                    <h6 class="fw-bold mt-4 mb-2" style="color: #0288d1;">Specifications & Terms</h6>
+                    <table class="spec-table w-100 mb-4">
+                        <tr><th>Quantity Locked</th><td>{{ proposal.requested_quantity }} {{ listing.unit_of_measure }}</td></tr>
+                        <tr><th>Agreed Rate</th><td>₹{{ proposal.proposed_price }} / {{ listing.unit_of_measure }}</td></tr>
+                        {% for key, value in formatted_specs.items %}
+                            <tr><th style="text-transform: capitalize;">{{ key }}</th><td>{{ value }}</td></tr>
+                        {% endfor %}
+                    </table>
+
+                    <div style="background: #fff8e1; padding: 20px; border-radius: 10px; border-left: 5px solid #fbc02d; text-align: center;">
+                        <span style="font-size: 13px; color: #555; text-transform: uppercase; font-weight: bold;">Total Escrow Requirement</span>
+                        <h2 style="color: #f57f17; font-weight: 900; margin: 5px 0 0 0;">₹{{ proposal.total_amount|floatformat:2 }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="glass-card" style="border-top: 5px solid #0288d1;">
+                    
+                    {% if proposal.status == 'CANCELLED' and not proposal.is_paid %}
+                        <div class="text-center" style="padding: 20px 0;">
+                            <div style="width: 80px; height: 80px; background: #ffebee; border: 3px solid #c62828; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; color: #c62828; margin: 0 auto 15px;">
+                                <i class="fa fa-ban"></i>
+                            </div>
+                            <h3 style="color: #c62828; font-weight: bold;">Contract Cancelled</h3>
+                            <p class="text-muted">This trade proposal was revoked before escrow funding.</p>
+                        </div>
+                        
+                    {% elif proposal.status == 'REFUNDED' %}
+                        <div class="text-center" style="padding: 20px 0;">
+                            <div style="width: 80px; height: 80px; background: #e8f5e9; border: 3px solid #2e7d32; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; color: #2e7d32; margin: 0 auto 15px;">
+                                <i class="fa fa-check-circle"></i>
+                            </div>
+                            <h3 style="color: #2e7d32; font-weight: bold;">Refund Successful</h3>
+                            
+                            <div style="background: #f1f8e9; border: 1px solid #c5e1a5; padding: 20px; border-radius: 8px; margin-top: 25px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                                <h6 style="color: #2e7d32; font-weight: bold; margin-bottom: 5px;"><i class="fa fa-money"></i> Funds Returned</h6>
+                                <p style="margin: 0; color: #1e293b; font-size: 14px;">The Kultiva Admin team has successfully processed and returned your escrow deposit.</p>
+                                <p style="margin: 8px 0 0 0; font-size: 13px; color: #555;">Please check your original payment method. The amount of <strong>₹{{ proposal.total_amount|floatformat:2 }}</strong> should reflect within 3-5 business days.</p>
+                            </div>
+                        </div>
+
+                    {% elif proposal.status == 'CANCELLED' %}
+                        <div class="text-center" style="padding: 20px 0;">
+                            <div style="width: 80px; height: 80px; background: #fff3e0; border: 3px solid #e65100; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; color: #e65100; margin: 0 auto 15px;">
+                                <i class="fa fa-clock-o"></i>
+                            </div>
+                            <h3 style="color: #e65100; font-weight: bold;">Escrow Refund Initiated</h3>
+                            
+                            <div style="background: #fff8e1; border: 1px solid #ffecb3; padding: 20px; border-radius: 8px; margin-top: 25px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                                <h6 style="color: #f57f17; font-weight: bold; margin-bottom: 5px;"><i class="fa fa-shield"></i> Under Refund Policy</h6>
+                                <p style="margin: 0; color: #1e293b; font-size: 14px;">This trade order has been halted and is currently being processed under our Escrow Refund Policy.</p>
+                                <p style="margin: 8px 0 0 0; font-size: 13px; color: #555;">Our administrative team is reviewing the dispute. Authorized funds will be returned to your original payment method within 3-5 business days.</p>
+                            </div>
+                        </div>
+
+                    {% elif not proposal.is_paid %}
+                        <h4 style="color: #0288d1; font-weight: bold; margin-bottom: 20px;"><i class="fa fa-shield"></i> Fund Escrow Vault</h4>
+                        <p class="text-muted mb-4" style="font-size: 13px;">Your money is protected. It will only be transferred to the farmer upon successful physical verification (QR Scan) at delivery.</p>
+
+                        <form id="paymentForm" action="{% url 'fund_escrow' proposal.id %}" method="POST">
+                            {% csrf_token %}
+                            <div class="form-floating-custom">
+                                <i class="fa fa-user"></i>
+                                <input type="text" id="cardName" autocomplete="cc-name" placeholder="Name on Card" required>
+                                <div class="error-msg" id="nameError">Name must be at least 3 characters</div>
+                            </div>
+                            <div class="form-floating-custom">
+                                <i class="fa fa-credit-card"></i>
+                                <input type="text" id="cardNumber" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                                <div class="error-msg" id="cardError">Please enter a valid 16-digit card number</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-floating-custom">
+                                        <i class="fa fa-calendar"></i>
+                                        <input type="month" id="cardExpiry" autocomplete="cc-exp" required title="Select expiration month and year">
+                                        <div class="error-msg" id="expiryError">Expiry date is required</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating-custom">
+                                        <i class="fa fa-lock"></i>
+                                        <input type="password" id="cardCvv" autocomplete="cc-csc" placeholder="CVV" maxlength="3" required>
+                                        <div class="error-msg" id="cvvError">Invalid CVV (3 digits)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="submitBtn" class="pay-btn mt-2" disabled>
+                                <i class="fa fa-lock"></i> Deposit ₹{{ proposal.total_amount|floatformat:2 }}
+                            </button>
+                        </form>
+
+                    {% else %}
+                        <div class="text-center" style="padding: 20px 0;">
+                            <div style="width: 80px; height: 80px; background: #e8f5e9; border: 3px solid #2e7d32; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; color: #2e7d32; margin: 0 auto 15px;">
+                                <i class="fa fa-check"></i>
+                            </div>
+                            <h3 style="color: #2e7d32; font-weight: bold;">Funds Securely Locked</h3>
+                            
+                            {% if proposal.scheduled_pickup_date %}
+                                <div style="background: #e3f2fd; border-left: 4px solid #0288d1; padding: 20px; border-radius: 8px; margin-top: 25px; text-align: left;">
+                                    <h6 style="color: #0288d1; font-weight: bold; margin-bottom: 5px;"><i class="fa fa-calendar-check-o"></i> Logistics Scheduled</h6>
+                                    <p style="margin: 0; color: #1e293b; font-size: 16px;">Your truck arrives on:<br><strong>{{ proposal.scheduled_pickup_date|date:"F j, Y \a\t g:i A" }}</strong></p>
+                                    <p style="margin: 8px 0 0 0; font-size: 13px; color: #555;">The farmer has been notified and will have the goods ready for QR scanning.</p>
+                                </div>
+                            {% else %}
+                                <div style="background: #fff8e1; border: 1px solid #ffecb3; padding: 25px; border-radius: 10px; margin-top: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
+                                    <h5 style="color: #f57f17; font-weight: bold; margin-bottom: 10px; text-align: center;"><i class="fa fa-truck"></i> Schedule Truck Arrival</h5>
+                                    <p style="font-size: 13px; color: #555; margin-bottom: 20px; text-align: center;">Let the farmer know when your logistics team will arrive to pick up the harvest.</p>
+                                    
+                                    <form action="{% url 'schedule_pickup' proposal.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="form-floating-custom mb-3">
+                                            <i class="fa fa-calendar"></i>
+                                            <input type="datetime-local" name="pickup_datetime" required style="padding-left: 50px; font-family: inherit; font-size: 14px;" class="form-control">
+                                        </div>
+                                        <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm" style="border-radius: 50px; padding: 12px; color: #1e293b;">
+                                            <i class="fa fa-paper-plane"></i> Confirm & Notify Farmer
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+
+                            <hr style="margin: 30px 0; border-color: #eee;">
+                            <p style="font-size: 12px; color: #888; text-align: left; margin-bottom: 10px;">Encountered an issue with the vendor or delivery?</p>
+                            <button class="btn btn-outline-danger w-100 py-2 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#refundModal">
+                                <i class="fa fa-exclamation-triangle"></i> Report Issue / Request Refund
+                            </button>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="refundModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border-top: 5px solid #d32f2f;">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color: #d32f2f;"><i class="fa fa-shield"></i> Escrow Dispute Resolution</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{% url 'request_refund' proposal.id %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p class="text-muted" style="font-size: 13px;">If the farmer has cancelled the delivery or the goods failed quality checks, you can request a refund.</p>
+                        <div class="form-floating-custom mt-3">
+                            <i class="fa fa-list"></i>
+                            <select name="reason" class="form-control" style="padding-left: 50px;" required>
+                                <option value="" disabled selected>Select reason for refund...</option>
+                                <option value="Farmer Cancelled">Vendor / Farmer Cancelled Order</option>
+                                <option value="Quality Issue">Goods Failed Quality Inspection</option>
+                                <option value="Non-Delivery">Goods Never Arrived (Non-Delivery)</option>
+                                <option value="Other">Other Escrow Issue</option>
+                            </select>
+                        </div>
+                        <div class="form-floating-custom">
+                            <i class="fa fa-commenting-o"></i>
+                            <textarea name="description" rows="3" placeholder="Provide detailed verification..." required style="padding-top: 15px;"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background: #f9f9f9; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn text-white rounded-pill fw-bold" style="background: #d32f2f;">Submit Dispute</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        // 1. IMAGE UPLOAD PREVIEW SCRIPT
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+        if(imageUpload) {
+            imageUpload.addEventListener('change', function() {
+                imagePreviewContainer.innerHTML = ''; 
+                
+                if (this.files) {
+                    Array.from(this.files).forEach(file => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                imagePreviewContainer.appendChild(img);
+                            }
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
+            });
+        }
+
+        // 2. ESCROW PAYMENT VALIDATION SCRIPT (WITH DYNAMIC DATE LOCK)
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('paymentForm');
+            if(!form) return; 
+
+            const cardName = document.getElementById('cardName');
+            const cardNumber = document.getElementById('cardNumber');
+            const cardCvv = document.getElementById('cardCvv');
+            const cardExpiry = document.getElementById('cardExpiry');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Dynamically lock past months
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = String(today.getMonth() + 1).padStart(2, '0'); 
+            const minMonthStr = `${currentYear}-${currentMonth}`; 
+            
+            if (cardExpiry) {
+                cardExpiry.setAttribute('min', minMonthStr);
+            }
+
+            function checkFormValidity() {
+                let isValid = true;
+                if(cardName.value.trim().length < 3) { isValid = false; }
+                if(cardNumber.value.replace(/\s/g, '').length !== 16) { isValid = false; }
+                if(cardCvv.value.length !== 3) { isValid = false; }
+                if(!cardExpiry.value || cardExpiry.value < minMonthStr) { isValid = false; }
+                submitBtn.disabled = !isValid;
+            }
+
+            cardName.addEventListener('input', checkFormValidity);
+            cardExpiry.addEventListener('input', checkFormValidity);
+            cardExpiry.addEventListener('change', checkFormValidity);
+
+            cardNumber.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 16) value = value.slice(0, 16);
+                let formatted = value.match(/.{1,4}/g);
+                e.target.value = formatted ? formatted.join(' ') : value;
+                checkFormValidity();
+            });
+
+            cardCvv.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
+                checkFormValidity();
+            });
+
+            form.addEventListener('submit', function(e) {
+                if(!submitBtn.disabled) {
+                    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing Escrow...';
+                } else {
+                    e.preventDefault();
+                }
+            });
+
+            const inputs = [cardName, cardNumber, cardExpiry, cardCvv];
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    const errorDiv = document.getElementById(this.id.replace('card', '').toLowerCase() + 'Error') || document.getElementById(this.id + 'Error');
+                    if(errorDiv) {
+                        if(this.id === 'cardName' && this.value.trim().length < 3 && this.value !== '') { errorDiv.style.display = 'block'; }
+                        else if(this.id === 'cardNumber' && this.value.replace(/\s/g, '').length !== 16 && this.value !== '') { errorDiv.style.display = 'block'; }
+                        else if(this.id === 'cardCvv' && this.value.length !== 3 && this.value !== '') { errorDiv.style.display = 'block'; }
+                        else if(this.id === 'cardExpiry' && (this.value === '' || this.value < minMonthStr)) { 
+                            errorDiv.innerText = this.value < minMonthStr ? "Card has expired" : "Expiry date is required";
+                            errorDiv.style.display = 'block'; 
+                        }
+                        else { errorDiv.style.display = 'none'; }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

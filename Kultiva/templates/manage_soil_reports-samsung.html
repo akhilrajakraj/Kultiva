@@ -1,0 +1,318 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Kultiva Admin - Soil Lab Requests</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    
+    <style>
+        body { padding-top: 110px; }
+        .management-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid #fbc02d; /* Yellow for Labs */
+        }
+        .table-custom th { color: #1b5e20; border-top: none; text-transform: uppercase; font-size: 13px; }
+        .table-custom td { vertical-align: middle; color: #555; }
+        .badge-status { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        
+        /* Interactive Input Fields */
+        .modal-input { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 8px 15px; outline: none; transition: 0.3s; }
+        .modal-input:focus { border-color: #2e7d32; box-shadow: 0 0 5px rgba(46, 125, 50, 0.3); }
+        .hidden-fields { display: none; background: #f1f8e9; padding: 15px; border-radius: 10px; border: 1px dashed #c5e1a5; margin-top: 15px; }
+    </style>
+</head>
+
+<body>
+    {% include 'admin_header.html' %}
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <strong><i class="fa fa-info-circle"></i></strong> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="management-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 style="color: #1b5e20; font-weight: bold;"><i class="fa fa-flask"></i> Soil Lab Requests</h3>
+                <span class="text-muted"><i class="fa fa-bar-chart"></i> Total Requests: {{ reports.count }}</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-custom">
+                    <thead style="background: #f9f9f9;">
+                        <tr>
+                            <th>Farmer</th>
+                            <th>Request Date</th>
+                            <th>Farm Location</th>
+                            <th>Prev Crop</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr>
+                            <td><strong>{{ report.farmer.username }}</strong><br><small class="text-muted">{{ report.farmer.email }}</small></td>
+                            <td>{{ report.request_date|date:"M d, Y" }}</td>
+                            
+                            <td>
+                                {% if report.farm_address %}
+                                    <strong class="text-dark">{{ report.farm_address.village|title }}</strong><br>
+                                    <small class="text-muted">{{ report.farm_address.district|title }}</small>
+                                {% else %}
+                                    <span class="text-danger small"><i class="fa fa-exclamation-triangle"></i> Legacy Data</span>
+                                {% endif %}
+                            </td>
+                            
+                            <td>{{ report.previous_crop|default:"N/A" }}</td>
+                            <td>
+                                {% if report.request_status == 'PENDING' %}
+                                    <span class="badge-status" style="background: rgba(251, 192, 45, 0.2); color: #f57f17;"><i class="fa fa-clock-o"></i> Pending</span>
+                                {% else %}
+                                    <span class="badge-status" style="background: rgba(46, 125, 50, 0.2); color: #2e7d32;"><i class="fa fa-check"></i> Completed</span>
+                                {% endif %}
+                            </td>
+                            
+                            <td class="text-center d-flex justify-content-center align-items-center">
+                                {% if report.report_file %}
+                                    <a href="{{ report.report_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle me-2" style="width: 35px; height: 35px; line-height: 22px;" title="View Uploaded Report">
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary rounded-circle me-2" style="width: 35px; height: 35px; line-height: 22px;" disabled title="No File Uploaded">
+                                        <i class="fa fa-file-excel-o"></i>
+                                    </button>
+                                {% endif %}
+                                
+                                <button class="btn btn-sm btn-outline-success rounded-circle" style="width: 35px; height: 35px; line-height: 22px;" 
+                                  onclick="openLabModal(
+                                      '{{ report.id }}', 
+                                      '{{ report.farmer.username|escapejs }}', 
+                                      '{{ report.request_status }}', 
+                                      '{{ report.ph }}', '{{ report.n }}', '{{ report.p }}', '{{ report.k }}',
+                                      '{{ report.farm_address.village|escapejs|default:"" }}',
+                                      '{{ report.farm_address.district|escapejs|default:"" }}',
+                                      '{{ report.farm_address.state|escapejs|default:"" }}',
+                                      '{{ report.farm_address.pincode|escapejs|default:"" }}',
+                                      '{{ report.farm_address.latitude|default:"" }}',
+                                      '{{ report.farm_address.longitude|default:"" }}',
+                                      '{{ report.farm_address|yesno:"true,false" }}'
+                                  )" title="Review & Process">
+                                  <i class="fa fa-eye"></i>
+                                </button>
+                            </td>
+                            </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">No soil lab requests found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="labModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border-top: 5px solid #2e7d32;">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="color: #1b5e20; font-weight: bold;"><i class="fa fa-edit"></i> Update Soil Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <form action="{% url 'update_soil_report' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" name="report_id" id="modal_report_id">
+                        
+                        <p class="text-muted mb-3">Updating records for Farmer: <strong id="modal_farmer_name" class="text-dark"></strong></p>
+
+                        <div id="modal_address_block" class="alert alert-info py-2 px-3 mb-4" style="background-color: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px;">
+                            <h6 class="text-primary fw-bold mb-2" style="font-size: 13px; text-transform: uppercase;">
+                                <i class="fa fa-map-marked-alt me-1"></i> Target Farm Location
+                            </h6>
+                            
+                            <div id="modal_address_content">
+                                <p class="mb-1" style="font-size: 14px; color: #333;">
+                                    <strong id="modal_village"></strong>, <span id="modal_district"></span>
+                                </p>
+                                <p class="mb-0 text-muted" style="font-size: 12px;">
+                                    <i class="fa fa-map-pin me-1"></i> State: <span id="modal_state"></span> | PIN: <span id="modal_pincode"></span><br>
+                                    <i class="fa fa-satellite me-1"></i> GPS: <span id="modal_gps"></span>
+                                </p>
+                            </div>
+                            
+                            <div id="modal_address_missing" style="display:none;">
+                                <p class="mb-0 text-danger fw-bold" style="font-size: 13px;">
+                                    <i class="fa fa-exclamation-triangle me-1"></i> Location Data Missing (Legacy Report)
+                                </p>
+                            </div>
+                        </div>
+                        <div id="followupAlert" class="alert alert-success mb-3" style="display: none; font-size: 13px;">
+                            <i class="fa fa-check-circle"></i> This test is already completed. Use the box below to send a follow-up email.
+                        </div>
+
+                        <div class="mb-3" id="statusSelectContainer">
+                            <label class="fw-bold" style="font-size: 13px; color: #555;">Update Status <span class="text-danger">*</span></label>
+                            <select name="status" id="modal_status" class="modal-input" required onchange="toggleTestFields()">
+                                <option value="PENDING">Pending Lab Test</option>
+                                <option value="COMPLETED">Test Completed / Data Uploaded</option>
+                            </select>
+                        </div>
+                        
+                        <input type="hidden" name="status" id="modal_status_hidden" disabled>
+
+                        <div id="testResultsFields" class="hidden-fields">
+                            <h6 style="font-size: 13px; font-weight: bold; color: #1b5e20; margin-bottom: 10px;">Input Lab Results</h6>
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <label style="font-size: 11px; font-weight:bold;">pH Level</label>
+                                    <input type="number" step="0.1" name="ph" id="modal_ph" class="modal-input" placeholder="e.g. 6.5">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label style="font-size: 11px; font-weight:bold;">Nitrogen (N)</label>
+                                    <input type="number" step="0.1" name="n" id="modal_n" class="modal-input" placeholder="kg/ha">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label style="font-size: 11px; font-weight:bold;">Phosphorus (P)</label>
+                                    <input type="number" step="0.1" name="p" id="modal_p" class="modal-input" placeholder="kg/ha">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label style="font-size: 11px; font-weight:bold;">Potassium (K)</label>
+                                    <input type="number" step="0.1" name="k" id="modal_k" class="modal-input" placeholder="kg/ha">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="fw-bold" id="message_label" style="font-size: 13px; color: #555;">Message to Farmer</label>
+                            <textarea name="admin_message" id="admin_message" class="modal-input" rows="3" placeholder="Type instructions or analysis notes here..."></textarea>
+                            <small class="text-muted" style="font-size: 11px;">This message will be included in the automated email.</small>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer" style="background: #f9f9f9; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="modal_submit_btn" class="btn text-white rounded-pill fw-bold" style="background: #1b5e20;"><i class="fa fa-envelope"></i> Save & Send Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        // 🔬 THE FIX: Updated function signature to accept the new address parameters
+        function openLabModal(id, farmerName, status, ph, n, p, k, village, district, state, pincode, lat, lon, hasAddress) {
+            document.getElementById('modal_report_id').value = id;
+            document.getElementById('modal_farmer_name').innerText = farmerName;
+            
+            // Populate Address Block dynamically
+            if (hasAddress === 'true') {
+                document.getElementById('modal_address_content').style.display = 'block';
+                document.getElementById('modal_address_missing').style.display = 'none';
+                
+                document.getElementById('modal_village').innerText = village;
+                document.getElementById('modal_district').innerText = district;
+                document.getElementById('modal_state').innerText = state;
+                document.getElementById('modal_pincode').innerText = pincode;
+                document.getElementById('modal_gps').innerText = lat + ', ' + lon;
+            } else {
+                document.getElementById('modal_address_content').style.display = 'none';
+                document.getElementById('modal_address_missing').style.display = 'block';
+            }
+
+            var statusContainer = document.getElementById('statusSelectContainer');
+            var statusSelect = document.getElementById('modal_status');
+            var hiddenStatus = document.getElementById('modal_status_hidden');
+            var followupAlert = document.getElementById('followupAlert');
+            var submitBtn = document.getElementById('modal_submit_btn');
+            var msgLabel = document.getElementById('message_label');
+            var msgArea = document.getElementById('admin_message');
+            var testFields = document.getElementById('testResultsFields');
+            
+            // Clear message box on open
+            msgArea.value = '';
+
+            if (status === 'COMPLETED') {
+                // --- MODE 2: FOLLOW-UP EMAIL MODE ---
+                statusContainer.style.display = 'none';
+                followupAlert.style.display = 'block';
+                
+                statusSelect.disabled = true;
+                hiddenStatus.disabled = false;
+                hiddenStatus.value = 'COMPLETED'; // Forces the backend to know it's a follow-up
+                
+                testFields.style.display = 'none';
+                document.getElementById('modal_ph').required = false;
+                document.getElementById('modal_n').required = false;
+                document.getElementById('modal_p').required = false;
+                document.getElementById('modal_k').required = false;
+                
+                msgLabel.innerText = 'Follow-up Email Message (Required)';
+                msgArea.required = true;
+                submitBtn.innerHTML = '<i class="fa fa-paper-plane"></i> Send Follow-up Email';
+                
+            } else {
+                // --- MODE 1: STANDARD GRADING MODE ---
+                statusContainer.style.display = 'block';
+                followupAlert.style.display = 'none';
+                
+                statusSelect.disabled = false;
+                statusSelect.value = status;
+                hiddenStatus.disabled = true;
+                
+                document.getElementById('modal_ph').value = ph !== 'None' ? ph : '';
+                document.getElementById('modal_n').value = n !== 'None' ? n : '';
+                document.getElementById('modal_p').value = p !== 'None' ? p : '';
+                document.getElementById('modal_k').value = k !== 'None' ? k : '';
+                
+                msgLabel.innerText = 'Message to Farmer';
+                msgArea.required = false;
+                submitBtn.innerHTML = '<i class="fa fa-envelope"></i> Save & Send Email';
+                
+                toggleTestFields(); // Check if they manually switch it to COMPLETED
+            }
+            
+            var modal = new bootstrap.Modal(document.getElementById('labModal'));
+            modal.show();
+        }
+
+        function toggleTestFields() {
+            var statusSelect = document.getElementById('modal_status');
+            var testFields = document.getElementById('testResultsFields');
+            
+            if (statusSelect.value === 'COMPLETED') {
+                testFields.style.display = 'block';
+                document.getElementById('modal_ph').required = true;
+                document.getElementById('modal_n').required = true;
+                document.getElementById('modal_p').required = true;
+                document.getElementById('modal_k').required = true;
+            } else {
+                testFields.style.display = 'none';
+                document.getElementById('modal_ph').required = false;
+                document.getElementById('modal_n').required = false;
+                document.getElementById('modal_p').required = false;
+                document.getElementById('modal_k').required = false;
+            }
+        }
+    </script>
+</body>
+</html>

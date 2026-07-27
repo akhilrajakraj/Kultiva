@@ -84,24 +84,14 @@
 
                     <h5 class="mt-4 pt-3 fw-bold" style="color: #1e293b; border-bottom: 2px solid #eee; padding-bottom: 10px;">Final Trade Terms</h5>
                     <table class="spec-table w-100">
-                        <tr><th>Agreed Unit Price</th><td style="color: #555; font-size: 16px;">₹{{ proposal.proposed_price }} / {{ listing.unit_of_measure }}</td></tr>
+                        <tr><th>Agreed Unit Price</th><td style="color: #1b5e20; font-size: 18px;">₹{{ listing.price }} / {{ listing.unit_of_measure }}</td></tr>
                         
-                        <tr><th>Requested Quantity</th><td style="color: #f57f17; font-size: 18px;"><i class="fa fa-shopping-basket"></i> {{ proposal.requested_quantity }} {{ listing.unit_of_measure }}</td></tr>
-                        
-                        <tr style="background: #f1f8e9;">
-                            <th style="color: #1b5e20; padding-left: 10px;"><i class="fa fa-money"></i> Total Escrow Value</th>
-                            <td style="color: #1b5e20; font-size: 20px; font-weight: 900; padding-right: 10px;">₹{{ proposal.total_amount|floatformat:2 }}</td>
-                        </tr>
-
-                        <tr><th>Inventory Status</th>
+                        <tr><th>Status</th>
                             <td>
                                 {% if proposal.status == 'COMPLETED' %}
                                     <span class="text-success"><i class="fa fa-check"></i> Stock Transferred to Buyer</span>
-                                {% elif proposal.status == 'PENDING' %}
-                                    <span style="font-size: 12px; color: #888;">Current Stock:</span> {{ listing.available_stock }} {{ listing.unit_of_measure }}<br>
-                                    <span style="font-size: 12px; color: #f57f17;"><i class="fa fa-arrow-down"></i> Stock After Accept:</span> {{ projected_stock|floatformat:1 }} {{ listing.unit_of_measure }}
                                 {% else %}
-                                    <span style="font-size: 12px; color: #888;">Remaining Stock:</span> {{ listing.available_stock }} {{ listing.unit_of_measure }}
+                                    {{ listing.available_stock }} {{ listing.unit_of_measure }}
                                 {% endif %}
                             </td>
                         </tr>
@@ -114,8 +104,8 @@
                     </table>
                     
                     <div class="mt-4 p-3" style="background: #fff8e1; border-left: 4px solid #fbc02d; font-size: 13px; color: #555;">
-                        <strong style="color: #f57f17;">Buyer's Request & Note:</strong> <br>
-                        <span style="font-family: monospace; font-size: 12px; color: #333;">{{ proposal.message|default:'No specific pickup instructions provided by buyer.' }}</span>
+                        <strong>Buyer's Initial Note:</strong> <br>
+                        "{{ proposal.message|default:'No specific pickup instructions provided by buyer.' }}"
                     </div>
                 </div>
             </div>
@@ -130,14 +120,14 @@
                         <h4 style="color: #f57f17; font-weight: bold;"><i class="fa fa-handshake-o"></i> Pending Negotiation</h4>
                         
                         <div class="text-start mt-3 p-3" style="background: rgba(255,255,255,0.7); border-radius: 10px; font-size: 13px; color: #555;">
-                            {% if is_buyer_initiated %}
-                                <p class="mb-0"><i class="fa fa-arrow-right text-success"></i> <strong>Offer Received:</strong> Review the terms and click Accept to lock the <strong class="text-success">₹{{ proposal.total_amount|floatformat:2 }}</strong> deal.</p>
+                            {% if "Requested Qty:" in proposal.message %}
+                                <p class="mb-0"><i class="fa fa-arrow-right text-success"></i> <strong>Offer Received:</strong> Review the terms and click Accept or Reject.</p>
                             {% else %}
                                 <p class="mb-0"><i class="fa fa-hourglass-half text-warning"></i> <strong>Offer Sent:</strong> Awaiting buyer response to your proposal.</p>
                             {% endif %}
                         </div>
                         
-                        {% if is_buyer_initiated %}
+                        {% if "Requested Qty:" in proposal.message %}
                             <form action="{% url 'farmer_respond_proposal' proposal.id %}" method="POST" class="mt-4 text-start">
                                 {% csrf_token %}
                                 <div class="mb-3">
@@ -166,65 +156,54 @@
                             </div>
                             
                             {% if can_revoke %}
-                                <div class="mt-3 text-start">
-                                    <button type="button" class="btn btn-outline-warning w-100 py-2 rounded-pill fw-bold shadow-sm" style="border-width: 2px;" data-bs-toggle="modal" data-bs-target="#revokeModal">
+                                <form action="{% url 'farmer_respond_proposal' proposal.id %}" method="POST" class="mt-3 text-start">
+                                    {% csrf_token %}
+                                    <button type="submit" name="action" value="CANCEL" class="btn btn-outline-warning w-100 py-2 rounded-pill fw-bold shadow-sm" style="border-width: 2px;">
                                         <i class="fa fa-undo"></i> Revoke Offer
                                     </button>
                                     <div class="text-center mt-2">
                                         <small class="text-muted" style="font-size: 11px;"><i class="fa fa-info-circle"></i> You can cancel this offer within 24 hours of sending.</small>
                                     </div>
-                                </div>
+                                </form>
                             {% endif %}
+                            
                         {% endif %}
                     </div>
 
                 {% elif proposal.status == 'ACCEPTED' %}
                     <div class="contract-card qr-wrapper d-print-none">
-                        
-                        {% if not proposal.is_paid %}
-                            <i class="fa fa-lock fa-4x mb-3" style="color: #ccc;"></i>
-                            <h4 style="color: #f57f17; font-weight: bold;">Awaiting Escrow Funding</h4>
-                            <p class="text-muted" style="font-size: 13px;">The contract is agreed, but the buyer has not yet deposited the funds into the secure vault.</p>
+                        {% if proposal.qr_code %}
+                            <h4 style="color: #1b5e20; font-weight: bold;"><i class="fa fa-qrcode"></i> Secure Handshake</h4>
+                            <p class="text-muted" style="font-size: 13px;">Ask the buyer to scan this code upon physical pickup. This validates the trade and unlocks escrow payments.</p>
                             
-                            <div class="mt-4 p-3" style="background: rgba(251, 192, 45, 0.1); border: 1px dashed #fbc02d; border-radius: 10px;">
-                                <div class="spinner-border text-warning spinner-border-sm mb-2" role="status"></div>
-                                <h6 style="color: #f57f17; font-weight: bold; font-size: 13px;">QR Generation Locked</h6>
-                                <p class="mb-0 text-muted" style="font-size: 11px;">Your secure delivery QR code will automatically generate here the moment the funds are secured.</p>
+                            <div class="mt-4">
+                                <img src="{{ proposal.qr_code.url }}" alt="Secure QR Code">
                             </div>
                             
+                            <form action="{% url 'generate_trade_qr' proposal.id %}" method="POST" class="mt-3">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-warning w-100 fw-bold">
+                                    <i class="fa fa-refresh"></i> Force Regenerate QR Link
+                                </button>
+                            </form>
+                            
+                            <div class="alert alert-success mt-3" style="font-size: 12px; font-weight: bold;">
+                                <i class="fa fa-shield"></i> Cryptographic Token Active
+                            </div>
                         {% else %}
-                            {% if proposal.qr_code %}
-                                <h4 style="color: #1b5e20; font-weight: bold;"><i class="fa fa-qrcode"></i> Secure Handshake</h4>
-                                <p class="text-muted" style="font-size: 13px;">Ask the buyer to scan this code upon physical pickup. This validates the trade and unlocks escrow payments.</p>
-                                
-                                <div class="mt-4">
-                                    <img src="{{ proposal.qr_code.url }}" alt="Secure QR Code">
-                                </div>
-                                
-                                <form action="{% url 'generate_trade_qr' proposal.id %}" method="POST" class="mt-3">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-warning w-100 fw-bold">
-                                        <i class="fa fa-refresh"></i> Force Regenerate QR Link
-                                    </button>
-                                </form>
-                                
-                                <div class="alert alert-success mt-3" style="font-size: 12px; font-weight: bold;">
-                                    <i class="fa fa-shield"></i> Funds Secured & Token Active
-                                </div>
-                            {% else %}
-                                <i class="fa fa-qrcode fa-5x mb-3" style="color: #ccc;"></i>
-                                <h4 style="color: #1b5e20; font-weight: bold;">Generate QR Code</h4>
-                                <p class="text-muted" style="font-size: 13px;">The escrow is funded! Generate the digital handshake tag for this contract to prepare for pickup.</p>
-                                
-                                <form action="{% url 'generate_trade_qr' proposal.id %}" method="POST" class="mt-4">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-warning w-100 py-3 rounded-pill fw-bold text-dark" style="font-size: 16px;">
-                                        <i class="fa fa-cogs"></i> Create Secure QR
-                                    </button>
-                                </form>
-                            {% endif %}
+                            <i class="fa fa-qrcode fa-5x mb-3" style="color: #ccc;"></i>
+                            <h4 style="color: #1b5e20; font-weight: bold;">Generate QR Code</h4>
+                            <p class="text-muted" style="font-size: 13px;">Generate the digital handshake tag for this contract. Only do this when the crop is fully harvested and ready for pickup.</p>
+                            
+                            <form action="{% url 'generate_trade_qr' proposal.id %}" method="POST" class="mt-4">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning w-100 py-3 rounded-pill fw-bold text-dark" style="font-size: 16px;">
+                                    <i class="fa fa-cogs"></i> Create Secure QR
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
+
                 {% elif proposal.status == 'COMPLETED' %}
                     <div class="printable-receipt">
                         <div class="receipt-card shadow-sm">
@@ -255,16 +234,7 @@
                                     </div>
                                     <div class="receipt-item" style="font-size: 12px;">
                                         <span>Unit Rate Locked</span>
-                                        <span>₹{{ proposal.proposed_price }} / {{ listing.unit_of_measure }}</span>
-                                    </div>
-                                    
-                                    <div class="receipt-item" style="font-size: 12px;">
-                                        <span>Volume Settled</span>
-                                        <span>{{ proposal.requested_quantity }} {{ listing.unit_of_measure }}</span>
-                                    </div>
-                                    <div class="receipt-item" style="font-size: 14px; font-weight: bold; color: #1e293b; margin-top: 5px; padding-top: 5px; border-top: 1px dashed #ccc;">
-                                        <span>Total Settled Amount</span>
-                                        <span>₹{{ proposal.total_amount|floatformat:2 }}</span>
+                                        <span>₹{{ listing.price }} / {{ listing.unit_of_measure }}</span>
                                     </div>
                                 </div>
 
@@ -294,38 +264,11 @@
         </div>
     </div>
 
-    <div class="modal fade d-print-none" id="revokeModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 15px; border-top: 5px solid #f57f17;">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" style="color: #f57f17;"><i class="fa fa-undo"></i> Revoke Offer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="{% url 'farmer_respond_proposal' proposal.id %}" method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="CANCEL">
-                    <div class="modal-body">
-                        <p class="text-muted" style="font-size: 13px;">You are about to revoke this outbound trade proposal. The buyer will be notified.</p>
-                        <div class="mt-2">
-                            <label class="fw-bold" style="font-size: 13px;">Reason for Revoking <span class="text-danger">*</span></label>
-                            <textarea name="farmer_message" class="form-control" rows="3" placeholder="e.g. Sorry, I have decided to sell this stock locally instead." required style="border-radius: 10px;"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer" style="background: #f9f9f9; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
-                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Go Back</button>
-                        <button type="submit" class="btn text-white rounded-pill fw-bold" style="background: #f57f17;">Confirm Revoke</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <div class="d-print-none">
         {% include 'footer.html' %}
     </div>
     
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    
 </body>
 </html>

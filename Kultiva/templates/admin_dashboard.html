@@ -4,191 +4,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Kultiva | Admin Command Center</title>
+  <title>Kultiva | Industrial Admin Control</title>
 
   <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
   <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <style>
-    /* ====================================================
-       KULTIVA BRAND TOKENS (UPDATED FOR HIGH CONTRAST)
-    ==================================================== */
     :root {
-      --brand-primary:   #1b5e20; /* Deep Forest Green */
-      --brand-secondary: #2e7d32; /* Fresh Green */
-      --brand-accent:    #ffc107; /* Vibrant Yellow/Gold for Contrast */
-      --brand-light:     #e8f5e9;
-      --alert-amber:     #f57f17;
-      --alert-red:       #c62828;
-      --surface:         #f4f7f6;
-      --white:           #ffffff;
-      --text-main:       #1e293b;
-      --text-muted:      #64748b;
-      --border-color:    #e2e8f0;
-      
-      --radius-std:      12px;
-      --shadow-soft:     0 4px 15px rgba(0,0,0,0.05);
-      --shadow-glow:     0 8px 25px rgba(27, 94, 32, 0.25); /* Green glow */
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --admin-accent: #1565c0; /* Professional Blue */
+        --success-glow: rgba(46, 125, 50, 0.2);
     }
 
-    body {
-      padding-top: 110px;
-      background-color: var(--surface);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: var(--text-main);
-    }
-
-    /* ====================================================
-       ZONE 1: WELCOME BANNER (HIGH CONTRAST GREEN & YELLOW)
-    ==================================================== */
-    .welcome-banner {
-      /* Deepened the gradient so the yellow text pops perfectly */
-      background: linear-gradient(135deg, #124016, var(--brand-primary));
-      border-radius: var(--radius-std);
-      padding: 32px 40px;
-      box-shadow: var(--shadow-glow);
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 30px;
-    }
-    .welcome-banner::after {
-      content: '\f0bb'; /* FontAwesome Tree/Network Icon */
-      font-family: 'Font Awesome 6 Free';
-      font-weight: 900;
-      position: absolute;
-      right: -20px;
-      bottom: -40px;
-      font-size: 180px;
-      color: var(--brand-secondary);
-      opacity: 0.15;
-    }
-    .welcome-banner h2 { 
-      font-weight: 800; 
-      font-size: 28px; 
-      margin-bottom: 8px; 
-      color: var(--brand-accent); /* Changed to Yellow */
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.4); /* Adds depth */
-    }
-    .welcome-banner p { 
-      color: var(--white); /* Kept white for readable body text */
-      font-size: 16px; 
-      margin: 0; 
-      letter-spacing: 0.3px;
-    }
-    .welcome-banner p strong {
-      color: var(--brand-accent); /* Username in Yellow */
-    }
-
-    /* ====================================================
-       ZONE 2: KPI METRIC CARDS
-    ==================================================== */
+    body { padding-top: 110px; background-color: #f0f2f5; font-family: 'Segoe UI', Roboto, sans-serif; }
+    
+    /* Advanced KPI Widgets */
+    .kpi-container { margin-bottom: 40px; }
     .kpi-card {
-      background: var(--white);
-      border-radius: var(--radius-std);
-      padding: 24px;
-      box-shadow: var(--shadow-soft);
-      border: 1px solid var(--border-color);
-      height: 100%;
+      background: var(--glass-bg);
+      border-radius: 20px;
+      padding: 25px;
       display: flex;
       align-items: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .kpi-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-    }
+    .kpi-card:hover { transform: scale(1.03); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
     .kpi-icon {
       width: 55px; height: 55px;
-      border-radius: 10px;
+      border-radius: 15px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px; margin-right: 20px; flex-shrink: 0;
+      font-size: 28px; margin-right: 18px;
     }
-    .kpi-data h4 { font-size: 24px; font-weight: 800; color: var(--text-main); margin: 0 0 4px 0; }
-    .kpi-data span { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* ====================================================
-       ZONE 3: ACTION CENTER (SOIL ALERTS)
-    ==================================================== */
-    .action-center-alert {
-      background: #fff8e1;
-      border-left: 5px solid var(--alert-amber);
-      border-radius: var(--radius-std);
-      padding: 20px 25px;
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 30px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .action-center-alert h5 { color: #f57f17; font-weight: 800; margin-bottom: 5px; }
-    .action-center-alert p { color: #666; font-size: 14px; margin: 0; }
-
-    /* ====================================================
-       ZONE 4: PANELS & LEDGERS
-    ==================================================== */
-    .saas-panel {
-      background: var(--white);
-      border-radius: var(--radius-std);
-      box-shadow: var(--shadow-soft);
-      border: 1px solid var(--border-color);
-      padding: 25px;
-      margin-bottom: 30px;
+    /* Industrial Module Grid */
+    .module-card {
+      background: white;
+      border-radius: 24px;
+      padding: 35px;
+      border: 1px solid #edf2f7;
+      text-align: left;
       height: 100%;
+      transition: 0.3s;
     }
-    .panel-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;
+    .module-card:hover { border-color: var(--admin-accent); background: #f8fbff; }
+    .module-badge {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        padding: 4px 12px; border-radius: 20px; background: #e0f2fe; color: #0369a1;
+        margin-bottom: 15px; display: inline-block;
     }
-    .panel-title { font-size: 18px; font-weight: 700; color: var(--brand-primary); margin: 0; }
 
-    /* Sleek Activity Ledger Table */
-    .ledger-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-    .ledger-table th { font-size: 11px; text-transform: uppercase; color: var(--text-muted); padding: 0 15px 10px; border: none; }
-    .ledger-table td { background: #f8fafc; padding: 15px; font-size: 14px; border: none; vertical-align: middle; }
-    .ledger-table tr td:first-child { border-radius: 8px 0 0 8px; font-weight: 600; color: var(--text-main); }
-    .ledger-table tr td:last-child { border-radius: 0 8px 8px 0; text-align: right; color: var(--text-muted); font-size: 12px; }
-
-    /* ====================================================
-       VERIFICATION QUEUE COMPONENTS
-    ==================================================== */
-    .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-    .filter-tab {
-      padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
-      border: 1px solid var(--border-color); background: var(--white); color: var(--text-muted);
-      cursor: pointer; transition: all 0.2s;
+    /* Table Command Center */
+    .command-panel {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.04);
     }
+    .status-pill {
+        padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    }
+    .pill-pending { background: #fff7ed; color: #9a3412; }
     
-    /* The active tab is now high-contrast Green & Yellow */
-    .filter-tab.active { 
-      background: var(--brand-primary); 
-      color: var(--brand-accent); 
-      border-color: var(--brand-primary); 
-      box-shadow: 0 4px 10px rgba(27, 94, 32, 0.2);
+    .btn-verify {
+        background: #1b5e20; color: white; border-radius: 10px;
+        padding: 8px 18px; font-weight: 700; font-size: 13px; border: none;
     }
-    .filter-tab .tab-count { 
-      background: #e2e8f0; 
-      color: var(--text-muted);
-      padding: 2px 8px; 
-      border-radius: 10px; 
-      margin-left: 5px; 
-    }
-    .filter-tab.active .tab-count { 
-      background: var(--brand-accent); 
-      color: var(--brand-primary); /* Invert for punchiness */
-    }
-    
-    .queue-search { width: 100%; padding: 10px 15px 10px 40px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px; background: #f8fafc; outline: none; transition: 0.2s; }
-    .queue-search:focus { border-color: var(--brand-primary); background: var(--white); }
-    .queue-search-wrap { position: relative; margin-bottom: 20px; }
-    .queue-search-wrap i { position: absolute; left: 15px; top: 12px; color: var(--text-muted); }
-
-    .data-table { width: 100%; }
-    .data-table th { font-size: 12px; color: var(--text-muted); padding-bottom: 10px; border-bottom: 2px solid #f1f5f9; }
-    .data-table td { padding: 15px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
-    
-    .btn-verify { background: var(--brand-primary); color: var(--brand-accent); padding: 6px 15px; border-radius: 6px; font-size: 12px; font-weight: bold; text-decoration: none; border: none; transition: 0.2s; }
-    .btn-verify:hover { background: #124016; color: var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-    .btn-view { background: #e2e8f0; color: var(--text-main); padding: 6px 15px; border-radius: 6px; font-size: 12px; font-weight: bold; text-decoration: none; transition: 0.2s; }
-    .btn-view:hover { background: #cbd5e1; }
   </style>
 </head>
 
@@ -196,253 +80,133 @@
 
   {% include 'admin_header.html' %}
 
-  <div class="container pb-5">
-
-    <div class="welcome-banner">
-      <h2><i class="fa-solid fa-shield-halved me-2"></i> Command Center</h2>
-      <p>Welcome back, <strong>{{ request.user.username }}</strong>. System integrity is operating at 100%.</p>
-    </div>
-
-    {% if pending_soil_count > 0 %}
-    <div class="action-center-alert">
-      <div>
-        <h5><i class="fa-solid fa-triangle-exclamation me-2"></i> Critical Action Required</h5>
-        <p>There are <strong>{{ pending_soil_count }}</strong> manual soil reports awaiting laboratory review and NPK data entry.</p>
-      </div>
-      <a href="{% url 'manage_soil_reports' %}" class="btn fw-bold text-dark rounded-pill px-4" style="background: var(--brand-accent); border: none; box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);">Review Lab Queue</a>
-    </div>
-    {% endif %}
-
-    <div class="row g-4 mb-4">
-      <div class="col-xl-3 col-md-6">
-        <div class="kpi-card">
-          <div class="kpi-icon" style="background: #e3f2fd; color: #1565c0;"><i class="fa-solid fa-boxes-stacked"></i></div>
-          <div class="kpi-data">
-            <h4>{{ total_products|default:"0" }}</h4>
-            <span>Active Listings</span>
-          </div>
-        </div>
-      </div>
-      <div class="col-xl-3 col-md-6">
-        <div class="kpi-card">
-          <div class="kpi-icon" style="background: var(--brand-light); color: var(--brand-primary);"><i class="fa-solid fa-users"></i></div>
-          <div class="kpi-data">
-            {% with t_users=total_farmers|add:total_sellers|add:total_buyers %}
-            <h4>{{ t_users|default:"0" }}</h4>
-            {% endwith %}
-            <span style="font-size: 10px;">Users (F:{{ total_farmers }} B:{{ total_buyers }} S:{{ total_sellers }})</span>
-          </div>
-        </div>
-      </div>
-      <div class="col-xl-3 col-md-6">
-        <div class="kpi-card">
-          <div class="kpi-icon" style="background: #fff8e1; color: #f57f17;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
-          <div class="kpi-data">
-            <h4>₹{{ total_b2b_revenue|default:"0"|floatformat:0 }}</h4>
-            <span>Escrow Locked</span>
-          </div>
-        </div>
-      </div>
-      <div class="col-xl-3 col-md-6">
-        <div class="kpi-card">
-          <div class="kpi-icon" style="background: #f3e5f5; color: #7b1fa2;"><i class="fa-solid fa-handshake"></i></div>
-          <div class="kpi-data">
-            <h4>{{ total_b2b_orders|default:"0" }}</h4>
-            <span>B2B Proposals</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row g-4">
-
-      <div class="col-xl-7">
-        <div class="saas-panel">
-          <div class="panel-header">
-            <h5 class="panel-title"><i class="fa-solid fa-fingerprint me-2 text-dark"></i> Verification Queue</h5>
-            
-            <div class="filter-tabs">
-              <button class="filter-tab active" data-role="ALL" onclick="applyFilter(this)">
-                All <span class="tab-count">{% with t=pending_farmers|length|add:pending_sellers|length|add:pending_buyers|length %}{{ t }}{% endwith %}</span>
-              </button>
-              <button class="filter-tab" data-role="FARMER" onclick="applyFilter(this)">
-                Farmers <span class="tab-count">{{ pending_farmers|length }}</span>
-              </button>
-              <button class="filter-tab" data-role="SELLER" onclick="applyFilter(this)">
-                Sellers <span class="tab-count">{{ pending_sellers|length }}</span>
-              </button>
-              <button class="filter-tab" data-role="BUYER" onclick="applyFilter(this)">
-                Buyers <span class="tab-count">{{ pending_buyers|length }}</span>
-              </button>
+  <div class="container">
+    <div class="row kpi-container">
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #e8f5e9; color: #2e7d32;"><i class="ph ph-users-three"></i></div>
+                <div><h4 class="fw-bold mb-0">{{ total_farmers|default:"0" }}</h4><small class="text-muted">Farmer Network</small></div>
             </div>
-          </div>
-
-          <div class="queue-search-wrap">
-            <i class="fa-solid fa-search"></i>
-            <input class="queue-search" id="queueSearch" type="text" placeholder="Search by name, email or credential…" oninput="applySearch(this.value)">
-          </div>
-
-          {% if pending_farmers or pending_sellers or pending_buyers %}
-          <div class="table-responsive">
-            <table class="data-table" id="verifyTable">
-              <thead>
-                <tr>
-                  <th>Entity Details</th>
-                  <th>Role</th>
-                  <th class="text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for farmer in pending_farmers %}
-                <tr data-role="FARMER" data-search="{{ farmer.username|lower }} {{ farmer.email|lower }} {{ farmer.farmer_profile.aadhar_no|default:'' }}">
-                  <td>
-                    <strong>{{ farmer.username }}</strong><br>
-                    <span style="font-size: 12px; color: var(--text-muted);">{{ farmer.email }}</span>
-                  </td>
-                  <td><span class="badge" style="background: #e8f5e9; color: #2e7d32; padding: 6px 10px;">FARMER</span></td>
-                  <td class="text-end">
-                    <a href="{% url 'view_farmer_profile' farmer.pk %}" class="btn-view me-1">Review</a>
-                    <a href="{% url 'approve_user' farmer.pk %}" class="btn-verify" onclick="return confirm('Approve {{ farmer.username }}?')">Approve</a>
-                  </td>
-                </tr>
-                {% endfor %}
-
-                {% for seller in pending_sellers %}
-                <tr data-role="SELLER" data-search="{{ seller.username|lower }} {{ seller.email|lower }} {{ seller.seller_profile.shop_name|default:''|lower }}">
-                  <td>
-                    <strong>{{ seller.seller_profile.shop_name|default:seller.username }}</strong><br>
-                    <span style="font-size: 12px; color: var(--text-muted);">{{ seller.email }}</span>
-                  </td>
-                  <td><span class="badge" style="background: #e3f2fd; color: #1565c0; padding: 6px 10px;">SELLER</span></td>
-                  <td class="text-end">
-                    <a href="{% url 'view_seller_profile' seller.pk %}" class="btn-view me-1">Review</a>
-                    <a href="{% url 'approve_user' seller.pk %}" class="btn-verify" onclick="return confirm('Approve {{ seller.username }}?')">Approve</a>
-                  </td>
-                </tr>
-                {% endfor %}
-
-                {% for buyer in pending_buyers %}
-                <tr data-role="BUYER" data-search="{{ buyer.username|lower }} {{ buyer.email|lower }} {{ buyer.buyer_profile.company_name|default:''|lower }}">
-                  <td>
-                    <strong>{{ buyer.buyer_profile.company_name|default:buyer.username }}</strong><br>
-                    <span style="font-size: 12px; color: var(--text-muted);">{{ buyer.email }}</span>
-                  </td>
-                  <td><span class="badge" style="background: #fff8e1; color: #f57f17; padding: 6px 10px;">BUYER</span></td>
-                  <td class="text-end">
-                    <a href="{% url 'view_buyer_profile' buyer.pk %}" class="btn-view me-1">Review</a>
-                    <a href="{% url 'approve_user' buyer.pk %}" class="btn-verify" onclick="return confirm('Approve {{ buyer.username }}?')">Approve</a>
-                  </td>
-                </tr>
-                {% endfor %}
-
-                <tr id="noResults" style="display:none;">
-                  <td colspan="3" class="text-center py-4 text-muted">No entries match your search filter.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          {% else %}
-          <div class="text-center py-5">
-            <i class="fa-solid fa-check-circle mb-3" style="font-size: 40px; color: #81c784;"></i>
-            <h6>All Entities Verified</h6>
-            <p class="text-muted" style="font-size: 14px;">The verification queue is completely clear.</p>
-          </div>
-          {% endif %}
         </div>
-      </div>
-
-      <div class="col-xl-5">
-        <div class="saas-panel">
-          <div class="panel-header">
-            <h5 class="panel-title"><i class="fa-solid fa-list-ul me-2 text-dark"></i> Recent Activity Ledger</h5>
-          </div>
-
-          <div class="table-responsive">
-            <table class="ledger-table">
-              <thead>
-                <tr>
-                  <th>User/Entity</th>
-                  <th>Role</th>
-                  <th class="text-end">Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for u in recent_registrations|slice:":6" %}
-                <tr>
-                  <td>{{ u.username }}</td>
-                  <td>
-                    {% if u.role == 'FARMER' %}
-                      <span class="badge" style="background: #e8f5e9; color: #2e7d32;"><i class="fa-solid fa-seedling me-1"></i> Farmer</span>
-                    {% elif u.role == 'SELLER' %}
-                      <span class="badge" style="background: #e3f2fd; color: #1565c0;"><i class="fa-solid fa-store me-1"></i> Seller</span>
-                    {% else %}
-                      <span class="badge" style="background: #fff8e1; color: #f57f17;"><i class="fa-solid fa-briefcase me-1"></i> Buyer</span>
-                    {% endif %}
-                  </td>
-                  <td>{{ u.date_joined|timesince }} ago</td>
-                </tr>
-                {% empty %}
-                <tr>
-                  <td colspan="3" class="text-center py-3 text-muted">No recent activity logged.</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          
-          <div class="mt-3 text-center">
-            <a href="{% url 'admin_farmer_report' %}" class="btn btn-light w-100 fw-bold" style="font-size: 13px; color: var(--text-muted);">Open Full Analytics <i class="fa-solid fa-arrow-right ms-1"></i></a>
-          </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #fff8e1; color: #f57f17;"><i class="ph ph-shopping-bag"></i></div>
+                <div><h4 class="fw-bold mb-0">{{ total_products|default:"0" }}</h4><small class="text-muted">Global Inventory</small></div>
+            </div>
         </div>
-      </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #e0f2fe; color: #0288d1;"><i class="ph ph-currency-inr"></i></div>
+                <div><h4 class="fw-bold mb-0">₹{{ total_b2b_revenue|default:"0"|floatformat:0 }}</h4><small class="text-muted">B2B Trade Volume</small></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card" style="background: #1a237e; color: white;">
+                <div class="kpi-icon" style="background: rgba(255,255,255,0.1); color: #fff;"><i class="ph ph-shield-check"></i></div>
+                <div><h4 class="fw-bold mb-0">{{ pending_approvals_count|default:"0" }}</h4><small style="color: rgba(255,255,255,0.7)">Awaiting Verification</small></div>
+            </div>
+        </div>
+    </div>
 
-    </div></div>{% include 'footer.html' %}
+    <div class="row mb-5">
+        <div class="col-lg-4">
+            <div class="module-card">
+                <span class="module-badge">Business Intelligence</span>
+                <h3 class="fw-bold"><i class="ph ph-chart-pie-slice me-2"></i> BI Analytics</h3>
+                <p>Generate PDF growth reports for Farmers, Sellers, and Corporate Buyers.</p>
+                <a href="{% url 'admin_farmer_report' %}" class="btn btn-sm btn-outline-primary fw-bold mt-2">Open Reports <i class="fa fa-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="module-card">
+                <span class="module-badge">Logistics Control</span>
+                <h3 class="fw-bold"><i class="ph ph-truck me-2"></i> Global Orders</h3>
+                <p>Monitor B2B trade proposals and B2C seed/tool retail transactions.</p>
+                <a href="{% url 'manage_seller_orders' %}" class="btn btn-sm btn-outline-primary fw-bold mt-2">Manage Ledgers</a>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="module-card">
+                <span class="module-badge">Scientific Service</span>
+                <h3 class="fw-bold"><i class="ph ph-flask me-2"></i> Soil Lab</h3>
+                <p>Manage manual soil analysis requests and upload NPK data for farmers.</p>
+                <a href="{% url 'manage_soil_reports' %}" class="btn btn-sm btn-outline-primary fw-bold mt-2">Lab Queue</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="command-panel mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <h4 class="fw-bold text-dark"><i class="ph ph-fingerprint me-2 text-primary"></i> Verification Command Queue</h4>
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">Filter Role</button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Farmers Only</a></li>
+                    <li><a class="dropdown-item" href="#">Sellers Only</a></li>
+                </ul>
+            </div>
+        </div>
+
+        {% if pending_farmers or pending_sellers %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr class="text-muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                        <th>Entity Name</th>
+                        <th>Industry Role</th>
+                        <th>Credentials (Aadhar/License)</th>
+                        <th>Registration Date</th>
+                        <th class="text-end">Verification Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for farmer in pending_farmers %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success text-white rounded-circle p-2 me-3" style="width:35px; height:35px; display:flex; align-items:center; justify-content:center; font-size:12px;">{{ farmer.username|slice:":1" }}</div>
+                                <div><strong class="d-block">{{ farmer.username }}</strong><small class="text-muted">{{ farmer.email }}</small></div>
+                            </div>
+                        </td>
+                        <td><span class="status-pill pill-pending">FARMER</span></td>
+                        <td><small class="fw-bold">{{ farmer.farmer_profile.aadhar_no|default:"No Aadhar" }}</small></td>
+                        <td>{{ farmer.date_joined|date:"d M, Y" }}</td>
+                        <td class="text-end"><a href="{% url 'approve_user' farmer.pk %}" class="btn-verify">Approve Entity</a></td>
+                    </tr>
+                    {% endfor %}
+
+                    {% for seller in pending_sellers %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning text-dark rounded-circle p-2 me-3" style="width:35px; height:35px; display:flex; align-items:center; justify-content:center; font-size:12px;">{{ seller.username|slice:":1" }}</div>
+                                <div><strong class="d-block">{{ seller.seller_profile.shop_name|default:seller.username }}</strong><small class="text-muted">{{ seller.email }}</small></div>
+                            </div>
+                        </td>
+                        <td><span class="status-pill" style="background:#e0f2fe; color:#0369a1;">SELLER</span></td>
+                        <td><small class="fw-bold">{{ seller.seller_profile.license_number|default:"No License" }}</small></td>
+                        <td>{{ seller.date_joined|date:"d M, Y" }}</td>
+                        <td class="text-end"><a href="{% url 'approve_user' seller.pk %}" class="btn-verify">Approve Entity</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="ph ph-checks text-success" style="font-size: 50px;"></i>
+            <h5 class="mt-3 text-muted">All Entities Verified</h5>
+            <p class="small text-muted">There are no pending registrations currently in the queue.</p>
+        </div>
+        {% endif %}
+    </div>
+  </div>
+
+  {% include 'footer.html' %}
 
   <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
   <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-
-  <script>
-    /* ==========================================================
-       VERIFICATION QUEUE JS (Retained Without Logic Loss)
-    ========================================================== */
-    var activeRole   = 'ALL';
-    var activeSearch = '';
-
-    function applyFilter(btn) {
-      document.querySelectorAll('.filter-tab').forEach(function(t) {
-        t.classList.remove('active');
-      });
-      btn.classList.add('active');
-      activeRole = btn.dataset.role;
-      renderTable();
-    }
-
-    function applySearch(val) {
-      activeSearch = val.trim().toLowerCase();
-      renderTable();
-    }
-
-    function renderTable() {
-      var rows    = document.querySelectorAll('#verifyTable tbody tr:not(#noResults)');
-      var visible = 0;
-
-      rows.forEach(function(row) {
-        var roleMatch   = (activeRole === 'ALL') || (row.dataset.role === activeRole);
-        var searchVal   = (row.dataset.search || '').toLowerCase();
-        var searchMatch = !activeSearch || searchVal.includes(activeSearch);
-
-        if (roleMatch && searchMatch) {
-          row.style.display = '';
-          visible++;
-        } else {
-          row.style.display = 'none';
-        }
-      });
-
-      var noResults = document.getElementById('noResults');
-      if (noResults) noResults.style.display = (visible === 0) ? '' : 'none';
-    }
-  </script>
+  <script src="{% static 'assets/js/templatemo-custom.js' %}"></script>
 
 </body>
 </html>

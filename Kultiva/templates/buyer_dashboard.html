@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
 
   <style>
-    body { padding-top: 100px; background-color: #f8f9fa; font-family: 'Times New Roman', Times, serif; }
+    body { padding-top: 100px; background-color: #f8f9fa; }
     
     /* Unified Glassmorphism Theme */
     .glass-widget {
@@ -38,8 +38,7 @@
     .kpi-card.ledger { border-left-color: #0288d1; }
     
     .kpi-icon { font-size: 40px; opacity: 0.8; }
-    .kpi-label { font-size: 13px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0px; }
-    .kpi-number { font-size: 32px; font-weight: 900; color: #1e293b; line-height: 1.2; margin-bottom: 5px;}
+    .kpi-label { font-size: 13px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
 
     /* Action Buttons */
     .action-btn {
@@ -62,75 +61,8 @@
     .action-icon { font-size: 24px; margin-right: 15px; }
 
     /* Table Styling */
-    .table-custom th { color: #1b5e20; border-top: none; border-bottom: 2px solid #c5e1a5; font-size: 13px; text-transform: uppercase; font-weight: 800; }
-    .table-custom td { vertical-align: middle; color: #555; font-weight: 600; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
-    
-    /* ====================================================
-       LIVE FEED UI ENGINE
-    ==================================================== */
-    .feed-container {
-        max-height: 400px;
-        overflow-y: auto;
-        padding-right: 10px;
-    }
-    /* Custom Scrollbar for Feed */
-    .feed-container::-webkit-scrollbar { width: 6px; }
-    .feed-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    .feed-container::-webkit-scrollbar-thumb { background: #c5e1a5; border-radius: 10px; }
-    .feed-container::-webkit-scrollbar-thumb:hover { background: #2e7d32; }
-
-    .feed-item {
-        background: #ffffff;
-        border: 1px solid #f1f5f9;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 12px;
-        transition: all 0.2s;
-        border-left: 4px solid #ccc;
-        display: flex;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    .feed-item:hover { background: #f8fafc; transform: translateX(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-    
-    .feed-icon {
-        width: 36px; height: 36px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 16px; flex-shrink: 0;
-    }
-    
-    .feed-color-success { border-left-color: #2e7d32; }
-    .feed-color-success .feed-icon { background: #e8f5e9; color: #2e7d32; }
-    
-    .feed-color-warning { border-left-color: #f57f17; }
-    .feed-color-warning .feed-icon { background: #fff8e1; color: #f57f17; }
-    
-    .feed-color-primary { border-left-color: #0288d1; }
-    .feed-color-primary .feed-icon { background: #e3f2fd; color: #0288d1; }
-    
-    .feed-color-info { border-left-color: #00acc1; }
-    .feed-color-info .feed-icon { background: #e0f7fa; color: #00acc1; }
-
-    .product-link {
-        color: #1b5e20;
-        text-decoration: none;
-        border-bottom: 1px dashed #1b5e20;
-        font-weight: 800;
-        transition: 0.2s;
-    }
-    .product-link:hover { color: #f57f17; border-bottom-color: #f57f17; }
-
-    /* Live Pulsing Dot */
-    .pulse-dot {
-        height: 10px; width: 10px; background-color: #f57f17;
-        border-radius: 50%; display: inline-block; margin-right: 8px;
-        animation: pulse-animation 1.5s infinite;
-    }
-    @keyframes pulse-animation {
-        0% { box-shadow: 0 0 0 0 rgba(245, 127, 23, 0.7); }
-        70% { box-shadow: 0 0 0 8px rgba(245, 127, 23, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(245, 127, 23, 0); }
-    }
+    .table-custom th { color: #1b5e20; border-top: none; border-bottom: 2px solid #c5e1a5; font-size: 14px; text-transform: uppercase; }
+    .table-custom td { vertical-align: middle; color: #555; font-weight: 500; font-size: 15px; }
   </style>
 </head>
 
@@ -154,24 +86,22 @@
           </div>
       </div>
 
-      <div class="row mb-4 g-4">
-          <div class="col-lg-4 col-md-6">
+      <div class="row mb-4">
+          <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
               <div class="glass-widget kpi-card">
                   <div>
                       <p class="kpi-label">Active Negotiations</p>
-                      <div class="kpi-number">{{ active_bids_count|default:"0" }}</div>
-                      <a href="{% url 'buyer_negotiations' %}" class="text-success fw-bold" style="text-decoration: none; font-size: 12px;"><i class="fa fa-briefcase"></i> View Bids & Offers <i class="fa fa-arrow-right"></i></a>
+                      <a href="{% url 'buyer_negotiations' %}" class="text-success fw-bold" style="text-decoration: none;"><i class="fa fa-briefcase"></i> View Bids & Offers <i class="fa fa-arrow-right"></i></a>
                   </div>
                   <i class="fa fa-handshake-o kpi-icon text-success"></i>
               </div>
           </div>
           
-          <div class="col-lg-4 col-md-6">
+          <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
               <div class="glass-widget kpi-card escrow">
                   <div>
                       <p class="kpi-label">Escrow Deliveries</p>
-                      <div class="kpi-number">{{ escrow_count|default:"0" }}</div>
-                      <a href="{% url 'buyer_escrow_list' %}" class="text-warning fw-bold" style="text-decoration: none; font-size: 12px;"><i class="fa fa-truck"></i> Track Shipments <i class="fa fa-arrow-right"></i></a>
+                      <a href="{% url 'buyer_escrow_list' %}" class="text-warning fw-bold" style="text-decoration: none;"><i class="fa fa-truck"></i> Track Shipments <i class="fa fa-arrow-right"></i></a>
                   </div>
                   <i class="fa fa-shield kpi-icon text-warning"></i>
               </div>
@@ -180,17 +110,16 @@
           <div class="col-lg-4 col-md-12">
               <div class="glass-widget kpi-card ledger">
                   <div>
-                      <p class="kpi-label">Completed Trades</p>
-                      <div class="kpi-number">{{ completed_count|default:"0" }}</div>
-                      <a href="{% url 'buyer_purchase_history' %}" class="text-info fw-bold" style="text-decoration: none; font-size: 12px;"><i class="fa fa-file-text-o"></i> View Tax Invoices <i class="fa fa-arrow-right"></i></a>
+                      <p class="kpi-label">Financial Ledger</p>
+                      <a href="{% url 'buyer_purchase_history' %}" class="text-info fw-bold" style="text-decoration: none;"><i class="fa fa-file-text-o"></i> View Tax Invoices <i class="fa fa-arrow-right"></i></a>
                   </div>
                   <i class="fa fa-bank kpi-icon text-info"></i>
               </div>
           </div>
       </div>
 
-      <div class="row g-4">
-          <div class="col-lg-4">
+      <div class="row">
+          <div class="col-lg-4 mb-4">
               <div class="glass-widget" style="border-top: 5px solid #2e7d32;">
                   <h5 style="color: #1b5e20; font-weight: bold; margin-bottom: 20px;"><i class="fa fa-bolt"></i> Quick Actions</h5>
                   
@@ -206,96 +135,30 @@
               </div>
           </div>
 
-          <div class="col-lg-8">
+          <div class="col-lg-8 mb-4">
               <div class="glass-widget">
-                  <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
                       <h5 style="color: #1e293b; font-weight: bold; margin: 0;"><i class="fa fa-truck text-primary"></i> Active Delivery Pipeline</h5>
-                      <a href="{% url 'buyer_escrow_list' %}" style="font-size: 13px; color: #fbc02d; font-weight: bold; text-decoration: none;">View All Escrows</a>
+                      <a href="{% url 'buyer_escrow_list' %}" style="font-size: 13px; color: #fbc02d; font-weight: bold; text-decoration: none;">View Escrow Vault</a>
                   </div>
                   
                   <div class="table-responsive">
                       <table class="table table-custom">
                           <thead>
                               <tr>
-                                  <th>Harvest</th>
-                                  <th>Vendor</th>
-                                  <th>Value</th>
-                                  <th>Status</th>
+                                  <th>Action Required</th>
                               </tr>
                           </thead>
                           <tbody>
-                              {% for delivery in active_deliveries %}
                               <tr>
-                                  <td>
-                                      <div style="font-weight: 800; color: #1e293b;">{{ delivery.listing.title }}</div>
-                                      <div style="font-size: 12px; color: #888;">{{ delivery.requested_quantity|floatformat:0 }} {{ delivery.listing.unit_of_measure }}</div>
-                                  </td>
-                                  <td>{{ delivery.farmer.username }}</td>
-                                  <td style="color: #1b5e20; font-weight: bold;">₹{{ delivery.total_amount }}</td>
-                                  <td>
-                                      {% if delivery.status == 'COMPLETED' %}
-                                          <span class="badge bg-success"><i class="fa fa-check-circle"></i> Received</span>
-                                      {% else %}
-                                          <span class="badge bg-warning text-dark"><i class="fa fa-clock-o"></i> In Transit</span>
-                                      {% endif %}
-                                  </td>
-                              </tr>
-                              {% empty %}
-                              <tr>
-                                  <td colspan="4" class="text-center py-5 text-muted" style="border-bottom: none;">
-                                      <i class="fa fa-map-marker mb-3" style="font-size: 30px; color: #ccc;"></i><br>
-                                      No active deliveries currently in transit.<br>
+                                  <td class="text-center py-5 text-muted" style="border-bottom: none;">
+                                      <i class="fa fa-search mb-3" style="font-size: 30px; color: #ccc;"></i><br>
+                                      Use the Marketplace to find verified farmers and negotiate contracts.<br>
                                       <a href="{% url 'buyer_marketplace' %}" class="btn btn-sm btn-outline-success rounded-pill mt-3 fw-bold px-4">Visit Marketplace</a>
                                   </td>
                               </tr>
-                              {% endfor %}
                           </tbody>
                       </table>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-      <div class="row mt-4">
-          <div class="col-12">
-              <div class="glass-widget" style="border-top: 5px solid #f57f17;">
-                  <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
-                      <h4 style="color: #1e293b; font-weight: 900; margin: 0;">
-                          <span class="pulse-dot"></span> Live Trading Floor
-                      </h4>
-                      <span style="font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase;">Real-Time Global Updates</span>
-                  </div>
-
-                  <div class="feed-container">
-                      {% for item in live_feed %}
-                          <div class="feed-item feed-color-{{ item.color }}">
-                              <div class="feed-icon">
-                                  <i class="fa {{ item.icon }}"></i>
-                              </div>
-                              <div class="flex-grow-1">
-                                  <div class="d-flex justify-content-between align-items-start mb-1">
-                                      <div style="font-size: 15px; color: #333;">
-                                          <a href="{% url 'buyer_product_detail' item.product_id %}" class="product-link">
-                                              {{ item.qty|floatformat:0 }} {{ item.unit }} of {{ item.product_name }}
-                                          </a> 
-                                          {{ item.message }}
-                                      </div>
-                                      <div style="font-size: 11px; color: #888; font-weight: bold; white-space: nowrap; margin-left: 15px;">
-                                          <i class="fa fa-clock-o"></i> {{ item.timestamp|timesince }} ago
-                                      </div>
-                                  </div>
-                                  <div style="font-size: 12px; color: #666; font-weight: 600;">
-                                      <i class="fa fa-user-circle text-muted"></i> Farmer: {{ item.farmer_name }}
-                                  </div>
-                              </div>
-                          </div>
-                      {% empty %}
-                          <div class="text-center py-5 text-muted">
-                              <i class="fa fa-wifi mb-3" style="font-size: 40px; opacity: 0.3;"></i>
-                              <h5>Awaiting Market Activity</h5>
-                              <p style="font-size: 14px;">The trading floor is currently quiet. Check back soon for new harvests.</p>
-                          </div>
-                      {% endfor %}
                   </div>
               </div>
           </div>

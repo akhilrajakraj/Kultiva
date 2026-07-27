@@ -18,15 +18,9 @@
         }
         .table-custom th { color: #1e293b; text-transform: uppercase; font-size: 13px; border-top: none; }
         .table-custom td { vertical-align: middle; color: #555; }
-        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; display: inline-block; text-align: center; }
-        
-        /* Dynamic Status Colors */
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
         .bg-pending-fund { background: rgba(251, 192, 45, 0.2); color: #f57f17; border: 1px solid #ffecb3;}
         .bg-locked { background: rgba(46, 125, 50, 0.2); color: #2e7d32; border: 1px solid #c5e1a5;}
-        
-        /* 🔬 NEW: Disputed and Refunded Badge Styles */
-        .bg-disputed { background: #fff3e0; color: #e65100; border: 1px solid #ffe082; }
-        .bg-refunded { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
     </style>
 </head>
 <body>
@@ -60,29 +54,19 @@
                         {% for p in deliveries %}
                         <tr>
                             <td><strong>#KUL-{{ p.id }}</strong></td>
-                            <td><span style="color: #0288d1; font-weight: bold;">{{ p.listing.title }}</span><br><small class="text-muted">{{ p.requested_quantity }} {{ p.listing.unit_of_measure }}</small></td>
+                            <td><span style="color: #0288d1; font-weight: bold;">{{ p.listing.title }}</span><br><small class="text-muted">{{ p.listing.available_stock }} {{ p.listing.unit_of_measure }}</small></td>
                             <td><strong>{{ p.farmer.username }}</strong></td>
                             <td>
-                                {% if p.status == 'REFUNDED' %}
-                                    <span class="badge-status bg-refunded"><i class="fa fa-check-circle"></i> Refunded</span>
-                                {% elif p.status == 'CANCELLED' and p.is_paid %}
-                                    <span class="badge-status bg-disputed"><i class="fa fa-clock-o"></i> Refund Initiated</span>
-                                {% elif not p.is_paid %}
+                                {% if not p.is_paid %}
                                     <span class="badge-status bg-pending-fund"><i class="fa fa-exclamation-circle"></i> Deposit Required</span>
                                 {% else %}
                                     <span class="badge-status bg-locked"><i class="fa fa-lock"></i> Funds Locked</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                {% if p.status == 'REFUNDED' or p.status == 'CANCELLED' %}
-                                    <a href="{% url 'buyer_escrow_detail' p.id %}" class="btn btn-sm btn-outline-danger rounded-circle" style="width: 35px; height: 35px;" title="View Refund Record">
-                                        <i class="fa fa-file-text-o"></i>
-                                    </a>
-                                {% else %}
-                                    <a href="{% url 'buyer_escrow_detail' p.id %}" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 35px; height: 35px;" title="View & Fund">
-                                        <i class="fa fa-eye"></i>
-                                    </a>
-                                {% endif %}
+                                <a href="{% url 'buyer_escrow_detail' p.id %}" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 35px; height: 35px;" title="View & Fund">
+                                    <i class="fa fa-eye"></i>
+                                </a>
                             </td>
                         </tr>
                         {% empty %}
@@ -94,7 +78,5 @@
         </div>
     </div>
     {% include 'footer.html' %}
-    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

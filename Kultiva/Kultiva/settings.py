@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-&))pao53g6dn%l7a&4jj@vf1c9sgg+=%!$8)fpk_n_o%iag0x=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']# Allow all hosts during development. Change this in production!
+ALLOWED_HOSTS = []# Allow all hosts during development. Change this in production!
 
 
 # Application definition
@@ -137,9 +137,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 # Your real Gmail address
-EMAIL_HOST_USER = 'kutliva8@gmail.com' 
+EMAIL_HOST_USER = '***************' 
 
 # The 16-character App Password you just generated (NOT your normal password)
-EMAIL_HOST_PASSWORD = 'bxhjbyijtsdbfezi' 
+EMAIL_HOST_PASSWORD = '***************' 
 
-DEFAULT_FROM_EMAIL = 'Kultiva Admin <kutliva8@gmail.com>'
+DEFAULT_FROM_EMAIL = '****************'  # This can be the same as EMAIL_HOST_USER

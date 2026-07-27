@@ -29,8 +29,6 @@
         
         .modal-input { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px 15px; outline: none; transition: 0.3s; }
         .modal-input:focus { border-color: #2e7d32; }
-        
-        .input-locked { background-color: #e9ecef; cursor: not-allowed; opacity: 1; }
     </style>
 </head>
 <body>
@@ -89,12 +87,12 @@
                     <table class="spec-table mt-4">
                         <tbody>
                             <tr>
-                                <th>Unreserved Stock</th>
-                                <td style="color: #2e7d32; font-size: 16px;"><i class="fa fa-cubes"></i> {{ unreserved_stock|floatformat:0 }} {{ item.unit_of_measure }}</td>
+                                <th>Available Stock</th>
+                                <td style="color: #2e7d32;"><i class="fa fa-cubes"></i> {{ item.available_stock }} {{ item.unit_of_measure }}</td>
                             </tr>
                             <tr>
                                 <th>Min. Order Qty</th>
-                                <td>{{ item.min_order_quantity|floatformat:0 }} {{ item.unit_of_measure }}</td>
+                                <td>{{ item.min_order_quantity }} {{ item.unit_of_measure }}</td>
                             </tr>
                             {% if item.variety_or_brand %}
                             <tr>
@@ -141,21 +139,8 @@
 
                     <div class="mt-4 pt-3">
                         {% if existing_proposal %}
-                            {% if is_buyer_initiated %}
-                                <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold" disabled>
-                                    <i class="fa fa-clock-o"></i> Proposal Pending Farmer Review
-                                </button>
-                            {% else %}
-                                <div class="text-center">
-                                    <a href="{% url 'buyer_proposal_detail' existing_proposal.id %}" class="btn w-100 py-3 rounded-pill fw-bold shadow-sm" style="background: #fbc02d; color: #1e293b; font-size: 16px;">
-                                        <i class="fa fa-exclamation-circle"></i> Action Required: Awaiting Your Response
-                                    </a>
-                                    <small class="text-muted mt-2 d-block fw-bold">The farmer has sent you a direct offer for this harvest.</small>
-                                </div>
-                            {% endif %}
-                        {% elif unreserved_stock <= 0 %}
-                            <button class="btn btn-danger w-100 py-3 rounded-pill fw-bold" disabled>
-                                <i class="fa fa-ban"></i> Fully Reserved
+                            <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold" disabled>
+                                <i class="fa fa-clock-o"></i> Proposal Pending Farmer Review
                             </button>
                         {% else %}
                             <button class="btn btn-success w-100 py-3 rounded-pill fw-bold" style="background: #1b5e20; font-size: 18px;" data-bs-toggle="modal" data-bs-target="#requestModal">
@@ -184,18 +169,11 @@
                         <div class="row">
                             <div class="col-6 mb-3">
                                 <label class="fw-bold" style="font-size: 12px;">Requested Qty ({{ item.unit_of_measure }}) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.1" name="proposed_qty" id="proposed_qty" class="modal-input" min="{{ item.min_order_quantity }}" max="{{ unreserved_stock }}" value="{{ unreserved_stock }}" required>
+                                <input type="number" step="0.1" name="proposed_qty" class="modal-input" min="{{ item.min_order_quantity }}" max="{{ item.available_stock }}" value="{{ item.available_stock }}" required>
                             </div>
                             <div class="col-6 mb-3">
-                                <label class="fw-bold" style="font-size: 12px;">Offer Price (₹ per {{ item.unit_of_measure }})</label>
-                                <input type="number" step="0.01" name="proposed_price" id="proposed_price" class="modal-input" value="{{ item.price }}" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3 p-3" style="background: #f1f8e9; border-radius: 8px; border-left: 4px solid #1b5e20;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="fw-bold" style="color: #2e7d32; font-size: 14px;">Total Deal Value:</span>
-                                <span class="fw-bold" style="color: #1b5e20; font-size: 20px;">₹<span id="live_total">0.00</span></span>
+                                <label class="fw-bold" style="font-size: 12px;">Offer Price (₹ per {{ item.unit_of_measure }}) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" name="proposed_price" class="modal-input" value="{{ item.price }}" required>
                             </div>
                         </div>
 
@@ -212,36 +190,10 @@
             </div>
         </div>
     </div>
+
     {% include 'footer.html' %}
 
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 1. Grab the elements
-            const qtyInput = document.getElementById('proposed_qty');
-            const priceInput = document.getElementById('proposed_price');
-            const totalDisplay = document.getElementById('live_total');
-
-            // 2. The Math Engine
-            function updateLiveTotal() {
-                const qty = parseFloat(qtyInput.value) || 0;
-                const price = parseFloat(priceInput.value) || 0;
-                
-                const total = qty * price;
-                
-                // Format the number to Indian standard with 2 decimals
-                totalDisplay.innerText = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            }
-
-            // 3. Run it once when the modal opens to show the default max value
-            updateLiveTotal();
-
-            // 4. Listen for the buyer typing to update it instantly
-            qtyInput.addEventListener('input', updateLiveTotal);
-            priceInput.addEventListener('input', updateLiveTotal); 
-        });
-    </script>
 </body>
 </html>

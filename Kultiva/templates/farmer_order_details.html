@@ -40,7 +40,7 @@
         .status-PENDING { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
         .status-SHIPPED { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
         .status-DELIVERED { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .status-CANCELLED, .status-REFUNDED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .status-CANCELLED { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
 
         .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; color: #555; }
         .detail-row strong { color: #1a1a1a; }
@@ -87,7 +87,6 @@
                             {% if order.status == 'PENDING' %}Processing
                             {% elif order.status == 'SHIPPED' %}In Transit
                             {% elif order.status == 'DELIVERED' %}Delivered
-                            {% elif order.status == 'REFUNDED' %}Refunded
                             {% else %}Cancelled{% endif %}
                         </span>
                     </div>
@@ -113,43 +112,28 @@
                     </div>
 
                     <div class="mt-4">
-                        {% if order.status == 'PENDING' %}
+                        {% if order.status == 'PENDING' or order.status == 'SHIPPED' %}
                             {% if is_cancel_window_open %}
                                 <button type="button" class="btn btn-outline-danger w-100 fw-bold rounded-pill" data-bs-toggle="modal" data-bs-target="#cancelModal">
-                                    <i class="fa fa-times-circle"></i> 
-                                    {% if order.payment_method == 'COD' %}
-                                        Cancel Order
-                                    {% else %}
-                                        Cancel Order & Request Refund
-                                    {% endif %}
+                                    <i class="fa fa-times-circle"></i> Cancel Order & Request Refund
                                 </button>
                                 <p class="text-center text-muted mt-2" style="font-size: 11px;">
                                     <i class="fa fa-clock-o"></i> You have 24 hours from purchase to cancel.
                                 </p>
                             {% else %}
-                                <div class="alert alert-secondary mb-0 text-center" style="font-size: 13px; font-weight: bold; border-radius: 10px;">
+                                <div class="alert alert-secondary mb-0 text-center" style="font-size: 13px; font-weight: bold;">
                                     <i class="fa fa-info-circle"></i> The 24-hour cancellation window has expired.
                                 </div>
                             {% endif %}
-                            
-                        {% elif order.status == 'SHIPPED' %}
-                            <div class="alert alert-warning mb-0 text-center" style="font-size: 13px; font-weight: bold; border-radius: 10px; background-color: #fff8e1; color: #f57f17; border: 1px solid #ffecb3;">
-                                <i class="fa fa-truck"></i> This order has been dispatched and can no longer be cancelled.
-                            </div>
-                            
                         {% elif order.status == 'DELIVERED' %}
                             <a href="{% url 'farmer_invoice_detail' order.order_id %}" class="btn btn-outline-success w-100 fw-bold rounded-pill"><i class="fa fa-download"></i> View & Download Invoice</a>
-                            
-                        {% elif order.status == 'CANCELLED' or order.status == 'REFUNDED' %}
-                            <div class="alert alert-danger mb-0 text-center" style="font-size: 13px; font-weight: bold; border-radius: 10px;">
-                                <i class="fa fa-info-circle"></i> This order was {{ order.status|lower }}. 
-                                {% if order.payment_method != 'COD' and order.status == 'CANCELLED' %}
-                                    Awaiting Admin Refund Verification.
-                                {% endif %}
+                        {% elif order.status == 'CANCELLED' %}
+                            <div class="alert alert-danger mb-0 text-center" style="font-size: 13px; font-weight: bold;">
+                                <i class="fa fa-info-circle"></i> This order was cancelled. Awaiting Admin Refund Verification.
                             </div>
                         {% endif %}
                     </div>
-                    </div>
+                </div>
             </div>
 
             <div class="col-lg-7">
@@ -197,7 +181,7 @@
                                 <div class="file-upload-wrapper" onclick="document.getElementById('imageUpload').click()">
                                     <i class="fa fa-cloud-upload text-success mb-2" style="font-size: 30px;"></i>
                                     <p style="margin: 0; color: #1b5e20; font-weight: bold;">Click here to browse images from your device</p>
-                                    <input type="file" name="image" id="imageUpload" accept="image/*" style="display: none;">
+                                    <input type="file" name="images" id="imageUpload" accept="image/*" multiple style="display: none;">
                                 </div>
                                 <div class="image-preview-container" id="imagePreviewContainer"></div>
 
@@ -207,11 +191,11 @@
                             </form>
                         {% endif %}
 
-                    {% elif order.status == 'CANCELLED' or order.status == 'REFUNDED' %}
+                    {% elif order.status == 'CANCELLED' %}
                         <div class="text-center py-5 text-muted">
                             <i class="fa fa-ban mb-3" style="font-size: 40px; opacity: 0.5;"></i>
                             <h5>Feedback Disabled</h5>
-                            <p>You cannot leave feedback for cancelled or refunded orders.</p>
+                            <p>You cannot leave feedback for cancelled orders.</p>
                         </div>
                     {% else %}
                         <div class="text-center py-5 text-muted">
@@ -238,14 +222,8 @@
                     <input type="hidden" name="action" value="cancel_order">
                     <div class="modal-body p-4">
                         <p style="font-size: 14px; color: #555;">Are you sure you want to cancel <strong>{{ order.product.title }}</strong>? This action cannot be undone.</p>
-                        
                         <p style="font-size: 13px; color: #888; background: #f8f9fa; padding: 10px; border-left: 3px solid #fbc02d; border-radius: 4px;">
-                            <strong>Note:</strong> 
-                            {% if order.payment_method == 'COD' %}
-                                This will cancel your Cash on Delivery order immediately. Both you and the seller will receive an email confirmation.
-                            {% else %}
-                                Since funds may have already been processed, an Admin will review this cancellation and initiate your refund within 3-5 business days. Both you and the seller will receive an email confirmation immediately.
-                            {% endif %}
+                            <strong>Note:</strong> Since funds may have already been processed, an Admin will review this cancellation and initiate your refund within 3-5 business days. Both you and the seller will receive an email confirmation immediately.
                         </p>
                         
                         <label style="font-weight: bold; color: #333; margin-top: 10px;">Reason for Cancellation <span class="text-danger">*</span></label>

@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva - Farmer Portfolio</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid #1b5e20;
+        }
+        
+        .stat-box {
+            background: #f1f8e9;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #2e7d32;
+            margin-bottom: 15px;
+        }
+        
+        .item-card {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            transition: 0.3s;
+            overflow: hidden;
+            height: 100%;
+        }
+        .item-card:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            transform: translateY(-3px);
+            border-color: #c5e1a5;
+        }
+        .crop-img { height: 180px; object-fit: cover; width: 100%; }
+    </style>
+</head>
+<body>
+
+    {% include 'buyer_header.html' %}
+
+    <div class="container mb-5">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb" style="font-size: 14px; font-weight: bold;">
+                <li class="breadcrumb-item"><a href="{% url 'buyer_farmer_list' %}" style="color: #1b5e20; text-decoration: none;">Farmer Network</a></li>
+                <li class="breadcrumb-item active" aria-current="page" style="color: #888;">{{ farmer.username }}'s Portfolio</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="glass-panel">
+                    <div class="text-center mb-4">
+                        <div style="width: 80px; height: 80px; background: #1b5e20; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 0 auto 15px;">
+                            {{ farmer.username|make_list|first|upper }}
+                        </div>
+                        <h4 style="color: #1e293b; font-weight: bold;">{{ farmer.username }}</h4>
+                        <span class="badge bg-success"><i class="fa fa-check-circle"></i> Verified Producer</span>
+                    </div>
+
+                    <div class="stat-box">
+                        <small style="color: #555; text-transform: uppercase; font-weight: bold;">Contact Details</small><br>
+                        <div style="margin-top: 10px;">
+                            <div style="font-size: 16px; color: #1e293b; margin-bottom: 6px; font-weight: bold;">
+                                <i class="fa fa-phone" style="color: #2e7d32; width: 22px;"></i> 
+                                {% if farmer.phone_number %}+91 {{ farmer.phone_number }}{% else %}<span class="text-muted fw-normal">Not Available</span>{% endif %}
+                            </div>
+                            <div style="font-size: 14px; color: #555;">
+                                <i class="fa fa-envelope" style="color: #2e7d32; width: 22px;"></i> 
+                                {{ farmer.email }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-box">
+                        <small style="color: #555; text-transform: uppercase; font-weight: bold;">Location</small><br>
+                        <span style="font-size: 16px; color: #1e293b;">
+                            {% if address %}{{ address.village }}, {{ address.district }}{% else %}Location Pending{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="stat-box">
+                        <small style="color: #555; text-transform: uppercase; font-weight: bold;">Agricultural Specs</small><br>
+                        <ul style="list-style: none; padding: 0; margin: 10px 0 0 0; font-size: 14px; color: #444;">
+                            <li class="mb-2"><strong>Land Area:</strong> {{ profile.land_area|default:"N/A" }} Acres</li>
+                            <li class="mb-2"><strong>Soil Type:</strong> {{ profile.soil_type|default:"N/A"|title }}</li>
+                            <li><strong>Irrigation:</strong> {{ profile.irrigation|default:"N/A"|title }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                
+                <div class="glass-panel mb-4" style="border-top-color: #0288d1;">
+                    <h4 style="color: #1e293b; font-weight: bold; margin-bottom: 25px;"><i class="fa fa-leaf text-success"></i> Active Harvests</h4>
+                    
+                    <div class="row">
+                        {% for item in listings %}
+                            <div class="col-md-6 mb-4">
+                                <div class="item-card bg-white">
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}" class="crop-img" alt="{{ item.title }}">
+                                    {% else %}
+                                        <div class="crop-img d-flex align-items-center justify-content-center bg-light text-muted">
+                                            <i class="fa fa-picture-o fa-3x"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="p-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge" style="background: #e3f2fd; color: #0288d1;">{{ item.get_category_display }}</span>
+                                            {% if item.is_organic %}
+                                                <span class="badge bg-success"><i class="fa fa-leaf"></i> Organic</span>
+                                            {% endif %}
+                                        </div>
+                                        <h5 style="font-weight: bold; color: #1e293b; margin-bottom: 5px;">{{ item.title }}</h5>
+                                        <p style="color: #555; font-size: 13px; margin-bottom: 15px;">{{ item.variety_or_brand|default:"Standard Variety" }}</p>
+                                        
+                                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                                            <div class="d-flex justify-content-between mb-1" style="font-size: 13px;">
+                                                <span class="text-muted">Available Stock:</span>
+                                                <strong>{{ item.available_stock }} {{ item.unit_of_measure }}</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between" style="font-size: 14px;">
+                                                <span class="text-muted">Price:</span>
+                                                <strong style="color: #1b5e20;">₹{{ item.price }} / {{ item.unit_of_measure }}</strong>
+                                            </div>
+                                        </div>
+                                        
+                                        <a href="{% url 'buyer_product_detail' item.id %}" class="btn btn-outline-success w-100 fw-bold" style="border-radius: 20px;">
+                                            <i class="fa fa-handshake-o"></i> Negotiate Deal
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12 text-center py-5">
+                                <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">This farmer currently has no active harvests.</h5>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="glass-panel" style="border-top-color: #fbc02d;">
+                    <h4 style="color: #1e293b; font-weight: bold; margin-bottom: 25px;"><i class="fa fa-star text-warning"></i> Customer Ratings & Reviews</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-4 border-end text-center pt-3">
+                            <div style="font-size: 60px; font-weight: 900; color: #1a1a1a; line-height: 1;">{{ avg_rating }}</div>
+                            <div class="text-warning fs-5 mb-2">
+                                <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i>
+                            </div>
+                            <div class="text-muted fw-bold mb-4" style="font-size: 13px;">Based on {{ total_reviews }} verified B2B ratings</div>
+                        </div>
+
+                        <div class="col-md-8 ps-md-4 pt-3">
+                            {% for review in reviews %}
+                                <div class="border-bottom pb-3 mb-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <span class="badge bg-success me-2 fs-6">{{ review.rating }} <i class="fa fa-star" style="font-size: 10px;"></i></span>
+                                        <span class="fw-bold text-dark">
+                                            {% if review.rating == 5 %}Excellent Partner!
+                                            {% elif review.rating == 4 %}Very Good Experience
+                                            {% elif review.rating == 3 %}Average Trade
+                                            {% elif review.rating == 2 %}Below Expectations
+                                            {% else %}Poor Experience{% endif %}
+                                        </span>
+                                    </div>
+                                    <p class="text-muted mb-2" style="font-size: 14px;">"{{ review.comment|default:'No written feedback provided.' }}"</p>
+                                    <div style="font-size: 12px; color: #888;">
+                                        <i class="fa fa-briefcase text-primary"></i> 
+                                        <strong>{{ review.reviewer.buyer_profile.company_name|default:review.reviewer.username|title }}</strong> 
+                                        <i class="fa fa-check-circle text-success" title="Verified B2B Trade"></i> • {{ review.created_at|date:"d M, Y" }}
+                                        
+                                        {% if review.b2b_trade and review.b2b_trade.listing %}
+                                            <br><span class="text-muted" style="font-size: 11px; margin-top: 4px; display: inline-block;">
+                                                <i class="fa fa-shopping-cart"></i> Purchased: {{ review.b2b_trade.listing.title }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fa fa-commenting-o mb-3" style="font-size: 40px; opacity: 0.5;"></i>
+                                    <h5>No Corporate Feedback Yet</h5>
+                                    <p>This farmer hasn't received any verified B2B reviews yet.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

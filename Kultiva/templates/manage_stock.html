@@ -67,8 +67,6 @@
         .status-active { background: #e8f5e9; color: #2e7d32; }
         .status-out { background: #ffebee; color: #c62828; }
         .status-hidden { background: #f1f1f1; color: #555; }
-        .status-banned { background: #eeeeee; color: #be1212; }
-        
 
         /* Consistent Action Buttons (View, Edit, Delete) */
         .action-container { display: flex; gap: 8px; justify-content: center; }
@@ -161,27 +159,21 @@
                                     <span class="badge-status status-active">ACTIVE</span>
                                 {% elif item.status == 'OUT_OF_STOCK' %}
                                     <span class="badge-status status-out">SOLD OUT</span>
-                                {% elif item.status == 'BANNED' %}
-                                    <span class="badge-status status-banned">BANNED</span>
                                 {% else %}
                                     <span class="badge-status status-hidden">HIDDEN</span>
                                 {% endif %}
                             </td>
                             <td>
-                            {% if item.status != 'BANNED' and item.status != 'OUT_OF_STOCK' %}
                                 <div class="action-container">
                                     <a href="{% url 'edit_listing' item.id %}" class="action-btn btn-view" title="View Live Preview">
                                         <i class="fa fa-eye"></i>
                                     </a>
                                     
-                                   
+                                    
                                     <button type="button" class="action-btn btn-delete" title="Remove Item" data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </div>
-                            {% elif item.status == 'BANNED' or item.status == 'OUT_OF_STOCK' %}
-                                <span class="badge-status status-banned"  style="font-size: 11px; color: #e27312df;">No Actions</span>
-                            {% endif %}
                             </td>
                         </tr>
                         {% empty %}

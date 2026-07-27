@@ -1,0 +1,467 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Order {{ order.order_id }} | Kultiva</title>
+    
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    
+    <style>
+        /* ================= SCREEN UI STYLES ================= */
+        body {
+            padding-top: 100px;
+            background: rgb(255,253,231);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(220, 237, 200, 0.4)), url("{% static 'assets/images/login-bg.png' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #c5e1a5;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .breadcrumb-nav { font-size: 14px; font-weight: bold; margin-bottom: 20px; }
+        .breadcrumb-nav a { color: #888; text-decoration: none; transition: 0.2s; }
+        .breadcrumb-nav a:hover { color: #1b5e20; }
+        .breadcrumb-nav span { color: #1b5e20; }
+
+        .order-title { display: flex; align-items: center; gap: 15px; margin-bottom: 5px; }
+        .order-title h1 { font-size: 28px; font-weight: 800; color: #1a1a1a; margin: 0; }
+        
+        .status-badge { padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
+        .status-PENDING { background: #e3f2fd; color: #1565c0; }
+        .status-SHIPPED { background: #fff8e1; color: #f57f17; }
+        .status-DELIVERED { background: #e8f5e9; color: #2e7d32; }
+        .status-CANCELLED { background: #ffebee; color: #c62828; }
+
+        .card-header-custom { padding: 20px; border-bottom: 1px solid #eee; font-size: 16px; font-weight: bold; color: #1b5e20; background: rgba(248, 249, 250, 0.5); }
+        .card-body-custom { padding: 20px; }
+
+        .order-table { width: 100%; border-collapse: collapse; }
+        .order-table th { text-align: left; padding-bottom: 15px; font-size: 12px; color: #888; text-transform: uppercase; border-bottom: 1px solid #eee; }
+        .order-table td { padding: 15px 0; border-bottom: 1px solid #eee; vertical-align: middle; }
+        .order-table tr:last-child td { border-bottom: none; padding-bottom: 0; }
+        .product-img { width: 50px; height: 50px; border-radius: 8px; border: 1px solid #ddd; object-fit: contain; background: #fff; mix-blend-mode: multiply; }
+
+        .form-label { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 8px; display: block; }
+        .form-control-custom { width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fff; outline: none; transition: 0.3s; margin-bottom: 15px; font-family: 'Times New Roman', Times, serif; }
+        .form-control-custom:focus { border-color: #1b5e20; box-shadow: 0 0 5px rgba(27, 94, 32, 0.2); }
+
+        .btn-update { width: 100%; background: #1b5e20; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; transition: 0.3s; }
+        .btn-update:hover { background: #fbc02d; color: #1b5e20; }
+
+        .tracking-details { background: #f1f8e9; border: 1px solid #c5e1a5; border-radius: 8px; padding: 15px; margin-bottom: 15px; display: none; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; }
+        .tracking-details.show { display: block; opacity: 1; transform: translateY(0); }
+
+        .customer-avatar { width: 45px; height: 45px; border-radius: 50%; background: #e3f2fd; color: #1565c0; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #666; }
+        .summary-total { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; font-size: 18px; font-weight: bold; color: #1a1a1a; }
+        
+        .dispatched-lock-box { background: rgba(255, 248, 225, 0.6); border: 1px solid #ffecb3; border-radius: 10px; padding: 20px; text-align: center; }
+        .dispatched-lock-box i { font-size: 40px; color: #f57f17; margin-bottom: 15px; }
+
+        /* UI ENHANCEMENT: Order Status Tracker */
+        .order-tracker { display: flex; justify-content: space-between; position: relative; margin-bottom: 30px; padding: 0 20px; }
+        .order-tracker::before { content: ''; position: absolute; top: 20px; left: 40px; right: 40px; height: 3px; background: #e0e0e0; z-index: 1; }
+        .tracker-step { position: relative; z-index: 2; text-align: center; width: 80px; }
+        .step-icon { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 3px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 16px; color: #aaa; transition: 0.3s; }
+        .step-text { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; }
+        
+        .tracker-step.active .step-icon { border-color: #1b5e20; background: #1b5e20; color: #fff; box-shadow: 0 0 10px rgba(27, 94, 32, 0.3); }
+        .tracker-step.active .step-text { color: #1b5e20; }
+
+        /* ================= PRINT UI STYLES (THE MAGIC TRICK) ================= */
+        .print-only { display: none; }
+        
+        @media print {
+            @page { margin: 20px; size: A4; }
+            body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+            .screen-only { display: none !important; } /* Hides entire dashboard & navbar */
+            .print-only { display: block !important; } /* Shows ONLY the invoice */
+            
+            /* Print Invoice Typography */
+            .print-wrapper { font-family: 'Arial', sans-serif; color: #333; padding: 20px; }
+            .print-header { border-bottom: 3px solid #1b5e20; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
+            .print-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+            .print-table th { background: #f8f9fa; border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #555; }
+            .print-table td { border: 1px solid #ddd; padding: 12px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="screen-only">
+        {% include 'seller_header.html' %}
+
+        <div class="container pb-5 wow fadeIn">
+            <div class="breadcrumb-nav">
+                <a href="{% url 'seller_orders' %}"><i class="fa fa-arrow-left"></i> Back to Orders</a>
+                <span class="mx-2">/</span>
+                <span>Manage {{ order.order_id }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <div class="order-title">
+                        <h1>Order {{ order.order_id }}</h1>
+                        <span class="status-badge status-{{ order.status }}" id="main-status-badge">
+                            {% if order.status == 'PENDING' %}<i class="fa fa-hourglass-half"></i> Processing
+                            {% elif order.status == 'SHIPPED' %}<i class="fa fa-truck"></i> Shipped
+                            {% elif order.status == 'DELIVERED' %}<i class="fa fa-check-circle"></i> Delivered
+                            {% else %}<i class="fa fa-times-circle"></i> Cancelled{% endif %}
+                        </span>
+                    </div>
+                    <p style="color: #888; font-size: 14px; margin-top: 5px; font-weight: bold;">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
+                </div>
+                <div>
+                    <button onclick="window.print()" class="btn btn-outline-success fw-bold rounded-pill shadow-sm">
+                        <i class="fa fa-print"></i> Print Invoice
+                    </button>
+                </div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} shadow-sm fw-bold border-0">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% if order.status != 'CANCELLED' %}
+            <div class="glass-widget p-4">
+                <div class="order-tracker">
+                    <div class="tracker-step active">
+                        <div class="step-icon"><i class="fa fa-shopping-basket"></i></div>
+                        <div class="step-text">Placed</div>
+                    </div>
+                    <div class="tracker-step active">
+                        <div class="step-icon"><i class="fa fa-box-open"></i></div>
+                        <div class="step-text">Processing</div>
+                    </div>
+                    <div class="tracker-step {% if order.status == 'SHIPPED' or order.status == 'DELIVERED' %}active{% endif %}">
+                        <div class="step-icon"><i class="fa fa-truck"></i></div>
+                        <div class="step-text">Shipped</div>
+                    </div>
+                    <div class="tracker-step {% if order.status == 'DELIVERED' %}active{% endif %}">
+                        <div class="step-icon"><i class="fa fa-check-circle"></i></div>
+                        <div class="step-text">Delivered</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="glass-widget">
+                        <div class="card-header-custom">
+                            <i class="fa fa-shopping-basket"></i> Ordered Item
+                        </div>
+                        <div class="card-body-custom">
+                            <table class="order-table">
+                                <thead>
+                                    <tr>
+                                        <th width="55%">Product</th>
+                                        <th width="15%" style="text-align: center;">Price</th>
+                                        <th width="10%" style="text-align: center;">Qty</th>
+                                        <th width="20%" style="text-align: right;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                {% if order.product.image %}
+                                                    <img src="{{ order.product.image.url }}" class="product-img">
+                                                {% else %}
+                                                    <div class="product-img d-flex align-items-center justify-content-center"><i class="fa fa-box text-muted"></i></div>
+                                                {% endif %}
+                                                <div>
+                                                    <div style="font-weight: bold; font-size: 15px; color: #1a1a1a;">{{ order.product.title }}</div>
+                                                    <div style="font-size: 12px; color: #888;">Category: {{ order.product.get_category_display }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="text-align: center; font-weight: bold; color: #555;">₹{{ order.product.price }}</td>
+                                        <td style="text-align: center; font-weight: bold;">x{{ order.quantity|floatformat:0 }}</td>
+                                        <td style="text-align: right; font-weight: 900; font-size: 16px; color: #1b5e20;">₹{{ subtotal|add:gst }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="glass-widget">
+                        <div class="card-header-custom">
+                            <i class="fa fa-receipt"></i> Payment Summary
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="summary-row">
+                                <span>Taxable Value (Subtotal)</span>
+                                <strong style="color: #333;">₹{{ subtotal }}</strong>
+                            </div>
+                            <div class="summary-row">
+                                <span>Estimated GST (Taxes)</span>
+                                <strong style="color: #333;">₹{{ gst }}</strong>
+                            </div>
+                            <div class="summary-row">
+                                <span>Packaging & Handling Fee</span>
+                                <strong style="color: #333;">₹{{ packaging_fee }}</strong>
+                            </div>
+                            <div class="summary-total">
+                                <span>Total Paid by Customer</span>
+                                <span style="color: #1b5e20;">₹{{ order.total_amount }}</span>
+                            </div>
+                            
+                            <div class="mt-3 p-3 rounded" style="background: #f8f9fa; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee;">
+                                <span style="color: #888; font-weight: bold;">Payment Method</span>
+                                <strong style="color: #1a1a1a; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fa fa-check-circle text-success"></i> {{ order.get_payment_method_display }} (Direct Payment)
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="glass-widget" style="border-top: 5px solid #1b5e20;">
+                        <div class="card-header-custom" style="color: #1b5e20;">
+                            <i class="fa fa-bell"></i> Fulfillment Status
+                        </div>
+                        <div class="card-body-custom">
+                            
+                            {% if order.status == 'PENDING' %}
+                                <form action="{% url 'update_order_status' order.order_id %}" method="POST" id="statusForm">
+                                    {% csrf_token %}
+                                    
+                                    <label class="form-label">Order Action</label>
+                                    <select name="new_status" class="form-control-custom" id="status-select" onchange="toggleTrackingFields()">
+                                        <option value="PENDING" selected>Keep Processing</option>
+                                        <option value="SHIPPED">Hand over to Courier (Ship)</option>
+                                        <option value="DELIVERED">Mark as Delivered Immediately</option> 
+                                        <option value="CANCELLED">Cancel Order</option>
+                                    </select>
+
+                                    <div class="tracking-details" id="tracking-fields">
+                                        <h6 style="font-size: 13px; font-weight: bold; color: #1b5e20; margin-bottom: 12px;"><i class="fa fa-truck"></i> One-Time Dispatch Details</h6>
+                                        
+                                        <label class="form-label">Courier Partner <span class="text-danger">*</span></label>
+                                        <select name="courier_partner" class="form-control-custom mb-2" id="courier-partner">
+                                            <option value="">Select Carrier...</option>
+                                            <option value="Delhivery">Delhivery</option>
+                                            <option value="Ecom Express">Ecom Express</option>
+                                            <option value="BlueDart">BlueDart</option>
+                                            <option value="India Post">India Post</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+
+                                        <label class="form-label">Tracking Number (AWB) <span class="text-danger">*</span></label>
+                                        <input type="text" name="tracking_number" class="form-control-custom mb-2" id="tracking-number" placeholder="e.g. 109283749283">
+
+                                        <label class="form-label">Tracking URL (Optional)</label>
+                                        <input type="url" name="tracking_url" class="form-control-custom mb-2" placeholder="https://...">
+                                        <p style="font-size: 10px; color: #888; margin-top: -5px; line-height: 1.2;">Details are emailed directly to the customer and are not stored permanently for security.</p>
+                                    </div>
+
+                                    <div class="mb-3 d-flex align-items-center gap-2">
+                                        <input type="checkbox" name="notify_customer" id="notify" checked style="width: 16px; height: 16px; accent-color: #1b5e20;">
+                                        <label for="notify" style="font-size: 13px; font-weight: bold; color: #555; margin: 0; cursor: pointer;">Notify customer via Email</label>
+                                    </div>
+
+                                    <button type="submit" class="btn-update shadow-sm" id="save-btn">
+                                        <i class="fa fa-save"></i> Process Update
+                                    </button>
+                                </form>
+
+                            {% elif order.status == 'SHIPPED' %}
+                                <div class="dispatched-lock-box mb-3">
+                                    <i class="fa fa-shipping-fast"></i>
+                                    <h5>Order Dispatched</h5>
+                                    <p style="font-size: 13px;">This package has been successfully handed over to the logistics partner.</p>
+                                </div>
+                                
+                                <form action="{% url 'update_order_status' order.order_id %}" method="POST" id="statusFormDelivered">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="new_status" value="DELIVERED">
+                                    
+                                    <div class="mb-3 p-2 rounded" style="background: #e8f5e9; border: 1px solid #c5e1a5;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="checkbox" name="notify_customer" id="notify-delivered" checked style="width: 16px; height: 16px; accent-color: #2e7d32;">
+                                            <label for="notify-delivered" style="font-size: 13px; font-weight: bold; color: #1b5e20; margin: 0; cursor: pointer;">Email Delivery Receipt to Customer</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn-update shadow-sm" style="background-color: #2e7d32;" id="deliver-btn">
+                                        <i class="fa fa-check-circle"></i> Confirm Delivery
+                                    </button>
+                                </form>
+
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fa fa-lock text-muted mb-2" style="font-size: 30px;"></i>
+                                    <h6 class="fw-bold" style="color: #1b5e20;">Order Finalized</h6>
+                                    <p style="font-size: 13px; color: #888;">This order has been marked as {{ order.get_status_display }} and can no longer be modified.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="glass-widget">
+                        <div class="card-header-custom">
+                            <i class="fa fa-user"></i> Customer Info
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="customer-avatar"><i class="fa fa-user"></i></div>
+                                <div>
+                                    <h6 style="font-weight: bold; color: #1a1a1a; margin: 0;">{{ order.farmer.username }}</h6>
+                                    <div style="font-size: 12px; color: #888; font-weight: bold;">Verified Buyer</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 style="font-size: 11px; text-transform: uppercase; color: #888; font-weight: bold; margin-bottom: 5px;">Contact Email</h6>
+                                <p style="font-size: 14px; font-weight: bold; color: #1565c0; margin: 0;"><i class="fa fa-envelope"></i> {{ order.farmer.email }}</p>
+                            </div>
+
+                            <div>
+                                <h6 style="font-size: 11px; text-transform: uppercase; color: #888; font-weight: bold; margin-bottom: 5px;">Shipping Address</h6>
+                                <p style="font-size: 14px; color: #333; line-height: 1.5; margin: 0; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee;">
+                                    {{ order.delivery_address }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% include 'footer.html' %}
+    </div>
+
+
+    <div class="print-only print-wrapper">
+        <div class="print-header">
+            <div>
+                <h1 style="color: #1b5e20; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px;">KULTIVA MARKETPLACE</h1>
+                <p style="color: #666; margin: 5px 0 0 0; font-size: 12px; text-transform: uppercase; font-weight: bold;">Official Tax Invoice</p>
+            </div>
+            <div style="text-align: right;">
+                <h3 style="margin: 0; color: #333;">Order: {{ order.order_id }}</h3>
+                <p style="margin: 5px 0; color: #666; font-size: 14px;">Date: {{ order.created_at|date:"d M Y" }}</p>
+                <div style="margin-top: 10px; padding: 5px 10px; border: 1px solid #ccc; display: inline-block; font-size: 12px; font-weight: bold;">{{ order.get_payment_method_display }}</div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+            <div style="width: 45%;">
+                <h4 style="font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 10px;">Sold By (Vendor)</h4>
+                <p style="margin: 0; font-size: 16px; font-weight: bold;">{{ request.user.username }}</p>
+                <p style="margin: 5px 0; font-size: 14px; color: #555;">Registered Kultiva Seller</p>
+            </div>
+            <div style="width: 45%;">
+                <h4 style="font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 10px;">Billed & Shipped To</h4>
+                <p style="margin: 0; font-size: 16px; font-weight: bold;">{{ order.farmer.username }}</p>
+                <p style="margin: 5px 0; font-size: 14px; color: #555; line-height: 1.5;">{{ order.delivery_address }}</p>
+            </div>
+        </div>
+
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th width="50%">Product Description</th>
+                    <th width="15%" style="text-align: center;">Price</th>
+                    <th width="15%" style="text-align: center;">Quantity</th>
+                    <th width="20%" style="text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>{{ order.product.title }}</strong><br>
+                        <span style="font-size: 12px; color: #666;">Category: {{ order.product.get_category_display }}</span>
+                    </td>
+                    <td style="text-align: center;">₹{{ order.product.price }}</td>
+                    <td style="text-align: center;">{{ order.quantity|floatformat:0 }}</td>
+                    <td style="text-align: right; font-weight: bold;">₹{{ subtotal|add:gst }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="width: 350px; margin-left: auto;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                <span>Taxable Value:</span>
+                <span>₹{{ subtotal }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                <span>Estimated GST:</span>
+                <span>₹{{ gst }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                <span>Packaging Fee:</span>
+                <span>₹{{ packaging_fee }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 2px solid #000; font-size: 18px; font-weight: bold;">
+                <span>Grand Total:</span>
+                <span>₹{{ order.total_amount }}</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 60px; font-size: 11px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+            This is a computer-generated document. No signature is required.<br>
+            Thank you for doing business on the Kultiva platform.
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        function toggleTrackingFields() {
+            const statusSelect = document.getElementById('status-select');
+            const trackingFields = document.getElementById('tracking-fields');
+            const partnerInput = document.getElementById('courier-partner');
+            const trackingInput = document.getElementById('tracking-number');
+            
+            if (statusSelect && trackingFields) {
+                if (statusSelect.value === 'SHIPPED') {
+                    trackingFields.classList.add('show');
+                    partnerInput.required = true;
+                    trackingInput.required = true;
+                } else {
+                    trackingFields.classList.remove('show');
+                    partnerInput.required = false;
+                    trackingInput.required = false;
+                }
+            }
+        }
+        
+        document.getElementById('statusForm')?.addEventListener('submit', function() {
+            const btn = document.getElementById('save-btn');
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+            btn.style.opacity = '0.8';
+            btn.style.cursor = 'not-allowed';
+        });
+        
+        // 🔬 THE FIX: Added JS listener for the new "Confirm Delivery" button
+        document.getElementById('statusFormDelivered')?.addEventListener('submit', function() {
+            const btn = document.getElementById('deliver-btn');
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Finalizing...';
+            btn.style.opacity = '0.8';
+            btn.style.cursor = 'not-allowed';
+        });
+    </script>
+</body>
+</html>

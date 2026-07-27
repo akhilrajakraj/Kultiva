@@ -37,10 +37,8 @@
         .form-label { font-weight: bold; color: #555; font-size: 13px; }
         .custom-input { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px 15px; outline: none; transition: 0.3s; }
         .custom-input:focus { border-color: #2e7d32; box-shadow: 0 0 5px rgba(46, 125, 50, 0.3); }
-        .custom-input:invalid { border-color: #e57373; } /* Highlights invalid inputs softly */
         
         .dynamic-section { display: none; background: #fafafa; padding: 20px; border-radius: 10px; border: 1px dashed #ccc; margin-top: 20px; }
-        .helper-text { font-size: 11px; color: #78909c; display: block; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -48,14 +46,7 @@
     {% include 'farmer_header.html' %}
 
     <div class="container mb-5">
-        
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} fw-bold shadow-sm mt-3"><i class="fa fa-info-circle"></i> {{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <div class="wizard-card border-top border-5 border-success mt-3">
+        <div class="wizard-card border-top border-5 border-success">
             <h2 style="color: #1b5e20; font-weight: bold;" class="mb-1">List Your Harvest</h2>
             <p class="text-muted mb-4">Select the category to unlock industry-standard listing options.</p>
 
@@ -83,41 +74,38 @@
                 </div>
             </div>
 
-            <form action="{% url 'add_farmer_listing' %}" method="POST" enctype="multipart/form-data" id="listingForm" style="display: none;" onsubmit="return validateForm()">
+            <form action="{% url 'add_farmer_listing' %}" method="POST" enctype="multipart/form-data" id="listingForm" style="display: none;">
                 {% csrf_token %}
                 <input type="hidden" name="category" id="hiddenCategory">
 
                 <div class="row">
                     <div class="col-md-8 mb-3">
                         <label class="form-label">Headline / Title <span class="text-danger">*</span></label>
-                        <input type="text" name="title" class="custom-input" placeholder="e.g., Premium A-Grade Basmati Rice" required minlength="5" maxlength="100">
-                        <span class="helper-text"><i class="fa fa-info-circle"></i> Make it descriptive (5-100 characters).</span>
+                        <input type="text" name="title" class="custom-input" placeholder="e.g., Premium A-Grade Basmati Rice" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label" id="varietyLabel">Crop Variety</label>
-                        <input type="text" name="variety_or_brand" class="custom-input" placeholder="e.g., Sharbati, Alphonso" maxlength="100">
+                        <input type="text" name="variety_or_brand" class="custom-input" placeholder="e.g., Sharbati, Alphonso">
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Total Stock <span class="text-danger">*</span></label>
-                        <input type="number" step="0.1" min="0.1" name="available_stock" id="availableStock" class="custom-input" required>
-                        <span class="helper-text"><i class="fa fa-balance-scale"></i> Total volume available.</span>
+                        <input type="number" step="0.1" name="available_stock" class="custom-input" required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Unit <span class="text-danger">*</span></label>
-                        <select name="unit_of_measure" id="unitSelect" class="custom-input" required></select>
+                        <select name="unit_of_measure" id="unitSelect" class="custom-input" required>
+                            </select>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Price per Unit (₹) <span class="text-danger">*</span></label>
-                        <input type="number" step="0.01" min="1.00" name="price" class="custom-input" required>
-                        <span class="helper-text"><i class="fa fa-money"></i> Competitive market rate.</span>
+                        <input type="number" step="0.01" name="price" class="custom-input" required>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <label class="form-label">Min. Order Qty <span class="text-danger">*</span></label>
-                        <input type="number" step="0.1" min="0.1" name="min_order_quantity" id="minOrder" class="custom-input" value="1" required>
-                        <span class="helper-text"><i class="fa fa-shopping-cart"></i> Minimum a buyer must buy.</span>
+                        <label class="form-label">Min. Order Qty</label>
+                        <input type="number" step="0.1" name="min_order_quantity" class="custom-input" value="1">
                     </div>
                 </div>
 
@@ -143,13 +131,11 @@
                     <div class="row mt-2">
                         <div class="col-md-6">
                             <label style="font-size: 11px; font-weight:bold;">Moisture Content (%)</label>
-                            <input type="number" step="0.1" min="0" max="40" name="moisture_content" class="custom-input" placeholder="e.g. 12.5">
-                            <span class="helper-text text-primary"><i class="fa fa-tint"></i> Standard limit: 10% - 14% (Absolute max 40%).</span>
+                            <input type="number" step="0.1" name="moisture_content" class="custom-input" placeholder="e.g. 12.5">
                         </div>
                         <div class="col-md-6">
                             <label style="font-size: 11px; font-weight:bold;">Broken Ratio (%)</label>
-                            <input type="number" step="0.1" min="0" max="100" name="broken_ratio" class="custom-input" placeholder="e.g. 2.0">
-                            <span class="helper-text text-primary"><i class="fa fa-pie-chart"></i> Percentage of broken grains (Usually 0% - 5%).</span>
+                            <input type="number" step="0.1" name="broken_ratio" class="custom-input" placeholder="e.g. 2.0">
                         </div>
                     </div>
                 </div>
@@ -160,31 +146,26 @@
                         <div class="col-md-6">
                             <label style="font-size: 11px; font-weight:bold;">Exact Harvest Date <span class="text-danger">*</span></label>
                             <input type="date" name="harvest_date" id="harvestDateInput" class="custom-input">
-                            <span class="helper-text"><i class="fa fa-info-circle"></i> Cannot be a future date.</span>
                         </div>
                         <div class="col-md-6">
                             <label style="font-size: 11px; font-weight:bold;">Estimated Shelf Life (Days)</label>
-                            <input type="number" min="1" max="365" name="shelf_life" class="custom-input" placeholder="e.g. 14">
-                            <span class="helper-text"><i class="fa fa-hourglass-half"></i> Safe consumption window.</span>
+                            <input type="number" name="shelf_life" class="custom-input" placeholder="e.g. 14">
                         </div>
                     </div>
                 </div>
 
                 <div class="row mt-3">
                     <div class="col-md-8 mb-3">
-                        <label class="form-label">Full Description <span class="text-danger">*</span></label>
-                        <textarea name="description" class="custom-input" rows="3" placeholder="Describe farming methods, exact location, or delivery terms..." required minlength="10"></textarea>
+                        <label class="form-label">Full Description</label>
+                        <textarea name="description" class="custom-input" rows="3" placeholder="Describe farming methods, exact location, or delivery terms..."></textarea>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Upload Image (Optional)</label>
-                        <input type="file" name="image" class="custom-input" accept="image/jpeg, image/png, image/webp">
-                        <span class="helper-text">High-quality photos attract buyers.</span>
+                        <label class="form-label">Upload Image</label>
+                        <input type="file" name="image" class="custom-input" accept="image/*">
                     </div>
                 </div>
 
-                <button type="submit" class="btn text-white w-100 rounded-pill fw-bold mt-3" style="background: #1b5e20; padding: 15px; font-size: 16px;">
-                    <i class="fa fa-upload"></i> Publish Listing
-                </button>
+                <button type="submit" class="btn text-white w-100 rounded-pill fw-bold mt-3" style="background: #1b5e20; padding: 15px; font-size: 16px;">Publish Listing</button>
             </form>
         </div>
     </div>
@@ -192,38 +173,26 @@
     {% include 'footer.html' %}
 
     <script>
-        // Restrict Harvest Date to prevent future dates
-        document.addEventListener('DOMContentLoaded', function() {
-            let today = new Date().toISOString().split('T')[0];
-            document.getElementById('harvestDateInput').setAttribute('max', today);
-        });
-
-        // Ensure Min Order doesn't exceed Total Stock
-        function validateForm() {
-            let stock = parseFloat(document.getElementById('availableStock').value);
-            let minOrder = parseFloat(document.getElementById('minOrder').value);
-            
-            if (minOrder > stock) {
-                alert("Validation Error: Minimum Order Quantity cannot exceed your Total Available Stock.");
-                return false;
-            }
-            return true;
-        }
-
         function selectCategory(cat, element) {
+            // Highlight selected box
             document.querySelectorAll('.category-box').forEach(box => box.classList.remove('active'));
             element.classList.add('active');
+
+            // Show Form & set hidden category
             document.getElementById('listingForm').style.display = 'block';
             document.getElementById('hiddenCategory').value = cat;
 
+            // Setup variables
             let unitSelect = document.getElementById('unitSelect');
             let grainSec = document.getElementById('grainSection');
             let prodSec = document.getElementById('produceSection');
             let harvestDate = document.getElementById('harvestDateInput');
             let varLabel = document.getElementById('varietyLabel');
 
+            // Clear previous options
             unitSelect.innerHTML = '';
 
+            // Apply specific industry standard logic
             if (cat === 'GRAINS') {
                 grainSec.style.display = 'block';
                 prodSec.style.display = 'none';
@@ -240,7 +209,7 @@
             }
             else if (cat === 'CASH_CROPS') {
                 grainSec.style.display = 'none';
-                prodSec.style.display = 'none'; 
+                prodSec.style.display = 'none'; // Basic form for now
                 harvestDate.required = false;
                 varLabel.innerText = "Hybrid/Strain Name";
                 unitSelect.innerHTML = '<option value="Ton">Tons</option><option value="Quintal">Quintals (100kg)</option>';

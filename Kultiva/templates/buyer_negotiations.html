@@ -103,9 +103,9 @@
                             <tbody>
                                 {% for bid in sent_bids %}
                                 <tr>
-                                    <td><span class="crop-title">{{ bid.listing.title }}</span><br><small class="text-muted">Qty: {{ bid.requested_quantity }} {{ bid.listing.unit_of_measure }}</small></td>
+                                    <td><span class="crop-title">{{ bid.listing.title }}</span><br><small class="text-muted">Qty: {{ bid.listing.available_stock }} {{ bid.listing.unit_of_measure }}</small></td>
                                     <td><strong>{{ bid.farmer.username }}</strong></td>
-                                    <td style="font-weight: bold; color: #1b5e20;">₹{{ bid.proposed_price }}</td>
+                                    <td style="font-weight: bold; color: #1b5e20;">₹{{ bid.listing.price }}</td>
                                     <td>{{ bid.created_at|date:"M d, Y" }}</td>
                                     <td>
                                         {% if bid.status == 'PENDING' %}
@@ -123,7 +123,7 @@
                                     </td>
                                 </tr>
                                 {% empty %}
-                                <tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa fa-paper-plane-o fa-3x mb-3" style="color: #ccc;"></i><br>You haven't sent any active bids.</td></tr>
+                                <tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa fa-paper-plane-o fa-3x mb-3" style="color: #ccc;"></i><br>You haven't sent any bids yet.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -148,7 +148,7 @@
                                 <tr>
                                     <td><span class="crop-title">{{ offer.listing.title }}</span></td>
                                     <td><strong>{{ offer.farmer.username }}</strong></td>
-                                    <td style="font-weight: bold; color: #1b5e20;">₹{{ offer.proposed_price }}</td>
+                                    <td style="font-weight: bold; color: #1b5e20;">₹{{ offer.listing.price }}</td>
                                     <td>{{ offer.created_at|date:"M d, Y" }}</td>
                                     <td>
                                         {% if offer.status == 'PENDING' %}

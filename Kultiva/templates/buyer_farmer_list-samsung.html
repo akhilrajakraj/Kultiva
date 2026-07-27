@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kultiva - Farmer Network</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <style>
+        body { padding-top: 110px; background-color: #f8f9fa; }
+        
+        /* Reusing your Glassmorphism aesthetic */
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-bottom: 4px solid #1b5e20;
+        }
+        
+        .farmer-avatar {
+            width: 60px;
+            height: 60px;
+            background: #e8f5e9;
+            color: #1b5e20;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .badge-custom { background: #fbc02d; color: #1e293b; font-weight: bold; padding: 5px 10px; border-radius: 20px; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    {% include 'buyer_header.html' %}
+
+    <div class="container mb-5">
+        <div class="row mb-4 align-items-center">
+            <div class="col-lg-6">
+                <h2 style="color: #1e293b; font-weight: bold;"><i class="fa fa-users text-success"></i> Verified Farmer Network</h2>
+                <p class="text-muted">Discover and connect with trusted producers across the region.</p>
+            </div>
+            <div class="col-lg-6">
+                <form method="GET" action="{% url 'buyer_farmer_list' %}">
+                    <div class="input-group shadow-sm" style="border-radius: 25px; overflow: hidden;">
+                        <input type="text" name="q" class="form-control border-0 bg-white px-4" placeholder="Search by name, district, or soil type..." value="{{ search_query }}" style="height: 50px;">
+                        <button class="btn text-white px-4" type="submit" style="background: #1b5e20; border-radius: 0 25px 25px 0;">
+                            <i class="fa fa-search"></i> Find
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for farmer in farmers %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="glass-widget d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="farmer-avatar shadow-sm">
+                                {{ farmer.username|make_list|first|upper }}
+                            </div>
+                            <span class="badge-custom"><i class="fa fa-leaf"></i> {{ farmer.listings.count }} Active Crops</span>
+                        </div>
+                        
+                        <h5 style="color: #1e293b; font-weight: bold; margin-bottom: 5px;">{{ farmer.username }}</h5>
+                        
+                        <p class="text-muted" style="font-size: 13px; margin-bottom: 15px;">
+                            <i class="fa fa-map-marker text-danger"></i> 
+                            {% if farmer.addresses.first %}
+                                {{ farmer.addresses.first.district }}, {{ farmer.addresses.first.state }}
+                            {% else %}
+                                Location Pending
+                            {% endif %}
+                        </p>
+
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; font-size: 13px; color: #555; margin-bottom: 20px; flex-grow: 1;">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><strong>Land Area:</strong></span>
+                                <span>{{ farmer.farmer_profile.land_area|default:"N/A" }} Acres</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><strong>Soil Type:</strong></span>
+                                <span>{{ farmer.farmer_profile.soil_type|default:"N/A"|title }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Lab Tested:</strong></span>
+                                {% if farmer.manual_soil_reports.last.request_status == 'COMPLETED' %}
+                                    <span class="text-success fw-bold"><i class="fa fa-check-circle"></i> Yes</span>
+                                {% else %}
+                                    <span class="text-warning"><i class="fa fa-clock-o"></i> Pending / No</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <a href="{% url 'buyer_view_farmer_profile' farmer.user_id %}" class="btn w-100 fw-bold shadow-sm" style="background: #e3f2fd; color: #0288d1; border-radius: 10px;">
+                            View Inventory Portfolio <i class="fa fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="fa fa-search fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No verified farmers found.</h4>
+                    <p>Try adjusting your search criteria.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
