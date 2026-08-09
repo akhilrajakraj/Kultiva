@@ -1,9 +1,4 @@
-"""Farmer-domain business services.
-
-These services preserve the existing marketplace tables while moving farmer
-rules out of the legacy HTTP layer. They are transaction-safe and enforce role
-and ownership checks at the service boundary.
-"""
+"""Farmer-domain business services."""
 from __future__ import annotations
 
 from decimal import Decimal
@@ -13,6 +8,7 @@ from django.db import transaction
 
 from backend.apps.accounts.models import User
 from backend.apps.escrow.services import EscrowService
+from backend.apps.trade.services import TradeService
 from backend.core.legacy.models import DirectTradeProposal, FarmerProfile, InputOrder, ManualSoilReport, MarketplaceListing
 
 
@@ -64,20 +60,10 @@ class FarmerService:
     @classmethod
     @transaction.atomic
     def request_manual_soil_report(cls, *, user: User, land_area: float | None = None, previous_crop: str | None = None) -> ManualSoilReport:
-        """Return the latest report for the farmer or create a new pending report.
-
-        Migration 0004 changed ManualSoilReport from OneToOneField to ForeignKey,
-        so this service must never use get_or_create(farmer=...) as though the
-        relationship were unique.
-        """
         cls._ensure_farmer(user)
         report = ManualSoilReport.objects.select_for_update().filter(farmer=user).order_by("-request_date").first()
         if report is None:
-            return ManualSoilReport.objects.create(
-                farmer=user,
-                land_area=land_area,
-                previous_crop=previous_crop,
-            )
+            return ManualSoilReport.objects.create(farmer=user, land_area=land_area, previous_crop=previous_crop)
         if report.request_status == "COMPLETED":
             raise ValueError("A completed manual soil report cannot be reopened automatically.")
         changed = []
@@ -147,44 +133,18 @@ class FarmerService:
         return MarketplaceListing.objects.filter(listed_by=user, wing="PRODUCE").order_by("-created_at")
 
     @classmethod
-    @transaction.atomic
     def send_trade_proposal(cls, *, user: User, listing_id: int, buyer_id: int, message: str = "", hide_listing: bool = False) -> DirectTradeProposal:
-        cls._ensure_farmer(user)
-        listing = MarketplaceListing.objects.select_for_update().get(pk=listing_id, listed_by=user, wing="PRODUCE", status__in=["ACTIVE", "HIDDEN"])
-        buyer = User.objects.get(pk=buyer_id, role=User.Role.BUYER, is_active=True, is_verified=True)
-        if DirectTradeProposal.objects.filter(listing=listing, farmer=user, buyer=buyer, status="PENDING").exists():
-            raise ValueError("A pending proposal already exists for this buyer and listing.")
-        proposal = DirectTradeProposal.objects.create(listing=listing, farmer=user, buyer=buyer, message=message.strip(), status="PENDING")
-        if hide_listing:
-            listing.status = "HIDDEN"
-            listing.save(update_fields=["status"])
-        return proposal
+        return TradeService.create_farmer_proposal(farmer=user, listing_id=listing_id, buyer_id=buyer_id, message=message, hide_listing=hide_listing)
 
     @classmethod
-    @transaction.atomic
     def respond_to_trade_proposal(cls, *, user: User, proposal_id: int, action: str, farmer_message: str = "") -> DirectTradeProposal:
-        cls._ensure_farmer(user)
-        proposal = DirectTradeProposal.objects.select_for_update().get(pk=proposal_id, farmer=user)
-        if proposal.status != "PENDING":
-            raise ValueError("This proposal has already been processed.")
-        action = action.upper()
-        if action not in {"ACCEPT", "REJECT", "CANCEL"}:
-            raise ValueError("Unsupported proposal action.")
-        proposal.status = {"ACCEPT": "ACCEPTED", "REJECT": "REJECTED", "CANCEL": "CANCELLED"}[action]
-        if farmer_message:
-            proposal.message = f"{proposal.message or ''}\nFarmer: {farmer_message}".strip()
-            proposal.save(update_fields=["status", "message"])
-        else:
-            proposal.save(update_fields=["status"])
-        return proposal
+        return TradeService.farmer_respond(farmer=user, proposal_id=proposal_id, action=action, farmer_message=farmer_message)
 
     @classmethod
     def generate_trade_token(cls, *, user: User, proposal_id: int) -> str:
-        cls._ensure_farmer(user)
-        return EscrowService.generate_trade_token(farmer=user, proposal_id=proposal_id)
+        return TradeService.generate_security_token(farmer=user, proposal_id=proposal_id)
 
     @classmethod
-    @transaction.atomic
     def update_listing_from_form(cls, *, user: User, listing_id: int, changes: Mapping[str, Any]) -> MarketplaceListing:
         return cls.update_listing(user=user, listing_id=listing_id, changes=changes)
 
