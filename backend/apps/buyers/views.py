@@ -5,8 +5,8 @@ validated and executed through BuyerService.
 """
 from __future__ import annotations
 
-from decimal import Decimal, InvalidOperation
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -76,7 +76,10 @@ def buyer_product_detail(request, listing_id):
     if not _buyer_only(request):
         messages.error(request, "Access Denied.")
         return redirect("index")
-    item = get_object_or_404(MarketplaceListing.objects.select_related("listed_by"), pk=listing_id, wing="PRODUCE", status="ACTIVE")
+    try:
+        item = BuyerService.get_produce_listing(user=request.user, listing_id=listing_id)
+    except MarketplaceListing.DoesNotExist:
+        return redirect("buyer_marketplace")
     existing_proposal = DirectTradeProposal.objects.filter(listing=item, buyer=request.user, status="PENDING").first()
     soil_report = ManualSoilReport.objects.filter(farmer=item.listed_by, request_status="COMPLETED").order_by("-request_date").first()
     formatted_specs = {k.replace("_", " "): v for k, v in item.specifications.items()}
