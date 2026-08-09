@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from backend.apps.farmers.services import FarmerService
-from backend.core.legacy.models import Address, DirectTradeProposal, EscrowTransaction, ManualSoilReport, MarketplaceListing
+from backend.core.legacy.models import DirectTradeProposal, EscrowTransaction, ManualSoilReport, MarketplaceListing
 
 
 def _farmer(request):
@@ -54,27 +54,12 @@ def add_listing(request):
         return redirect("index")
     if request.method == "POST":
         try:
-            FarmerService.create_produce_listing(
-                user=user,
-                category=request.POST.get("category", ""),
-                title=request.POST.get("title", ""),
-                price=request.POST.get("price", "0"),
-                unit_of_measure=request.POST.get("unit_of_measure", ""),
-                available_stock=float(request.POST.get("available_stock", "0")),
-                min_order_quantity=float(request.POST.get("min_order_quantity", "1")),
-                description=request.POST.get("description", ""),
-                variety_or_brand=request.POST.get("variety_or_brand") or None,
-                harvest_date=request.POST.get("harvest_date") or None,
-                is_organic=request.POST.get("is_organic") == "on",
-                grade=request.POST.get("grade") or None,
-                specifications={key: request.POST[key] for key in ("moisture_content", "shelf_life", "broken_ratio") if request.POST.get(key)},
-                image=request.FILES.get("image"),
-            )
+            FarmerService.create_produce_listing(user=user, category=request.POST.get("category", ""), title=request.POST.get("title", ""), price=request.POST.get("price", "0"), unit_of_measure=request.POST.get("unit_of_measure", ""), available_stock=float(request.POST.get("available_stock", "0")), min_order_quantity=float(request.POST.get("min_order_quantity", "1")), description=request.POST.get("description", ""), variety_or_brand=request.POST.get("variety_or_brand") or None, harvest_date=request.POST.get("harvest_date") or None, is_organic=request.POST.get("is_organic") == "on", grade=request.POST.get("grade") or None, specifications={key: request.POST[key] for key in ("moisture_content", "shelf_life", "broken_ratio") if request.POST.get(key)}, image=request.FILES.get("image"))
             messages.success(request, "Your harvest has been successfully listed on the marketplace!")
             return redirect("farmer_home")
         except (ValueError, TypeError) as exc:
             messages.error(request, str(exc))
-    return render(request, "farmer_add_listing.html")
+    return render(request, "domains/farmer/add_listing.html")
 
 
 @login_required
@@ -82,7 +67,7 @@ def manage_crops(request):
     user = _farmer(request)
     if user is None:
         return redirect("index")
-    return render(request, "farmer_manage_crops.html", {"listings": FarmerService.list_inventory(user=user)})
+    return render(request, "domains/farmer/manage_crops.html", {"listings": FarmerService.list_inventory(user=user)})
 
 
 @login_required
@@ -110,7 +95,7 @@ def edit_listing(request):
             return redirect("farmer_manage_crops")
         except (ValueError, TypeError) as exc:
             messages.error(request, str(exc))
-    return render(request, "farmer_edit_listing.html", {"listing": listing})
+    return render(request, "domains/farmer/edit_listing.html", {"listing": listing})
 
 
 @login_required
@@ -138,7 +123,7 @@ def submit_soil_report(request):
         except (ValueError, TypeError) as exc:
             messages.error(request, str(exc))
         return redirect("farmer_home")
-    return render(request, "farmer_home.html", {"manual_report": ManualSoilReport.objects.filter(farmer=user).first()})
+    return render(request, "farmer_home.html", {"manual_report": ManualSoilReport.objects.filter(farmer=user).order_by("-request_date").first()})
 
 
 @login_required
@@ -147,7 +132,7 @@ def proposals(request):
     if user is None:
         return redirect("index")
     proposals = DirectTradeProposal.objects.filter(farmer=user).select_related("listing", "buyer").order_by("-created_at")
-    return render(request, "farmer_proposals.html", {"proposals": proposals})
+    return render(request, "domains/farmer/proposals.html", {"proposals": proposals})
 
 
 @login_required
@@ -301,8 +286,4 @@ def invoice_detail(request, order_id: str):
     return render(request, "farmer_invoice_detail.html", {"order": order, "product": order.product, "txn": EscrowTransaction.objects.filter(security_token=f"ORDER-{order.order_id}").first()})
 
 
-__all__ = [
-    "profile", "add_listing", "manage_crops", "edit_listing", "delete_listing", "submit_soil_report",
-    "proposals", "proposal_detail", "send_proposal", "respond_proposal", "generate_trade_qr",
-    "input_market", "input_detail", "checkout", "process_order", "payment_gateway", "orders", "order_detail", "invoice_detail",
-]
+__all__ = ["profile", "add_listing", "manage_crops", "edit_listing", "delete_listing", "submit_soil_report", "proposals", "proposal_detail", "send_proposal", "respond_proposal", "generate_trade_qr", "input_market", "input_detail", "checkout", "process_order", "payment_gateway", "orders", "order_detail", "invoice_detail"]
