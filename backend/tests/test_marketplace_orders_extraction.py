@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from backend.apps.marketplace.services import MarketplaceService
 from backend.apps.orders.services import OrderService
+from backend.apps.sellers.services import SellerService
 from backend.core.legacy.models import InputOrder, MarketplaceListing
 from backend.core.legacy.models import User
 
@@ -12,6 +13,8 @@ class MarketplaceOrderExtractionTests(TestCase):
     def setUp(self):
         self.farmer = User.objects.create_user(username="farmer1", password="x", role=User.Role.FARMER, is_active=True)
         self.seller = User.objects.create_user(username="seller1", password="x", role=User.Role.SELLER, is_active=True)
+        self.seller.is_verified = True
+        self.seller.save(update_fields=["is_verified"])
         self.other_seller = User.objects.create_user(username="seller2", password="x", role=User.Role.SELLER, is_active=True)
         self.buyer = User.objects.create_user(username="buyer1", password="x", role=User.Role.BUYER, is_active=True)
 
@@ -60,6 +63,44 @@ class MarketplaceOrderExtractionTests(TestCase):
             description="Certified seed",
         )
 
+    def test_seller_service_lists_only_owned_inventory(self):
+        own = self._input_product()
+        MarketplaceService.create_listing(
+            user=self.other_seller,
+            wing="INPUT",
+            category="TOOLS",
+            title="Other Seller Tool",
+            price=100,
+            unit_of_measure="unit",
+            available_stock=5,
+            min_order_quantity=1,
+            description="Tool",
+        )
+        listings = SellerService.list_inventory(user=self.seller)
+        self.assertEqual(list(listings.values_list("pk", flat=True)), [own.pk])
+
+    def test_unverified_seller_cannot_publish_inventory(self):
+        self.seller.is_verified = False
+        self.seller.save(update_fields=["is_verified"])
+        with self.assertRaises(ValueError):
+            SellerService.create_listing(
+                user=self.seller,
+                category="SEEDS",
+                title="Blocked Seeds",
+                price=50,
+                unit_of_measure="kg",
+                available_stock=5,
+                min_order_quantity=1,
+                description="Should not publish",
+            )
+
+    def test_seller_service_rejects_cross_seller_listing_access(self):
+        product = self._input_product()
+        with self.assertRaises(MarketplaceListing.DoesNotExist):
+            SellerService.get_listing(user=self.other_seller, listing_id=product.pk)
+        with self.assertRaises(MarketplaceListing.DoesNotExist):
+            SellerService.update_listing(user=self.other_seller, listing_id=product.pk, changes={"title": "Hijacked"})
+
     def test_input_order_is_atomic_and_decrements_stock(self):
         product = self._input_product()
         order = OrderService.place_input_order(
@@ -106,7 +147,7 @@ class MarketplaceOrderExtractionTests(TestCase):
             payment_method="CARD",
             delivery_address="Address",
         )
-        updated = OrderService.update_status(actor=self.seller, order_id=order.order_id, status="SHIPPED")
+        updated = SellerService.update_order_status(user=self.seller, order_id=order.order_id, status="SHIPPED")
         self.assertEqual(updated.status, "SHIPPED")
 
     def test_seller_cannot_update_another_sellers_order(self):
@@ -119,7 +160,7 @@ class MarketplaceOrderExtractionTests(TestCase):
             delivery_address="Address",
         )
         with self.assertRaises(ValueError):
-            OrderService.update_status(actor=self.other_seller, order_id=order.order_id, status="SHIPPED")
+            SellerService.update_order_status(user=self.other_seller, order_id=order.order_id, status="SHIPPED")
 
     def test_terminal_order_status_cannot_be_reopened(self):
         product = self._input_product()
@@ -130,6 +171,7 @@ class MarketplaceOrderExtractionTests(TestCase):
             payment_method="UPI",
             delivery_address="Address",
         )
-        OrderService.update_status(actor=self.seller, order_id=order.order_id, status="DELIVERED")
+        SellerService.update_order_status(user=self.seller, order_id=order.order_id, status="SHIPPED")
+        SellerService.update_order_status(user=self.seller, order_id=order.order_id, status="DELIVERED")
         with self.assertRaises(ValueError):
-            OrderService.update_status(actor=self.seller, order_id=order.order_id, status="SHIPPED")
+            SellerService.update_order_status(user=self.seller, order_id=order.order_id, status="SHIPPED")
