@@ -7,10 +7,12 @@ physical database authority during the extraction phase.
 from __future__ import annotations
 
 from decimal import Decimal
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from backend.apps.farmers.services import FarmerService
 from backend.core.legacy.models import DirectTradeProposal, EscrowTransaction, ManualSoilReport, MarketplaceListing
@@ -83,6 +85,8 @@ def edit_listing(request):
     if request.method == "POST":
         try:
             changes = {field: request.POST.get(field) for field in ("category", "title", "variety_or_brand", "price", "unit_of_measure", "available_stock", "min_order_quantity", "description", "harvest_date", "grade") if field in request.POST}
+            if "stock" in request.POST and "available_stock" not in changes:
+                changes["available_stock"] = request.POST.get("stock")
             if "price" in changes:
                 changes["price"] = Decimal(changes["price"])
             for field in ("available_stock", "min_order_quantity"):
@@ -131,8 +135,14 @@ def proposals(request):
     user = _farmer(request)
     if user is None:
         return redirect("index")
-    proposals = DirectTradeProposal.objects.filter(farmer=user).select_related("listing", "buyer").order_by("-created_at")
-    return render(request, "domains/farmer/proposals.html", {"proposals": proposals})
+    base = DirectTradeProposal.objects.filter(farmer=user).select_related("listing", "buyer").order_by("-created_at")
+    context = {
+        "pending": base.filter(status="PENDING"),
+        "accepted": base.filter(status="ACCEPTED"),
+        "completed": base.filter(status="COMPLETED"),
+        "history": base.filter(status__in=["REJECTED", "CANCELLED"]),
+    }
+    return render(request, "domains/farmer/proposals.html", context)
 
 
 @login_required
@@ -142,8 +152,6 @@ def proposal_detail(request, proposal_id: int):
         return redirect("index")
     proposal = get_object_or_404(DirectTradeProposal.objects.select_related("listing", "buyer"), pk=proposal_id, farmer=user)
     formatted_specs = {k.replace("_", " "): v for k, v in (proposal.listing.specifications or {}).items()}
-    from django.utils import timezone
-    from datetime import timedelta
     can_revoke = timezone.now() - proposal.created_at <= timedelta(hours=24)
     is_buyer_initiated = bool(proposal.message and "Requested Qty:" in proposal.message)
     return render(request, "farmer_proposal_detail.html", {"proposal": proposal, "listing": proposal.listing, "buyer": proposal.buyer, "formatted_specs": formatted_specs, "is_buyer_initiated": is_buyer_initiated, "can_revoke": can_revoke})
@@ -157,7 +165,8 @@ def send_proposal(request):
     if request.method != "POST":
         return redirect("farmer_home")
     try:
-        proposal = FarmerService.send_trade_proposal(user=user, listing_id=int(request.POST["listing_id"]), buyer_id=int(request.POST["buyer_id"]), message=request.POST.get("message", ""), hide_listing=request.POST.get("hide_listing") == "on")
+        hide_listing = request.POST.get("hide_listing") == "on" or request.POST.get("visibility_action") == "HIDE"
+        proposal = FarmerService.send_trade_proposal(user=user, listing_id=int(request.POST["listing_id"]), buyer_id=int(request.POST["buyer_id"]), message=request.POST.get("message", ""), hide_listing=hide_listing)
         messages.success(request, "Trade proposal sent successfully.")
         return redirect("farmer_proposal_detail", proposal_id=proposal.id)
     except (ValueError, TypeError) as exc:
@@ -188,9 +197,7 @@ def generate_trade_qr(request, proposal_id: int):
         try:
             token = FarmerService.generate_trade_token(user=user, proposal_id=proposal_id)
             messages.success(request, "Secure trade token generated successfully.")
-            proposal = get_object_or_404(DirectTradeProposal, pk=proposal_id, farmer=user)
-            proposal.security_token = token
-            return redirect("farmer_proposal_detail", proposal_id=proposal.id)
+            return redirect("farmer_proposal_detail", proposal_id=proposal_id)
         except (ValueError, TypeError) as exc:
             messages.error(request, str(exc))
     return redirect("farmer_proposal_detail", proposal_id=proposal_id)
