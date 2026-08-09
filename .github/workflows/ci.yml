@@ -26,8 +26,8 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: config.settings.development
         run: python manage.py check
-      - name: Domain boundary tests
-        working-directory: Kultiva
+      - name: Professional runtime compatibility tests
+        working-directory: backend
         env:
-          DJANGO_SETTINGS_MODULE: Kultiva.settings
-        run: python -m unittest discover -s ../backend/tests -t .. -p 'test_*.py' -v
+          DJANGO_SETTINGS_MODULE: config.settings.development
+        run: python -m unittest discover -s tests -p 'test_*.py' -v

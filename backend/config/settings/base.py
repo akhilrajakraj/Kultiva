@@ -1,49 +1,73 @@
-"""Compatibility-first base settings for the restructured Kultiva runtime.
+"""Base settings for the compatibility-first professional Kultiva runtime.
 
-The legacy Django application remains the source of truth for models, migrations,
-URLs, templates, static files, media and business behaviour until extraction is
-fully verified. This configuration makes the new backend entrypoint execute the
-same application rather than a partially reconstructed application.
+The legacy Django application remains the database/model migration authority in
+Phase 2. The professional backend is nevertheless a real Django runtime: it
+owns the entrypoint, settings, URL configuration, domain boundaries and AI
+boundaries while importing the legacy implementation only at compatibility
+seams.
 """
 from pathlib import Path
+import os
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LEGACY_PROJECT_ROOT = REPO_ROOT / "Kultiva"
 
-# The legacy project historically runs with its inner project directory on
-# sys.path, which makes imports such as ``Kultiva.settings`` and
-# ``Kultiva.models`` resolve to ``Kultiva/Kultiva``. Preserve that import
-# contract for the compatibility runtime.
 for path in (LEGACY_PROJECT_ROOT, REPO_ROOT):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
 from Kultiva.settings import *  # noqa: F401,F403,E402
 
-# Keep the restructured runtime's predictable repository-relative paths.
 PROJECT_ROOT = REPO_ROOT
 BASE_DIR = PROJECT_ROOT
 
-# Environment overrides are intentionally lightweight and do not change legacy
-# behaviour unless explicitly supplied by the deployment environment.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", SECRET_KEY)
+DEBUG = os.environ.get("DJANGO_DEBUG", str(DEBUG)).lower() in {"1", "true", "yes", "on"}
+
 ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.environ.get(
-        "DJANGO_ALLOWED_HOSTS", ",".join(ALLOWED_HOSTS or [])
+    host.strip()
+    for host in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS", ",".join(ALLOWED_HOSTS or ["localhost", "127.0.0.1"])
     ).split(",")
-    if h.strip()
+    if host.strip()
 ]
 
 TIME_ZONE = os.environ.get("DJANGO_TIME_ZONE", TIME_ZONE or "Asia/Kolkata")
+ROOT_URLCONF = "config.urls"
+WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
-# The legacy app owns these resources during the compatibility phase.
+# The legacy app owns the concrete Django models/migrations during Phase 2.
+# Boundary apps are registered as migration-free shells around those models.
+DOMAIN_APPS = [
+    "backend.apps.accounts.apps.AccountsConfig",
+    "backend.apps.admin_portal.apps.AdminPortalConfig",
+    "backend.apps.advisory.apps.AdvisoryConfig",
+    "backend.apps.analytics.apps.AnalyticsConfig",
+    "backend.apps.buyers.apps.BuyersConfig",
+    "backend.apps.escrow.apps.EscrowConfig",
+    "backend.apps.farmers.apps.FarmersConfig",
+    "backend.apps.marketplace.apps.MarketplaceConfig",
+    "backend.apps.notifications.apps.NotificationsConfig",
+    "backend.apps.orders.apps.OrdersConfig",
+    "backend.apps.payments.apps.PaymentsConfig",
+    "backend.apps.reviews.apps.ReviewsConfig",
+    "backend.apps.sellers.apps.SellersConfig",
+    "backend.apps.soil.apps.SoilConfig",
+    "backend.apps.weather.apps.WeatherConfig",
+]
+INSTALLED_APPS = list(INSTALLED_APPS)
+for app in DOMAIN_APPS:
+    if app not in INSTALLED_APPS:
+        INSTALLED_APPS.append(app)
+
 TEMPLATES[0]["DIRS"] = [PROJECT_ROOT / "Kultiva" / "templates"]
 STATICFILES_DIRS = [PROJECT_ROOT / "Kultiva" / "static"]
 MEDIA_ROOT = PROJECT_ROOT / "Kultiva" / "media"
 MEDIA_URL = "/media/"
 
-# Do not register placeholder domain apps: their model modules are compatibility
-# exports, not independent Django models. Registering them would create duplicate
-# model ownership and migrations.
+# Keep the existing user/table/migration contract until the extraction is
+# explicitly migrated with SeparateDatabaseAndState in the next phase.
+AUTH_USER_MODEL = "Kultiva.User"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
