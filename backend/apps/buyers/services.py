@@ -1,7 +1,9 @@
 """Buyer-domain business services."""
 from __future__ import annotations
 
+from datetime import timedelta
 from decimal import Decimal
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -116,7 +118,7 @@ class BuyerService:
         proposal = DirectTradeProposal.objects.select_for_update().get(pk=proposal_id, buyer=user)
         if proposal.status != "PENDING":
             raise ValueError("Only pending proposals can be revoked.")
-        if timezone.now() - proposal.created_at > timezone.timedelta(hours=24):
+        if timezone.now() - proposal.created_at > timedelta(hours=24):
             raise ValueError("The 24-hour revocation window has expired.")
         proposal.status = "CANCELLED"
         proposal.save(update_fields=["status"])
