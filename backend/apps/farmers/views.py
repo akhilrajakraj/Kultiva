@@ -32,7 +32,7 @@ def profile(request):
     profile_obj = FarmerService.get_profile(user=user)
     address = user.addresses.first()
     if request.method == "POST":
-        changes = {field: request.POST.get(field) for field in ("aadhar_no", "land_area", "soil_type", "irrigation") if field in request.POST}
+        changes = {field: request.POST.get(field) for field in ("aadhar_no", "land_area", "soil_type", "irrigation", "kissan_id") if field in request.POST}
         try:
             if changes:
                 FarmerService.update_profile(user=user, changes=changes)
@@ -122,12 +122,13 @@ def submit_soil_report(request):
         return redirect("index")
     if request.method == "POST":
         try:
-            FarmerService.request_manual_soil_report(user=user, land_area=float(request.POST["land_area"]) if request.POST.get("land_area") else None, previous_crop=request.POST.get("previous_crop") or None)
+            address_id = int(request.POST["farm_address_id"]) if request.POST.get("farm_address_id") else None
+            FarmerService.request_manual_soil_report(user=user, farm_address_id=address_id, previous_crop=request.POST.get("previous_crop") or None)
             messages.success(request, "Manual soil report request submitted.")
         except (ValueError, TypeError) as exc:
             messages.error(request, str(exc))
         return redirect("farmer_home")
-    return render(request, "farmer_home.html", {"manual_report": ManualSoilReport.objects.filter(farmer=user).order_by("-request_date").first()})
+    return render(request, "farmer_home.html", {"manual_report": ManualSoilReport.objects.filter(farmer=user).select_related("farm_address").order_by("-request_date").first()})
 
 
 @login_required
@@ -195,7 +196,7 @@ def generate_trade_qr(request, proposal_id: int):
         return redirect("index")
     if request.method == "POST":
         try:
-            token = FarmerService.generate_trade_token(user=user, proposal_id=proposal_id)
+            FarmerService.generate_trade_token(user=user, proposal_id=proposal_id)
             messages.success(request, "Secure trade token generated successfully.")
             return redirect("farmer_proposal_detail", proposal_id=proposal_id)
         except (ValueError, TypeError) as exc:
@@ -218,79 +219,3 @@ def input_detail(request, listing_id: int):
     if user is None:
         return redirect("index")
     product = get_object_or_404(MarketplaceListing, pk=listing_id, wing="INPUT", status="ACTIVE")
-    has_purchased = EscrowTransaction.objects.filter(item_purchased=product, purchaser=user, payment_status="COMPLETED").exists()
-    formatted_specs = {k.replace("_", " "): v for k, v in (product.specifications or {}).items()}
-    return render(request, "farmer_input_detail.html", {"product": product, "formatted_specs": formatted_specs, "has_purchased": has_purchased})
-
-
-@login_required
-def checkout(request, listing_id: int):
-    user = _farmer(request)
-    if user is None:
-        return redirect("index")
-    product = get_object_or_404(MarketplaceListing, pk=listing_id, wing="INPUT", status="ACTIVE")
-    address = user.addresses.first()
-    qty = float(request.POST.get("quantity", 1)) if request.method == "POST" else 1
-    total = product.price * Decimal(str(qty)) + Decimal("20.00")
-    return render(request, "farmer_checkout.html", {"product": product, "address": address, "quantity": qty, "total": total})
-
-
-@login_required
-def process_order(request, listing_id: int):
-    user = _farmer(request)
-    if user is None:
-        return redirect("index")
-    if request.method != "POST":
-        return redirect("farmer_checkout", listing_id=listing_id)
-    try:
-        qty = float(request.POST.get("quantity", 1))
-        payment_mode = request.POST.get("payment_mode", "UPI")
-        address = user.addresses.first()
-        address_text = f"{address.village}, {address.district}, {address.state} - {address.pincode}" if address else "Address Pending"
-        order = FarmerService.place_input_order(user=user, listing_id=listing_id, quantity=qty, payment_method=payment_mode, delivery_address=address_text)
-        messages.success(request, f"Order {order.order_id} placed successfully.")
-        return redirect("farmer_order_details", order_id=order.order_id)
-    except (ValueError, TypeError) as exc:
-        messages.error(request, str(exc))
-        return redirect("farmer_checkout", listing_id=listing_id)
-
-
-@login_required
-def payment_gateway(request, listing_id: int):
-    user = _farmer(request)
-    if user is None:
-        return redirect("index")
-    if request.method == "POST":
-        return process_order(request, listing_id)
-    product = get_object_or_404(MarketplaceListing, pk=listing_id, wing="INPUT", status="ACTIVE")
-    qty = float(request.GET.get("quantity", 1))
-    return render(request, "dummy_payment_gateway.html", {"product": product, "quantity": qty, "total": product.price * Decimal(str(qty)) + Decimal("20.00")})
-
-
-@login_required
-def orders(request):
-    user = _farmer(request)
-    if user is None:
-        return redirect("index")
-    return render(request, "farmer_orders.html", {"orders": FarmerService.list_input_orders(user=user, status=request.GET.get("status"), query=request.GET.get("q")), "current_status": request.GET.get("status", "ALL"), "search_query": request.GET.get("q", "")})
-
-
-@login_required
-def order_detail(request, order_id: str):
-    user = _farmer(request)
-    if user is None:
-        return redirect("index")
-    order = FarmerService.get_input_order(user=user, order_id=order_id)
-    return render(request, "farmer_order_details.html", {"order": order, "product": order.product, "txn": EscrowTransaction.objects.filter(security_token=f"ORDER-{order.order_id}").first()})
-
-
-@login_required
-def invoice_detail(request, order_id: str):
-    user = _farmer(request)
-    if user is None:
-        return redirect("index")
-    order = FarmerService.get_input_order(user=user, order_id=order_id)
-    return render(request, "farmer_invoice_detail.html", {"order": order, "product": order.product, "txn": EscrowTransaction.objects.filter(security_token=f"ORDER-{order.order_id}").first()})
-
-
-__all__ = ["profile", "add_listing", "manage_crops", "edit_listing", "delete_listing", "submit_soil_report", "proposals", "proposal_detail", "send_proposal", "respond_proposal", "generate_trade_qr", "input_market", "input_detail", "checkout", "process_order", "payment_gateway", "orders", "order_detail", "invoice_detail"]
