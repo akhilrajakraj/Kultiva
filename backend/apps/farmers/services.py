@@ -6,16 +6,15 @@ and ownership checks at the service boundary.
 """
 from __future__ import annotations
 
-import uuid
 from decimal import Decimal
 from typing import Any, Mapping
 
 from django.db import transaction
 
 from backend.apps.accounts.models import User
+from backend.apps.escrow.services import EscrowService
 from backend.core.legacy.models import (
     DirectTradeProposal,
-    EscrowTransaction,
     FarmerProfile,
     InputOrder,
     ManualSoilReport,
@@ -172,16 +171,9 @@ class FarmerService:
         return proposal
 
     @classmethod
-    @transaction.atomic
     def generate_trade_token(cls, *, user: User, proposal_id: int) -> str:
         cls._ensure_farmer(user)
-        proposal = DirectTradeProposal.objects.select_for_update().get(pk=proposal_id, farmer=user)
-        if proposal.status != "ACCEPTED":
-            raise ValueError("A trade token can only be generated for an accepted proposal.")
-        token = uuid.uuid4().hex
-        proposal.security_token = token
-        proposal.save(update_fields=["security_token"])
-        return token
+        return EscrowService.generate_trade_token(farmer=user, proposal_id=proposal_id)
 
     @classmethod
     @transaction.atomic
@@ -204,7 +196,7 @@ class FarmerService:
             product.status = "OUT_OF_STOCK"
         product.save(update_fields=["available_stock", "status"])
         order = InputOrder.objects.create(farmer=user, product=product, quantity=quantity, total_amount=total, payment_method=payment_method, delivery_address=delivery_address.strip(), status="PENDING")
-        EscrowTransaction.objects.create(item_purchased=product, vendor=product.listed_by, purchaser=user, amount_paid=total, payment_status="COMPLETED", security_token=f"ORDER-{order.order_id}")
+        EscrowService.create_payment_transaction(purchaser=user, listing=product, amount=total, payment_status=EscrowService.COMPLETED, security_token=f"ORDER-{order.order_id}")
         return order
 
     @classmethod
