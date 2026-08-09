@@ -5,8 +5,8 @@ validated and executed through BuyerService.
 """
 from __future__ import annotations
 
-from datetime import timedelta
 from decimal import Decimal, InvalidOperation
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -50,7 +50,7 @@ def buyer_dashboard(request):
         return redirect("index")
     sent_bids = DirectTradeProposal.objects.filter(buyer=request.user).select_related("listing", "farmer").order_by("-created_at")
     received_offers = DirectTradeProposal.objects.filter(buyer=request.user).exclude(status="CANCELLED").select_related("listing", "farmer").order_by("-created_at")
-    return render(request, "buyer_dashboard.html", {"sent_bids": sent_bids, "received_offers": received_offers})
+    return render(request, "domains/buyer/dashboard.html", {"sent_bids": sent_bids, "received_offers": received_offers})
 
 
 @login_required
@@ -68,11 +68,7 @@ def buyer_marketplace(request):
     elif sort == "price_high":
         products = products.order_by("-price", "-created_at")
     page_obj = Paginator(products, 12).get_page(request.GET.get("page"))
-    return render(request, "buyer_marketplace.html", {
-        "products": page_obj,
-        "category_choices": MarketplaceListing.CATEGORY_CHOICES,
-        "selected_categories": categories,
-    })
+    return render(request, "domains/buyer/marketplace.html", {"products": page_obj, "category_choices": MarketplaceListing.CATEGORY_CHOICES, "selected_categories": categories})
 
 
 @login_required
@@ -82,9 +78,9 @@ def buyer_product_detail(request, listing_id):
         return redirect("index")
     item = get_object_or_404(MarketplaceListing.objects.select_related("listed_by"), pk=listing_id, wing="PRODUCE", status="ACTIVE")
     existing_proposal = DirectTradeProposal.objects.filter(listing=item, buyer=request.user, status="PENDING").first()
-    soil_report = ManualSoilReport.objects.filter(farmer=item.listed_by, request_status="COMPLETED").first()
+    soil_report = ManualSoilReport.objects.filter(farmer=item.listed_by, request_status="COMPLETED").order_by("-request_date").first()
     formatted_specs = {k.replace("_", " "): v for k, v in item.specifications.items()}
-    return render(request, "buyer_product_detail.html", {"item": item, "existing_proposal": existing_proposal, "soil_report": soil_report, "formatted_specs": formatted_specs})
+    return render(request, "domains/buyer/product_detail.html", {"item": item, "existing_proposal": existing_proposal, "soil_report": soil_report, "formatted_specs": formatted_specs})
 
 
 @login_required
@@ -96,21 +92,12 @@ def buyer_profile(request):
     address = request.user.addresses.order_by("addr_id").first()
     if request.method == "POST":
         try:
-            BuyerService.update_business_details(
-                user=request.user,
-                company_name=request.POST.get("company_name", ""),
-                first_name=request.POST.get("first_name", ""),
-                last_name=request.POST.get("last_name", ""),
-                village=request.POST.get("village", ""),
-                district=request.POST.get("district", ""),
-                state=request.POST.get("state", ""),
-                pincode=request.POST.get("pincode", ""),
-            )
+            BuyerService.update_business_details(user=request.user, company_name=request.POST.get("company_name", ""), first_name=request.POST.get("first_name", ""), last_name=request.POST.get("last_name", ""), village=request.POST.get("village", ""), district=request.POST.get("district", ""), state=request.POST.get("state", ""), pincode=request.POST.get("pincode", ""))
             messages.success(request, "Business profile updated successfully.")
             return redirect("buyer_profile")
         except ValueError as exc:
             messages.error(request, str(exc))
-    return render(request, "buyer_profile.html", {"profile": profile, "address": address})
+    return render(request, "domains/buyer/profile.html", {"profile": profile, "address": address})
 
 
 @login_required
@@ -120,7 +107,7 @@ def buyer_negotiations(request):
         return redirect("index")
     sent_bids = DirectTradeProposal.objects.filter(buyer=request.user).select_related("listing", "farmer").order_by("-created_at")
     received_offers = DirectTradeProposal.objects.filter(buyer=request.user).select_related("listing", "farmer").order_by("-created_at")
-    return render(request, "buyer_negotiations.html", {"sent_bids": sent_bids, "received_offers": received_offers})
+    return render(request, "domains/buyer/negotiations.html", {"sent_bids": sent_bids, "received_offers": received_offers})
 
 
 @login_required
@@ -131,13 +118,7 @@ def submit_buyer_proposal(request, listing_id):
     if request.method != "POST":
         return redirect("buyer_product_detail", listing_id=listing_id)
     try:
-        proposal = BuyerService.submit_proposal(
-            user=request.user,
-            listing_id=listing_id,
-            quantity=_float(request.POST.get("proposed_qty"), "quantity"),
-            offered_price=_decimal(request.POST.get("proposed_price"), "offered price"),
-            note=request.POST.get("message", ""),
-        )
+        proposal = BuyerService.submit_proposal(user=request.user, listing_id=listing_id, quantity=_float(request.POST.get("proposed_qty"), "quantity"), offered_price=_decimal(request.POST.get("proposed_price"), "offered price"), note=request.POST.get("message", ""))
         messages.success(request, f"Proposal #{proposal.pk} submitted successfully.")
         return redirect("buyer_proposal_detail", proposal_id=proposal.pk)
     except (ValueError, MarketplaceListing.DoesNotExist) as exc:
@@ -154,14 +135,7 @@ def buyer_proposal_detail(request, proposal_id):
     formatted_specs = {k.replace("_", " "): v for k, v in proposal.listing.specifications.items()}
     is_buyer_initiated = bool(proposal.message and "Requested Qty:" in proposal.message)
     can_revoke = is_buyer_initiated and proposal.status == "PENDING" and timezone.now() - proposal.created_at <= timedelta(hours=24)
-    return render(request, "buyer_proposal_detail.html", {
-        "proposal": proposal,
-        "listing": proposal.listing,
-        "farmer": proposal.farmer,
-        "formatted_specs": formatted_specs,
-        "is_buyer_initiated": is_buyer_initiated,
-        "can_revoke": can_revoke,
-    })
+    return render(request, "domains/buyer/proposal_detail.html", {"proposal": proposal, "listing": proposal.listing, "farmer": proposal.farmer, "formatted_specs": formatted_specs, "is_buyer_initiated": is_buyer_initiated, "can_revoke": can_revoke})
 
 
 @login_required
@@ -173,17 +147,11 @@ def respond_to_proposal(request, proposal_id):
         return redirect("buyer_proposal_detail", proposal_id=proposal_id)
     try:
         action = request.POST.get("action", "").upper()
-        if action == "CANCEL":
-            proposal = BuyerService.revoke_buyer_proposal(user=request.user, proposal_id=proposal_id)
-        else:
-            proposal = BuyerService.respond_to_proposal(user=request.user, proposal_id=proposal_id, action=action)
+        proposal = BuyerService.revoke_buyer_proposal(user=request.user, proposal_id=proposal_id) if action == "CANCEL" else BuyerService.respond_to_proposal(user=request.user, proposal_id=proposal_id, action=action)
         messages.success(request, f"Proposal #{proposal.pk} is now {proposal.status}.")
     except (ValueError, DirectTradeProposal.DoesNotExist) as exc:
         messages.error(request, str(exc))
     return redirect("buyer_proposal_detail", proposal_id=proposal_id)
 
 
-__all__ = [
-    "buyer_dashboard", "buyer_marketplace", "buyer_product_detail", "buyer_profile",
-    "buyer_negotiations", "submit_buyer_proposal", "buyer_proposal_detail", "respond_to_proposal",
-]
+__all__ = ["buyer_dashboard", "buyer_marketplace", "buyer_product_detail", "buyer_profile", "buyer_negotiations", "submit_buyer_proposal", "buyer_proposal_detail", "respond_to_proposal"]
