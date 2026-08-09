@@ -13,13 +13,7 @@ from django.db import transaction
 
 from backend.apps.accounts.models import User
 from backend.apps.escrow.services import EscrowService
-from backend.core.legacy.models import (
-    DirectTradeProposal,
-    FarmerProfile,
-    InputOrder,
-    ManualSoilReport,
-    MarketplaceListing,
-)
+from backend.core.legacy.models import DirectTradeProposal, FarmerProfile, InputOrder, ManualSoilReport, MarketplaceListing
 
 
 class FarmerService:
@@ -70,12 +64,24 @@ class FarmerService:
     @classmethod
     @transaction.atomic
     def request_manual_soil_report(cls, *, user: User, land_area: float | None = None, previous_crop: str | None = None) -> ManualSoilReport:
+        """Return the latest report for the farmer or create a new pending report.
+
+        Migration 0004 changed ManualSoilReport from OneToOneField to ForeignKey,
+        so this service must never use get_or_create(farmer=...) as though the
+        relationship were unique.
+        """
         cls._ensure_farmer(user)
-        report, _ = ManualSoilReport.objects.select_for_update().get_or_create(farmer=user, defaults={"land_area": land_area, "previous_crop": previous_crop})
+        report = ManualSoilReport.objects.select_for_update().filter(farmer=user).order_by("-request_date").first()
+        if report is None:
+            return ManualSoilReport.objects.create(
+                farmer=user,
+                land_area=land_area,
+                previous_crop=previous_crop,
+            )
         if report.request_status == "COMPLETED":
             raise ValueError("A completed manual soil report cannot be reopened automatically.")
         changed = []
-        if land_area is not None:
+        if land_area is not None and hasattr(report, "land_area"):
             report.land_area = land_area
             changed.append("land_area")
         if previous_crop is not None:
@@ -89,7 +95,9 @@ class FarmerService:
     @transaction.atomic
     def complete_manual_soil_report(cls, *, user: User, nitrogen: float, phosphorus: float, potassium: float, ph: float) -> ManualSoilReport:
         cls._ensure_farmer(user)
-        report = ManualSoilReport.objects.select_for_update().get(farmer=user)
+        report = ManualSoilReport.objects.select_for_update().filter(farmer=user).order_by("-request_date").first()
+        if report is None:
+            raise ValueError("No manual soil report request exists for this farmer.")
         report.n, report.p, report.k, report.ph = nitrogen, phosphorus, potassium, ph
         report.request_status = "COMPLETED"
         report.save(update_fields=["n", "p", "k", "ph", "request_status"])
