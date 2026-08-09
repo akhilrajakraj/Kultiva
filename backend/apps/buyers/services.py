@@ -4,8 +4,9 @@ from __future__ import annotations
 from django.db import transaction
 
 from backend.apps.accounts.models import User
+from backend.apps.marketplace.services import MarketplaceService
 from backend.apps.trade.services import TradeService
-from backend.core.legacy.models import Address, BuyerProfile, DirectTradeProposal, MarketplaceListing
+from backend.core.legacy.models import Address, BuyerProfile, DirectTradeProposal
 
 
 class BuyerService:
@@ -37,13 +38,21 @@ class BuyerService:
         if unknown:
             raise ValueError(f"Unsupported buyer profile fields: {', '.join(sorted(unknown))}")
         changes = dict(changes)
+        if "company_name" in changes:
+            company_name = str(changes["company_name"]).strip()
+            if not company_name:
+                raise ValueError("Company name is required.")
+            changes["company_name"] = company_name
         if "gst_number" in changes:
             gst = str(changes["gst_number"]).strip().upper()
             if BuyerProfile.objects.filter(gst_number=gst).exclude(pk=profile.pk).exists():
                 raise ValueError("This GST number is already registered.")
             changes["gst_number"] = gst
         if "iec_code" in changes:
-            changes["iec_code"] = str(changes["iec_code"]).strip().upper()
+            iec = str(changes["iec_code"]).strip().upper()
+            if not iec:
+                raise ValueError("IEC code is required.")
+            changes["iec_code"] = iec
         for field, value in changes.items():
             setattr(profile, field, value)
         if changes:
@@ -70,15 +79,18 @@ class BuyerService:
     @classmethod
     def browse_produce(cls, *, user: User, query: str | None = None, categories=None, organic: bool = False):
         cls._ensure_buyer(user)
-        listings = MarketplaceListing.objects.filter(wing="PRODUCE", status="ACTIVE", available_stock__gt=0).select_related("listed_by")
-        if query:
-            from django.db.models import Q
-            listings = listings.filter(Q(title__icontains=query) | Q(variety_or_brand__icontains=query) | Q(description__icontains=query))
-        if categories:
-            listings = listings.filter(category__in=categories)
-        if organic:
-            listings = listings.filter(is_organic=True)
-        return listings.order_by("-created_at")
+        return MarketplaceService.browse(
+            user=user,
+            wing=MarketplaceService.PRODUCE,
+            query=query,
+            categories=categories,
+            organic=organic,
+        )
+
+    @classmethod
+    def get_produce_listing(cls, *, user: User, listing_id: int):
+        cls._ensure_buyer(user)
+        return MarketplaceService.get_active_listing(user=user, listing_id=listing_id)
 
     @classmethod
     def submit_proposal(cls, *, user: User, listing_id: int, quantity: float, offered_price, note: str = "") -> DirectTradeProposal:
