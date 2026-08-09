@@ -1,0 +1,8 @@
+from django.apps import AppConfig
+
+
+class WeatherConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "backend.apps.weather"
+    label = "weather_boundary"
+    verbose_name = "Weather Boundary"

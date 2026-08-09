@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install backend dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r backend/requirements/base.txt
+      - name: Validate Python syntax
+        run: python -m compileall backend Kultiva
+      - name: Canonical Django system check
+        working-directory: Kultiva
+        env:
+          DJANGO_SETTINGS_MODULE: Kultiva.settings
+        run: python manage.py check
+      - name: Restructured backend system check
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.development
+        run: python manage.py check
+      - name: Professional runtime compatibility tests
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.development
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
