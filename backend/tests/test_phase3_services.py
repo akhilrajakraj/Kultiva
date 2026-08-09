@@ -14,12 +14,12 @@ from backend.apps.accounts.models import User
 from backend.apps.advisory.services import get_crop_advisory
 from backend.apps.admin_portal.services import AdminService
 from backend.apps.buyers.services import BuyerService
-from backend.apps.farmers.models import FarmerProfile, ManualSoilReport
+from backend.apps.farmers.models import FarmerProfile
 from backend.apps.farmers.services import FarmerService
 from backend.apps.sellers.services import SellerService
 from backend.apps.soil.services import get_safe_defaults
 from backend.apps.weather.services import get_weather
-from backend.core.legacy.models import EscrowTransaction, InputOrder, MarketplaceListing
+from backend.core.legacy.models import DirectTradeProposal, EscrowTransaction, InputOrder
 
 
 class Phase3ServiceTests(TestCase):
