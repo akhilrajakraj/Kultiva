@@ -2,6 +2,7 @@
 from django.contrib import admin
 from django.urls import path, re_path
 from . import views
+from backend.apps.escrow import legacy_views as escrow_views
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -49,6 +50,27 @@ urlpatterns = [
     path('farmer/home', views.farmer_home, name='farmer_home'),
     path('buyer/dashboard', views.buyer_dashboard, name='buyer_dashboard'),
     path('seller/dashboard', views.seller_dashboard, name='seller_dashboard'),
+
+    # Buyer marketplace and negotiation routes
+    path('buyer/marketplace/', views.buyer_marketplace, name='buyer_marketplace'),
+    path('buyer/product/<int:listing_id>/', views.buyer_product_detail, name='buyer_product_detail'),
+    path('buyer/product/<int:listing_id>/proposal/', views.submit_buyer_proposal, name='submit_buyer_proposal'),
+    path('buyer/proposals/', views.buyer_proposals, name='buyer_proposals'),
+    path('buyer/proposal/<int:proposal_id>/', views.buyer_proposal_detail, name='buyer_proposal_detail'),
+    path('buyer/proposal/<int:proposal_id>/respond/', views.respond_to_proposal, name='respond_to_proposal'),
+    path('buyer/negotiations/', views.buyer_negotiations, name='buyer_negotiations'),
+    path('buyer/scan-qr/', views.buyer_scan_qr, name='buyer_scan_qr'),
+    path('buyer/purchases/', views.buyer_purchase_history, name='buyer_purchase_history'),
+    path('buyer/invoice/<str:transaction_id>/', views.buyer_invoice_detail, name='buyer_invoice_detail'),
+    path('buyer/profile/', views.buyer_profile, name='buyer_profile'),
+
+    # Buyer escrow routes. Business rules are delegated to EscrowService.
+    path('buyer/escrow-checkout/<int:proposal_id>/', escrow_views.buyer_escrow_checkout, name='buyer_escrow_checkout'),
+    path('buyer/process-payment/<int:proposal_id>/', escrow_views.process_payment, name='process_payment'),
+    path('buyer/escrow/', escrow_views.buyer_escrow_list, name='buyer_escrow_list'),
+    path('buyer/escrow/<int:proposal_id>/', escrow_views.buyer_escrow_detail, name='buyer_escrow_detail'),
+    path('buyer/escrow/<int:proposal_id>/fund/', escrow_views.fund_escrow, name='fund_escrow'),
+    path('buyer/escrow/<int:proposal_id>/refund/', escrow_views.request_refund, name='request_refund'),
 
     # Seller Stock Management
     path('seller/add-item/', views.add_seller_listing, name='add_seller_listing'),
