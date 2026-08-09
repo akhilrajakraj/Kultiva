@@ -12,13 +12,14 @@ from Kultiva.urls import urlpatterns as legacy_urlpatterns  # noqa: E402
 from backend.apps.farmers import views as farmer_views  # noqa: E402
 from backend.apps.sellers import views as seller_views  # noqa: E402
 from backend.apps.buyers import views as buyer_views  # noqa: E402
+from backend.apps.orders import views as order_views  # noqa: E402
 
 _FARMER_ROUTE_NAMES = {
     "farmer_profile", "add_farmer_listing", "farmer_manage_crops", "edit_farmer_listing",
     "delete_farmer_listing", "submit_manual_soil", "send_trade_proposal", "farmer_proposals",
-    "farmer_proposal_detail", "farmer_respond_proposal", "generate_trade_qr", "farmer_input_market",
-    "farmer_input_detail", "farmer_checkout", "process_input_order", "dummy_payment_gateway",
-    "farmer_orders", "farmer_invoice_detail", "farmer_order_details",
+    "farmer_proposal_detail", "farmer_respond_proposal", "generate_trade_qr",
+    "farmer_input_market", "farmer_input_detail", "farmer_checkout", "process_input_order",
+    "dummy_payment_gateway", "farmer_orders", "farmer_invoice_detail", "farmer_order_details",
 }
 _SELLER_ROUTE_NAMES = {
     "seller_dashboard", "add_seller_listing", "manage_stock", "remove_listing", "edit_listing",
@@ -45,14 +46,13 @@ urlpatterns += [
     path("farmer/contract/<int:proposal_id>/", farmer_views.proposal_detail, name="farmer_proposal_detail"),
     path("farmer/proposal/<int:proposal_id>/respond/", farmer_views.respond_proposal, name="farmer_respond_proposal"),
     path("farmer/generate-qr/<int:proposal_id>/", farmer_views.generate_trade_qr, name="generate_trade_qr"),
-    path("farmer/input-market/", farmer_views.input_market, name="farmer_input_market"),
-    path("farmer/input-market/product/<int:listing_id>/", farmer_views.input_detail, name="farmer_input_detail"),
-    path("farmer/checkout/<int:listing_id>/", farmer_views.checkout, name="farmer_checkout"),
-    path("farmer/process-order/<int:listing_id>/", farmer_views.process_order, name="process_input_order"),
-    path("farmer/payment-gateway/<int:listing_id>/", farmer_views.payment_gateway, name="dummy_payment_gateway"),
-    path("farmer/my-orders/", farmer_views.orders, name="farmer_orders"),
-    path("farmer/invoice/<str:order_id>/", farmer_views.invoice_detail, name="farmer_invoice_detail"),
-    path("farmer/orders/<str:order_id>/", farmer_views.order_detail, name="farmer_order_details"),
+
+    path("farmer/input-market/", order_views.input_market, name="farmer_input_market"),
+    path("farmer/checkout/<int:listing_id>/", order_views.checkout, name="farmer_checkout"),
+    path("farmer/process-order/<int:listing_id>/", order_views.process_order, name="process_input_order"),
+    path("farmer/my-orders/", order_views.orders, name="farmer_orders"),
+    path("farmer/invoice/<str:order_id>/", order_views.invoice_detail, name="farmer_invoice_detail"),
+    path("farmer/orders/<str:order_id>/", order_views.order_detail, name="farmer_order_details"),
 
     path("seller/dashboard", seller_views.seller_dashboard, name="seller_dashboard"),
     path("seller/add-item/", seller_views.add_seller_listing, name="add_seller_listing"),
