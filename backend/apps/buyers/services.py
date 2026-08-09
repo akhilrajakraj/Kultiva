@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from backend.apps.accounts.models import User
-from backend.core.legacy.models import BuyerProfile, DirectTradeProposal, MarketplaceListing
+from backend.core.legacy.models import Address, BuyerProfile, DirectTradeProposal, MarketplaceListing
 
 
 class BuyerService:
@@ -57,6 +57,47 @@ class BuyerService:
             setattr(profile, field, value)
         if changes:
             profile.save(update_fields=list(changes.keys()))
+        return profile
+
+    @classmethod
+    @transaction.atomic
+    def update_business_details(
+        cls,
+        *,
+        user: User,
+        company_name: str,
+        first_name: str,
+        last_name: str,
+        village: str,
+        district: str,
+        state: str,
+        pincode: str,
+    ) -> BuyerProfile:
+        """Update buyer operational identity and shipping hub atomically."""
+        cls._ensure_buyer(user)
+        profile = cls.update_profile(user=user, changes={"company_name": company_name})
+        user.first_name = first_name.strip()
+        user.last_name = last_name.strip()
+        user.save(update_fields=["first_name", "last_name"])
+
+        address = user.addresses.order_by("addr_id").first()
+        address_values = {
+            "village": village.strip(),
+            "district": district.strip(),
+            "state": state.strip(),
+            "pincode": pincode.strip(),
+        }
+        if address is None:
+            Address.objects.create(
+                user=user,
+                latitude=0,
+                longitude=0,
+                **address_values,
+            )
+        else:
+            for field, value in address_values.items():
+                setattr(address, field, value)
+            address.save(update_fields=list(address_values.keys()))
         return profile
 
     @classmethod
