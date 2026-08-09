@@ -1,13 +1,10 @@
 """Buyer-domain business services."""
 from __future__ import annotations
 
-from datetime import timedelta
-from decimal import Decimal
-
 from django.db import transaction
-from django.utils import timezone
 
 from backend.apps.accounts.models import User
+from backend.apps.trade.services import TradeService
 from backend.core.legacy.models import Address, BuyerProfile, DirectTradeProposal, MarketplaceListing
 
 
@@ -28,13 +25,7 @@ class BuyerService:
             raise ValueError("A buyer profile already exists for this user.")
         if BuyerProfile.objects.filter(gst_number=gst_number).exists():
             raise ValueError("This GST number is already registered.")
-        return BuyerProfile.objects.create(
-            user=user,
-            company_name=company_name.strip(),
-            gst_number=gst_number,
-            iec_code=iec_code.strip().upper(),
-            apeda_org=apeda_org.strip() if apeda_org else None,
-        )
+        return BuyerProfile.objects.create(user=user, company_name=company_name.strip(), gst_number=gst_number, iec_code=iec_code.strip().upper(), apeda_org=apeda_org.strip() if apeda_org else None)
 
     @classmethod
     @transaction.atomic
@@ -61,43 +52,19 @@ class BuyerService:
 
     @classmethod
     @transaction.atomic
-    def update_business_details(
-        cls,
-        *,
-        user: User,
-        company_name: str,
-        first_name: str,
-        last_name: str,
-        village: str,
-        district: str,
-        state: str,
-        pincode: str,
-    ) -> BuyerProfile:
-        """Update buyer operational identity and shipping hub atomically."""
+    def update_business_details(cls, *, user: User, company_name: str, first_name: str, last_name: str, village: str, district: str, state: str, pincode: str) -> BuyerProfile:
         cls._ensure_buyer(user)
         profile = cls.update_profile(user=user, changes={"company_name": company_name})
-        user.first_name = first_name.strip()
-        user.last_name = last_name.strip()
+        user.first_name, user.last_name = first_name.strip(), last_name.strip()
         user.save(update_fields=["first_name", "last_name"])
-
         address = user.addresses.order_by("addr_id").first()
-        address_values = {
-            "village": village.strip(),
-            "district": district.strip(),
-            "state": state.strip(),
-            "pincode": pincode.strip(),
-        }
+        values = {"village": village.strip(), "district": district.strip(), "state": state.strip(), "pincode": pincode.strip()}
         if address is None:
-            Address.objects.create(
-                user=user,
-                latitude=0,
-                longitude=0,
-                **address_values,
-            )
+            Address.objects.create(user=user, latitude=0, longitude=0, **values)
         else:
-            for field, value in address_values.items():
+            for field, value in values.items():
                 setattr(address, field, value)
-            address.save(update_fields=list(address_values.keys()))
+            address.save(update_fields=list(values))
         return profile
 
     @classmethod
@@ -114,56 +81,16 @@ class BuyerService:
         return listings.order_by("-created_at")
 
     @classmethod
-    @transaction.atomic
-    def submit_proposal(cls, *, user: User, listing_id: int, quantity: float, offered_price: Decimal | float | str, note: str = "") -> DirectTradeProposal:
-        cls._ensure_buyer(user)
-        listing = MarketplaceListing.objects.select_for_update().get(pk=listing_id, wing="PRODUCE", status="ACTIVE")
-        if quantity <= 0 or quantity > listing.available_stock:
-            raise ValueError("Requested quantity must be positive and within available stock.")
-        price = Decimal(str(offered_price))
-        if price <= 0:
-            raise ValueError("Offered price must be greater than zero.")
-        existing = DirectTradeProposal.objects.filter(listing=listing, buyer=user, status="PENDING").exists()
-        if existing:
-            raise ValueError("A pending proposal already exists for this listing.")
-        message = f"Requested Qty: {quantity} {listing.unit_of_measure} | Offer Price: ₹{price}/{listing.unit_of_measure} | Note: {note.strip()}"
-        return DirectTradeProposal.objects.create(
-            listing=listing,
-            farmer=listing.listed_by,
-            buyer=user,
-            message=message,
-            status="PENDING",
-        )
+    def submit_proposal(cls, *, user: User, listing_id: int, quantity: float, offered_price, note: str = "") -> DirectTradeProposal:
+        return TradeService.create_buyer_proposal(buyer=user, listing_id=listing_id, quantity=quantity, offered_price=offered_price, note=note)
 
     @classmethod
-    @transaction.atomic
     def respond_to_proposal(cls, *, user: User, proposal_id: int, action: str) -> DirectTradeProposal:
-        cls._ensure_buyer(user)
-        proposal = DirectTradeProposal.objects.select_for_update().select_related("listing", "farmer").get(pk=proposal_id, buyer=user)
-        if proposal.status != "PENDING":
-            raise ValueError("This proposal has already been processed.")
-        action = action.upper()
-        if action == "ACCEPT":
-            proposal.status = "ACCEPTED"
-        elif action in {"REJECT", "CANCEL"}:
-            proposal.status = "REJECTED" if action == "REJECT" else "CANCELLED"
-        else:
-            raise ValueError("Unsupported proposal action.")
-        proposal.save(update_fields=["status"])
-        return proposal
+        return TradeService.buyer_respond(buyer=user, proposal_id=proposal_id, action=action)
 
     @classmethod
-    @transaction.atomic
     def revoke_buyer_proposal(cls, *, user: User, proposal_id: int) -> DirectTradeProposal:
-        cls._ensure_buyer(user)
-        proposal = DirectTradeProposal.objects.select_for_update().get(pk=proposal_id, buyer=user)
-        if proposal.status != "PENDING":
-            raise ValueError("Only pending proposals can be revoked.")
-        if timezone.now() - proposal.created_at > timedelta(hours=24):
-            raise ValueError("The 24-hour revocation window has expired.")
-        proposal.status = "CANCELLED"
-        proposal.save(update_fields=["status"])
-        return proposal
+        return TradeService.revoke_buyer_proposal(buyer=user, proposal_id=proposal_id)
 
 
 __all__ = ["BuyerService"]
