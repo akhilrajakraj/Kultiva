@@ -36,7 +36,7 @@ class FarmerService:
     def update_profile(cls, *, user: User, changes: Mapping[str, Any]) -> FarmerProfile:
         cls._ensure_farmer(user)
         profile = FarmerProfile.objects.select_for_update().get(user=user)
-        allowed = {"aadhar_no", "land_area", "soil_type", "irrigation"}
+        allowed = {"aadhar_no", "land_area", "soil_type", "irrigation", "kissan_id"}
         unknown = set(changes) - allowed
         if unknown:
             raise ValueError(f"Unsupported farmer profile fields: {', '.join(sorted(unknown))}")
@@ -59,20 +59,23 @@ class FarmerService:
 
     @classmethod
     @transaction.atomic
-    def request_manual_soil_report(cls, *, user: User, land_area: float | None = None, previous_crop: str | None = None) -> ManualSoilReport:
+    def request_manual_soil_report(cls, *, user: User, farm_address_id: int | None = None, previous_crop: str | None = None) -> ManualSoilReport:
         cls._ensure_farmer(user)
         report = ManualSoilReport.objects.select_for_update().filter(farmer=user).order_by("-request_date").first()
         if report is None:
-            return ManualSoilReport.objects.create(farmer=user, land_area=land_area, previous_crop=previous_crop)
+            values = {"farmer": user, "previous_crop": previous_crop}
+            if farm_address_id:
+                values["farm_address_id"] = farm_address_id
+            return ManualSoilReport.objects.create(**values)
         if report.request_status == "COMPLETED":
             raise ValueError("A completed manual soil report cannot be reopened automatically.")
         changed = []
-        if land_area is not None and hasattr(report, "land_area"):
-            report.land_area = land_area
-            changed.append("land_area")
         if previous_crop is not None:
             report.previous_crop = previous_crop
             changed.append("previous_crop")
+        if farm_address_id is not None:
+            report.farm_address_id = farm_address_id
+            changed.append("farm_address")
         if changed:
             report.save(update_fields=changed)
         return report
