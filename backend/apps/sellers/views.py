@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 import json
+from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -47,33 +48,20 @@ def seller_dashboard(request):
     if not _seller_only(request):
         messages.error(request, "Access Denied. Vendor Portal Only.")
         return redirect("index")
-
     products = SellerService.list_inventory(user=request.user)
     orders = InputOrder.objects.filter(product__listed_by=request.user).select_related("product", "farmer")
     valid_orders = orders.exclude(status="CANCELLED")
     total_revenue = valid_orders.aggregate(total=Sum("total_amount"))["total"] or Decimal("0.00")
     low_stock_items = products.filter(available_stock__lt=10).order_by("available_stock")[:5]
     top_products = products.annotate(total_sold=Sum("inputorder__quantity")).filter(total_sold__isnull=False).order_by("-total_sold")[:5]
-
     chart_labels, chart_data = [], []
     now = timezone.now()
     for months_back in range(5, -1, -1):
-        # A fixed 30-day interval preserves the legacy dashboard's six-point contract.
-        target = now - timezone.timedelta(days=30 * months_back)
+        target = now - timedelta(days=30 * months_back)
         chart_labels.append(target.strftime("%b"))
-        revenue = valid_orders.filter(
-            created_at__year=target.year, created_at__month=target.month
-        ).aggregate(total=Sum("total_amount"))["total"] or 0
+        revenue = valid_orders.filter(created_at__year=target.year, created_at__month=target.month).aggregate(total=Sum("total_amount"))["total"] or 0
         chart_data.append(float(revenue))
-
-    return render(request, "seller_dashboard.html", {
-        "total_revenue": total_revenue,
-        "orders_count": valid_orders.count(),
-        "low_stock_items": low_stock_items,
-        "top_products": top_products,
-        "chart_labels": chart_labels,
-        "chart_data": chart_data,
-    })
+    return render(request, "seller_dashboard.html", {"total_revenue": total_revenue, "orders_count": valid_orders.count(), "low_stock_items": low_stock_items, "top_products": top_products, "chart_labels": chart_labels, "chart_data": chart_data})
 
 
 @login_required
@@ -83,26 +71,13 @@ def add_seller_listing(request):
         return redirect("index")
     if request.method != "POST":
         return render(request, "seller_add_item.html")
-
     try:
-        specifications = request.POST.get("specifications", "{}")
+        raw_specs = request.POST.get("specifications", "{}")
         try:
-            specifications = json.loads(specifications) if specifications else {}
+            specifications = json.loads(raw_specs) if raw_specs else {}
         except json.JSONDecodeError as exc:
             raise ValueError("Specifications must contain valid JSON.") from exc
-        listing = SellerService.create_listing(
-            user=request.user,
-            category=request.POST.get("category", "").strip(),
-            title=request.POST.get("title", "").strip(),
-            price=_parse_decimal(request.POST.get("price"), "price"),
-            unit_of_measure=request.POST.get("unit_of_measure", "").strip(),
-            available_stock=_parse_float(request.POST.get("available_stock"), "stock"),
-            min_order_quantity=_parse_float(request.POST.get("min_order_quantity", 1), "minimum order quantity"),
-            variety_or_brand=request.POST.get("variety_or_brand") or None,
-            description=request.POST.get("description", "").strip(),
-            specifications=specifications,
-            image=request.FILES.get("image"),
-        )
+        listing = SellerService.create_listing(user=request.user, category=request.POST.get("category", "").strip(), title=request.POST.get("title", "").strip(), price=_parse_decimal(request.POST.get("price"), "price"), unit_of_measure=request.POST.get("unit_of_measure", "").strip(), available_stock=_parse_float(request.POST.get("available_stock"), "stock"), min_order_quantity=_parse_float(request.POST.get("min_order_quantity", 1), "minimum order quantity"), variety_or_brand=request.POST.get("variety_or_brand") or None, description=request.POST.get("description", "").strip(), specifications=specifications, image=request.FILES.get("image"))
         messages.success(request, f"{listing.title} was added to your inventory.")
         return redirect("manage_stock")
     except ValueError as exc:
@@ -125,8 +100,7 @@ def remove_listing(request):
         return redirect("index")
     if request.method == "POST":
         try:
-            listing_id = int(request.POST.get("listing_id"))
-            SellerService.delete_listing(user=request.user, listing_id=listing_id)
+            SellerService.delete_listing(user=request.user, listing_id=int(request.POST.get("listing_id")))
             messages.success(request, "Listing removed successfully.")
         except (TypeError, ValueError, MarketplaceListing.DoesNotExist):
             messages.error(request, "The selected listing could not be removed.")
@@ -141,18 +115,8 @@ def edit_listing(request, listing_id):
     listing = get_object_or_404(MarketplaceListing, pk=listing_id, listed_by=request.user, wing="INPUT")
     if request.method == "GET":
         return render(request, "seller_edit_listing.html", {"listing": listing})
-
     try:
-        changes = {
-            "category": request.POST.get("category", listing.category).strip(),
-            "title": request.POST.get("title", listing.title).strip(),
-            "variety_or_brand": request.POST.get("variety_or_brand") or None,
-            "price": _parse_decimal(request.POST.get("price", listing.price), "price"),
-            "unit_of_measure": request.POST.get("unit_of_measure", listing.unit_of_measure).strip(),
-            "available_stock": _parse_float(request.POST.get("available_stock", listing.available_stock), "stock"),
-            "min_order_quantity": _parse_float(request.POST.get("min_order_quantity", listing.min_order_quantity), "minimum order quantity"),
-            "description": request.POST.get("description", listing.description).strip(),
-        }
+        changes = {"category": request.POST.get("category", listing.category).strip(), "title": request.POST.get("title", listing.title).strip(), "variety_or_brand": request.POST.get("variety_or_brand") or None, "price": _parse_decimal(request.POST.get("price", listing.price), "price"), "unit_of_measure": request.POST.get("unit_of_measure", listing.unit_of_measure).strip(), "available_stock": _parse_float(request.POST.get("available_stock", listing.available_stock), "stock"), "min_order_quantity": _parse_float(request.POST.get("min_order_quantity", listing.min_order_quantity), "minimum order quantity"), "description": request.POST.get("description", listing.description).strip()}
         if request.POST.get("specifications"):
             try:
                 changes["specifications"] = json.loads(request.POST["specifications"])
@@ -179,12 +143,7 @@ def seller_profile_view(request):
     profile = get_object_or_404(SellerProfile, user=request.user)
     if request.method == "POST":
         try:
-            SellerService.update_profile(user=request.user, changes={
-                "shop_name": request.POST.get("shop_name", profile.shop_name),
-                "license_number": request.POST.get("license_number", profile.license_number),
-                "gst_number": request.POST.get("gst_number") or None,
-                "description": request.POST.get("description") or None,
-            })
+            SellerService.update_profile(user=request.user, changes={"shop_name": request.POST.get("shop_name", profile.shop_name), "license_number": request.POST.get("license_number", profile.license_number), "gst_number": request.POST.get("gst_number") or None, "description": request.POST.get("description") or None})
             messages.success(request, "Seller profile updated successfully.")
         except ValueError as exc:
             messages.error(request, str(exc))
@@ -204,11 +163,7 @@ def seller_orders(request):
     if query:
         from django.db.models import Q
         orders = orders.filter(Q(order_id__icontains=query) | Q(product__title__icontains=query) | Q(farmer__username__icontains=query))
-    return render(request, "seller_orders.html", {
-        "orders": orders,
-        "current_status": status_filter,
-        "search_query": query,
-    })
+    return render(request, "seller_orders.html", {"orders": orders, "current_status": status_filter, "search_query": query})
 
 
 @login_required
@@ -227,11 +182,7 @@ def update_order_status(request, order_id):
         return redirect("index")
     if request.method == "POST":
         try:
-            order = SellerService.update_order_status(
-                user=request.user,
-                order_id=order_id,
-                status=request.POST.get("status", "").upper(),
-            )
+            order = SellerService.update_order_status(user=request.user, order_id=order_id, status=request.POST.get("status", "").upper())
             messages.success(request, f"Order {order.order_id} is now {order.status}.")
         except (ValueError, InputOrder.DoesNotExist) as exc:
             messages.error(request, str(exc))
@@ -247,7 +198,7 @@ def seller_reports(request):
     time_filter = request.GET.get("time_filter", "all")
     now = timezone.now()
     if time_filter == "week":
-        orders = orders.filter(created_at__gte=now - timezone.timedelta(days=7))
+        orders = orders.filter(created_at__gte=now - timedelta(days=7))
     elif time_filter == "month":
         orders = orders.filter(created_at__year=now.year, created_at__month=now.month)
     elif time_filter == "year":
@@ -255,13 +206,7 @@ def seller_reports(request):
     valid_orders = orders.exclude(status="CANCELLED")
     gross = valid_orders.aggregate(total=Sum("total_amount"))["total"] or Decimal("0.00")
     net = gross / Decimal("1.15")
-    return render(request, "seller_reports.html", {
-        "total_sales": round(gross, 2),
-        "net_earnings": round(net, 2),
-        "gst_collected": round(gross - net, 2),
-        "recent_transactions": orders[:50],
-        "time_filter": time_filter,
-    })
+    return render(request, "seller_reports.html", {"total_sales": round(gross, 2), "net_earnings": round(net, 2), "gst_collected": round(gross - net, 2), "recent_transactions": orders[:50], "time_filter": time_filter})
 
 
 @login_required
@@ -274,13 +219,7 @@ def seller_receipt_detail(request, order_id):
     subtotal_inclusive = order.total_amount - packaging_fee
     gst_rate = 5 if order.product and order.product.category in {"SEEDS", "FERTILIZERS"} else 18
     taxable = subtotal_inclusive / Decimal(str(1 + gst_rate / 100))
-    return render(request, "seller_receipt_detail.html", {
-        "order": order,
-        "subtotal": round(taxable, 2),
-        "gst": round(subtotal_inclusive - taxable, 2),
-        "gst_rate": gst_rate,
-        "packaging_fee": packaging_fee,
-    })
+    return render(request, "seller_receipt_detail.html", {"order": order, "subtotal": round(taxable, 2), "gst": round(subtotal_inclusive - taxable, 2), "gst_rate": gst_rate, "packaging_fee": packaging_fee})
 
 
 @login_required
@@ -294,22 +233,8 @@ def export_seller_orders_csv(request):
     writer = csv.writer(response)
     writer.writerow(["Order ID", "Product", "Farmer", "Quantity", "Amount", "Payment", "Status", "Created At"])
     for order in orders:
-        writer.writerow([
-            order.order_id,
-            order.product.title if order.product else "Deleted product",
-            order.farmer.username,
-            order.quantity,
-            order.total_amount,
-            order.payment_method,
-            order.status,
-            order.created_at.isoformat(),
-        ])
+        writer.writerow([order.order_id, order.product.title if order.product else "Deleted product", order.farmer.username, order.quantity, order.total_amount, order.payment_method, order.status, order.created_at.isoformat()])
     return response
 
 
-__all__ = [
-    "seller_dashboard", "add_seller_listing", "manage_stock", "remove_listing",
-    "edit_listing", "seller_profile_view", "seller_orders", "seller_order_detail",
-    "update_order_status", "seller_reports", "seller_receipt_detail",
-    "export_seller_orders_csv",
-]
+__all__ = ["seller_dashboard", "add_seller_listing", "manage_stock", "remove_listing", "edit_listing", "seller_profile_view", "seller_orders", "seller_order_detail", "update_order_status", "seller_reports", "seller_receipt_detail", "export_seller_orders_csv"]
