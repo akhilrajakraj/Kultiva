@@ -48,8 +48,10 @@ urlpatterns += [
     path("farmer/generate-qr/<int:proposal_id>/", farmer_views.generate_trade_qr, name="generate_trade_qr"),
 
     path("farmer/input-market/", order_views.input_market, name="farmer_input_market"),
+    path("farmer/input-market/product/<int:listing_id>/", farmer_views.input_detail, name="farmer_input_detail"),
     path("farmer/checkout/<int:listing_id>/", order_views.checkout, name="farmer_checkout"),
     path("farmer/process-order/<int:listing_id>/", order_views.process_order, name="process_input_order"),
+    path("farmer/payment-gateway/<int:listing_id>/", order_views.process_order, name="dummy_payment_gateway"),
     path("farmer/my-orders/", order_views.orders, name="farmer_orders"),
     path("farmer/invoice/<str:order_id>/", order_views.invoice_detail, name="farmer_invoice_detail"),
     path("farmer/orders/<str:order_id>/", order_views.order_detail, name="farmer_order_details"),
