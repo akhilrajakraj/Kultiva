@@ -5,14 +5,22 @@ on:
   pull_request:
 
 jobs:
-  structure:
+  backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
       - name: Install backend dependencies
-        run: python -m pip install -r backend/requirements/base.txt
+        run: python -m pip install --upgrade pip && python -m pip install -r backend/requirements/base.txt
       - name: Validate Python syntax
         run: python -m compileall backend
+      - name: Django system check
+        env:
+          DJANGO_SETTINGS_MODULE: Kultiva.settings
+        run: python manage.py check
+      - name: Domain boundary tests
+        env:
+          DJANGO_SETTINGS_MODULE: Kultiva.settings
+        run: python -m unittest discover -s backend/tests -p 'test_*.py' -v
