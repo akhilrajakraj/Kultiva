@@ -1,61 +1,36 @@
-"""Base Django settings for Kultiva."""
+"""Compatibility-first base settings for the restructured Kultiva runtime.
+
+The legacy Django application remains the source of truth for models, migrations,
+URLs, templates, static files, media and business behaviour until extraction is
+fully verified. This configuration makes the new backend entrypoint execute the
+same application rather than a partially reconstructed application.
+"""
 from pathlib import Path
+import sys
 
-BASE_DIR = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-SECRET_KEY = "change-me-in-environment"
-DEBUG = False
-ALLOWED_HOSTS: list[str] = []
+from Kultiva.settings import *  # noqa: F401,F403,E402
 
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-]
+# Keep the restructured runtime's predictable repository-relative paths.
+PROJECT_ROOT = REPO_ROOT
+BASE_DIR = PROJECT_ROOT
 
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-]
+# Environment overrides are intentionally lightweight and do not change legacy
+# behaviour unless explicitly supplied by the deployment environment.
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", SECRET_KEY)
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", ",".join(ALLOWED_HOSTS or [])).split(",") if h.strip()]
 
-ROOT_URLCONF = "config.urls"
-WSGI_APPLICATION = "config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"
+TIME_ZONE = os.environ.get("DJANGO_TIME_ZONE", TIME_ZONE or "Asia/Kolkata")
 
-TEMPLATES = [{
-    "BACKEND": "django.template.backends.django.DjangoTemplates",
-    "DIRS": [BASE_DIR / "frontend" / "templates"],
-    "APP_DIRS": True,
-    "OPTIONS": {"context_processors": [
-        "django.template.context_processors.request",
-        "django.contrib.auth.context_processors.auth",
-        "django.contrib.messages.context_processors.messages",
-    ]},
-}]
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "data" / "kultiva.sqlite3",
-    }
-}
-
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "Asia/Kolkata"
-USE_I18N = True
-USE_TZ = True
-
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "frontend" / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "frontend" / "static"]
+# The legacy app owns these resources during the compatibility phase.
+TEMPLATES[0]["DIRS"] = [PROJECT_ROOT / "Kultiva" / "templates"]
+STATICFILES_DIRS = [PROJECT_ROOT / "Kultiva" / "static"]
+MEDIA_ROOT = PROJECT_ROOT / "Kultiva" / "media"
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Do not register placeholder domain apps: their model modules are compatibility
+# exports, not independent Django models. Registering them would create duplicate
+# model ownership and migrations.
