@@ -9,8 +9,15 @@ from pathlib import Path
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+LEGACY_PROJECT_ROOT = REPO_ROOT / "Kultiva"
+
+# The legacy project historically runs with its inner project directory on
+# sys.path, which makes imports such as ``Kultiva.settings`` and
+# ``Kultiva.models`` resolve to ``Kultiva/Kultiva``. Preserve that import
+# contract for the compatibility runtime.
+for path in (LEGACY_PROJECT_ROOT, REPO_ROOT):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
 
 from Kultiva.settings import *  # noqa: F401,F403,E402
 
@@ -21,7 +28,13 @@ BASE_DIR = PROJECT_ROOT
 # Environment overrides are intentionally lightweight and do not change legacy
 # behaviour unless explicitly supplied by the deployment environment.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", SECRET_KEY)
-ALLOWED_HOSTS = [h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", ",".join(ALLOWED_HOSTS or [])).split(",") if h.strip()]
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS", ",".join(ALLOWED_HOSTS or [])
+    ).split(",")
+    if h.strip()
+]
 
 TIME_ZONE = os.environ.get("DJANGO_TIME_ZONE", TIME_ZONE or "Asia/Kolkata")
 
