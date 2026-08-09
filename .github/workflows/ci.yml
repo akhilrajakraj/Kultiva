@@ -25,4 +25,4 @@ jobs:
         working-directory: Kultiva
         env:
           DJANGO_SETTINGS_MODULE: Kultiva.settings
-        run: python -m unittest discover -s backend/tests -p 'test_*.py' -v
+        run: python -m unittest discover -s ../backend/tests -t .. -p 'test_*.py' -v
