@@ -12,7 +12,7 @@ from django.db import transaction
 
 from backend.apps.accounts.models import User
 from backend.apps.marketplace.services import MarketplaceService
-from backend.core.legacy.models import InputOrder, SellerProfile
+from backend.core.legacy.models import InputOrder, MarketplaceListing, SellerProfile
 
 
 class SellerService:
@@ -76,7 +76,7 @@ class SellerService:
         available_stock: float, description: str,
         variety_or_brand: str | None = None, min_order_quantity: float = 1,
         specifications: Mapping[str, Any] | None = None, image=None,
-    ):
+    ) -> MarketplaceListing:
         cls._ensure_seller(user)
         if not user.is_verified:
             raise ValueError("Seller verification is required before publishing inventory.")
@@ -89,24 +89,21 @@ class SellerService:
 
     @classmethod
     @transaction.atomic
-    def update_listing(cls, *, user: User, listing_id: int, changes: Mapping[str, Any]):
+    def update_listing(cls, *, user: User, listing_id: int, changes: Mapping[str, Any]) -> MarketplaceListing:
         cls._ensure_seller(user)
-        listing = MarketplaceService.get_active_listing(user=user, listing_id=listing_id, wing=MarketplaceService.INPUT)
-        # Ownership is checked by MarketplaceService.update_listing. Permit
-        # editing an out-of-stock listing as well, so stock can be restored.
+        listing = MarketplaceListing.objects.get(pk=listing_id, listed_by=user, wing=MarketplaceService.INPUT)
         return MarketplaceService.update_listing(user=user, listing_id=listing.pk, changes=dict(changes))
 
     @classmethod
     @transaction.atomic
     def delete_listing(cls, *, user: User, listing_id: int) -> None:
         cls._ensure_seller(user)
-        listing = MarketplaceService.get_active_listing(user=user, listing_id=listing_id, wing=MarketplaceService.INPUT)
-        MarketplaceService.delete_listing(user=user, listing_id=listing.pk)
+        MarketplaceListing.objects.get(pk=listing_id, listed_by=user, wing=MarketplaceService.INPUT)
+        MarketplaceService.delete_listing(user=user, listing_id=listing_id)
 
     @classmethod
     def list_inventory(cls, *, user: User):
         cls._ensure_seller(user)
-        from backend.core.legacy.models import MarketplaceListing
         return MarketplaceListing.objects.filter(listed_by=user, wing=MarketplaceService.INPUT).order_by("-created_at")
 
     @classmethod
