@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import strip_tags
 
 from backend.apps.escrow.services import EscrowService
+from backend.apps.trade.services import TradeService
 from backend.core.legacy.models import DirectTradeProposal, EscrowTransaction
 
 
@@ -94,6 +95,10 @@ def process_payment(request, proposal_id):
                 buyer=request.user,
                 proposal_id=proposal.id,
                 transaction_id=escrow.transaction_id,
+            )
+            TradeService.complete_trade(
+                user=request.user,
+                proposal_id=proposal.id,
             )
 
             # Preserve the legacy inventory behavior: the completed trade
