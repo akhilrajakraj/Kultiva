@@ -50,6 +50,16 @@ class MarketplaceService:
             raise ValueError(f"{field.title()} must be greater than zero.")
         return result
 
+    @staticmethod
+    def _non_negative_float(value: Any, field: str) -> float:
+        try:
+            result = float(value)
+        except (TypeError, ValueError):
+            raise ValueError(f"Invalid {field}.")
+        if result < 0:
+            raise ValueError(f"{field.title()} cannot be negative.")
+        return result
+
     @classmethod
     def browse(cls, *, user: User, wing: str = PRODUCE, query: str | None = None,
                categories=None, organic: bool = False, seller_id: int | None = None):
@@ -63,8 +73,7 @@ class MarketplaceService:
         if query and str(query).strip():
             query = str(query).strip()
             listings = listings.filter(
-                Q(title__icontains=query)
-                | Q(variety_or_brand__icontains=query)
+                Q(title__icontains=query) | Q(variety_or_brand__icontains=query)
                 | Q(description__icontains=query)
             )
         if categories:
@@ -149,7 +158,7 @@ class MarketplaceService:
         if "price" in changes:
             changes["price"] = cls._positive_decimal(changes["price"], "price")
         if "available_stock" in changes:
-            changes["available_stock"] = cls._positive_float(changes["available_stock"], "available stock")
+            changes["available_stock"] = cls._non_negative_float(changes["available_stock"], "available stock")
         if "min_order_quantity" in changes:
             changes["min_order_quantity"] = cls._positive_float(changes["min_order_quantity"], "minimum order quantity")
         if "unit_of_measure" in changes:
@@ -167,7 +176,7 @@ class MarketplaceService:
             changes["status"] = status
         projected_stock = float(changes.get("available_stock", listing.available_stock))
         projected_minimum = float(changes.get("min_order_quantity", listing.min_order_quantity))
-        if projected_minimum > projected_stock:
+        if projected_stock > 0 and projected_minimum > projected_stock:
             raise ValueError("Minimum order quantity cannot exceed available stock.")
         if projected_stock == 0:
             changes["status"] = cls.OUT_OF_STOCK
