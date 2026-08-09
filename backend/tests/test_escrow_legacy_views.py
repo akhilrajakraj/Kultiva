@@ -113,7 +113,7 @@ class EscrowLegacyViewIntegrationTests(TestCase):
             ).exists()
         )
 
-    def test_process_payment_completes_service_escrow_and_preserves_negotiated_amount(self):
+    def test_process_payment_completes_service_escrow_and_trade_state(self):
         self.client.force_login(self.buyer)
 
         response = self.client.post(
@@ -131,5 +131,6 @@ class EscrowLegacyViewIntegrationTests(TestCase):
         self.proposal.refresh_from_db()
         self.listing.refresh_from_db()
         self.assertTrue(self.proposal.is_paid)
+        self.assertEqual(self.proposal.status, "COMPLETED")
         self.assertEqual(self.listing.available_stock, 0)
         self.assertEqual(self.listing.status, "OUT_OF_STOCK")
