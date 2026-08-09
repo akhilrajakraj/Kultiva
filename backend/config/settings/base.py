@@ -25,14 +25,7 @@ BASE_DIR = PROJECT_ROOT
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", SECRET_KEY)
 DEBUG = os.environ.get("DJANGO_DEBUG", str(DEBUG)).lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.environ.get(
-        "DJANGO_ALLOWED_HOSTS", ",".join(ALLOWED_HOSTS or ["localhost", "127.0.0.1"])
-    ).split(",")
-    if host.strip()
-]
-
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", ",".join(ALLOWED_HOSTS or ["localhost", "127.0.0.1"])).split(",") if host.strip()]
 TIME_ZONE = os.environ.get("DJANGO_TIME_ZONE", TIME_ZONE or "Asia/Kolkata")
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -55,6 +48,7 @@ DOMAIN_APPS = [
     "backend.apps.reviews.apps.ReviewsConfig",
     "backend.apps.sellers.apps.SellersConfig",
     "backend.apps.soil.apps.SoilConfig",
+    "backend.apps.trade.apps.TradeConfig",
     "backend.apps.weather.apps.WeatherConfig",
 ]
 INSTALLED_APPS = list(INSTALLED_APPS)
@@ -62,12 +56,10 @@ for app in DOMAIN_APPS:
     if app not in INSTALLED_APPS:
         INSTALLED_APPS.append(app)
 
-TEMPLATES[0]["DIRS"] = [PROJECT_ROOT / "Kultiva" / "templates"]
+TEMPLATES[0]["DIRS"] = [PROJECT_ROOT / "Kultiva" / "templates", PROJECT_ROOT / "Kultiva" / "templates" / "domains"]
 STATICFILES_DIRS = [PROJECT_ROOT / "Kultiva" / "static"]
 MEDIA_ROOT = PROJECT_ROOT / "Kultiva" / "media"
 MEDIA_URL = "/media/"
 
-# Keep the existing user/table/migration contract until the extraction is
-# explicitly migrated with SeparateDatabaseAndState in the next phase.
 AUTH_USER_MODEL = "Kultiva.User"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
