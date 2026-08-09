@@ -1,1 +1,96 @@
-from backend.core.legacy.views import *  # noqa: F401,F403
+"""Order HTTP boundary."""
+from __future__ import annotations
+
+from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+
+from backend.apps.orders.services import OrderService
+from backend.core.legacy.models import EscrowTransaction, MarketplaceListing
+
+
+def _farmer(request):
+    return request.user if request.user.is_authenticated and request.user.role == request.user.Role.FARMER and request.user.is_active else None
+
+
+@login_required
+def input_market(request):
+    user = _farmer(request)
+    if user is None:
+        return redirect("index")
+    products = MarketplaceListing.objects.filter(wing="INPUT", status="ACTIVE", available_stock__gt=0).select_related("listed_by").order_by("-created_at")
+    return render(request, "farmer_input_market.html", {"products": products})
+
+
+@login_required
+def checkout(request, listing_id: int):
+    user = _farmer(request)
+    if user is None:
+        return redirect("index")
+    product = get_object_or_404(MarketplaceListing, pk=listing_id, wing="INPUT", status="ACTIVE")
+    address = user.addresses.first()
+    quantity = float(request.POST.get("quantity", 1)) if request.method == "POST" else 1
+    total = OrderService.calculate_total(product=product, quantity=quantity)
+    return render(request, "farmer_checkout.html", {"product": product, "address": address, "quantity": quantity, "total": total})
+
+
+@login_required
+def process_order(request, listing_id: int):
+    user = _farmer(request)
+    if user is None:
+        return redirect("index")
+    if request.method != "POST":
+        return redirect("farmer_checkout", listing_id=listing_id)
+    try:
+        quantity = float(request.POST.get("quantity", 1))
+        address = user.addresses.first()
+        address_text = f"{address.village}, {address.district}, {address.state} - {address.pincode}" if address else "Address Pending"
+        order = OrderService.place_input_order(
+            user=user,
+            listing_id=listing_id,
+            quantity=quantity,
+            payment_method=request.POST.get("payment_mode", "UPI"),
+            delivery_address=address_text,
+        )
+        messages.success(request, f"Order {order.order_id} placed successfully.")
+        return redirect("farmer_order_details", order_id=order.order_id)
+    except (ValueError, TypeError) as exc:
+        messages.error(request, str(exc))
+        return redirect("farmer_checkout", listing_id=listing_id)
+
+
+@login_required
+def orders(request):
+    user = _farmer(request)
+    if user is None:
+        return redirect("index")
+    return render(request, "farmer_orders.html", {
+        "orders": OrderService.list_for_farmer(user=user, status=request.GET.get("status"), query=request.GET.get("q")),
+        "current_status": request.GET.get("status", "ALL"),
+        "search_query": request.GET.get("q", ""),
+    })
+
+
+@login_required
+def order_detail(request, order_id: str):
+    user = _farmer(request)
+    if user is None:
+        return redirect("index")
+    order = OrderService.get_for_farmer(user=user, order_id=order_id)
+    txn = EscrowTransaction.objects.filter(security_token=f"ORDER-{order.order_id}").first()
+    return render(request, "farmer_order_details.html", {"order": order, "product": order.product, "txn": txn})
+
+
+@login_required
+def invoice_detail(request, order_id: str):
+    user = _farmer(request)
+    if user is None:
+        return redirect("index")
+    order = OrderService.get_for_farmer(user=user, order_id=order_id)
+    txn = EscrowTransaction.objects.filter(security_token=f"ORDER-{order.order_id}").first()
+    return render(request, "farmer_invoice_detail.html", {"order": order, "product": order.product, "txn": txn})
+
+
+__all__ = ["input_market", "checkout", "process_order", "orders", "order_detail", "invoice_detail"]
