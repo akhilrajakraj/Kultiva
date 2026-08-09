@@ -49,7 +49,7 @@ class Phase3ServiceTests(TestCase):
         )
 
     def test_farmer_profile_and_soil_workflow(self):
-        farmer = self._user("farmer", User.Role.FARMER)
+        farmer = self._user("farmer-profile-soil", User.Role.FARMER)
         profile = FarmerService.create_profile(
             user=farmer, aadhar_no="123456789012", land_area=2.5,
             soil_type="Loamy", irrigation="Drip",
@@ -66,8 +66,8 @@ class Phase3ServiceTests(TestCase):
         self.assertEqual(completed.n, 80)
 
     def test_farmer_produce_listing_and_trade_proposal(self):
-        farmer = self._user("farmer-trade", User.Role.FARMER)
-        buyer = self._user("buyer-trade", User.Role.BUYER)
+        farmer = self._user("farmer-trade-service", User.Role.FARMER)
+        buyer = self._user("buyer-trade-service", User.Role.BUYER)
         FarmerService.create_profile(
             user=farmer, aadhar_no="123456789013", land_area=2,
             soil_type="Loamy", irrigation="Rain",
@@ -91,8 +91,8 @@ class Phase3ServiceTests(TestCase):
         self.assertEqual(DirectTradeProposal.objects.get(pk=proposal.pk).security_token, token)
 
     def test_seller_inventory_and_order_workflow(self):
-        seller = self._user("seller", User.Role.SELLER)
-        farmer = self._user("input-farmer", User.Role.FARMER)
+        seller = self._user("seller-input-workflow", User.Role.SELLER)
+        farmer = self._user("input-farmer-workflow", User.Role.FARMER)
         profile = SellerService.create_profile(
             user=seller, shop_name="Agri Shop", license_number="LIC123456",
             gst_number="22AAAAA0000A1Z5", description="Input store",
@@ -122,8 +122,8 @@ class Phase3ServiceTests(TestCase):
         self.assertEqual(txn.payment_status, "COMPLETED")
 
     def test_buyer_profile_and_proposal_workflow(self):
-        farmer = self._user("produce-farmer", User.Role.FARMER)
-        buyer = self._user("corporate-buyer", User.Role.BUYER)
+        farmer = self._user("produce-farmer-workflow", User.Role.FARMER)
+        buyer = self._user("corporate-buyer-workflow", User.Role.BUYER)
         FarmerService.create_profile(
             user=farmer, aadhar_no="123456789014", land_area=3,
             soil_type="Clay", irrigation="Canal",
@@ -147,8 +147,8 @@ class Phase3ServiceTests(TestCase):
         self.assertEqual(rejected.status, "REJECTED")
 
     def test_admin_moderation_and_refund(self):
-        admin = self._user("admin", User.Role.ADMIN)
-        seller = self._user("moderated-seller", User.Role.SELLER)
+        admin = self._user("admin-moderation", User.Role.ADMIN)
+        seller = self._user("moderated-seller-service", User.Role.SELLER)
         listing = SellerService.create_listing(
             user=seller, category="TOOLS", title="Hoe", price=Decimal("500"),
             unit_of_measure="piece", available_stock=5, description="Farm tool",
