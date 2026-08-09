@@ -12,6 +12,7 @@ class MarketplaceOrderExtractionTests(TestCase):
     def setUp(self):
         self.farmer = User.objects.create_user(username="farmer1", password="x", role=User.Role.FARMER, is_active=True)
         self.seller = User.objects.create_user(username="seller1", password="x", role=User.Role.SELLER, is_active=True)
+        self.other_seller = User.objects.create_user(username="seller2", password="x", role=User.Role.SELLER, is_active=True)
         self.buyer = User.objects.create_user(username="buyer1", password="x", role=User.Role.BUYER, is_active=True)
 
     def test_create_and_browse_produce_listing(self):
@@ -46,18 +47,21 @@ class MarketplaceOrderExtractionTests(TestCase):
         with self.assertRaises(ValueError):
             MarketplaceService.update_listing(user=self.farmer, listing_id=listing.pk, changes={"min_order_quantity": 30})
 
-    def test_input_order_is_atomic_and_decrements_stock(self):
-        product = MarketplaceService.create_listing(
+    def _input_product(self, stock=20):
+        return MarketplaceService.create_listing(
             user=self.seller,
             wing="INPUT",
             category="SEEDS",
             title="Rice Seeds",
             price=Decimal("50.00"),
             unit_of_measure="kg",
-            available_stock=20,
+            available_stock=stock,
             min_order_quantity=2,
             description="Certified seed",
         )
+
+    def test_input_order_is_atomic_and_decrements_stock(self):
+        product = self._input_product()
         order = OrderService.place_input_order(
             user=self.farmer,
             listing_id=product.pk,
@@ -92,3 +96,40 @@ class MarketplaceOrderExtractionTests(TestCase):
             )
         product.refresh_from_db()
         self.assertEqual(product.available_stock, 2)
+
+    def test_seller_can_update_owned_order_status(self):
+        product = self._input_product()
+        order = OrderService.place_input_order(
+            user=self.farmer,
+            listing_id=product.pk,
+            quantity=2,
+            payment_method="CARD",
+            delivery_address="Address",
+        )
+        updated = OrderService.update_status(actor=self.seller, order_id=order.order_id, status="SHIPPED")
+        self.assertEqual(updated.status, "SHIPPED")
+
+    def test_seller_cannot_update_another_sellers_order(self):
+        product = self._input_product()
+        order = OrderService.place_input_order(
+            user=self.farmer,
+            listing_id=product.pk,
+            quantity=2,
+            payment_method="COD",
+            delivery_address="Address",
+        )
+        with self.assertRaises(ValueError):
+            OrderService.update_status(actor=self.other_seller, order_id=order.order_id, status="SHIPPED")
+
+    def test_terminal_order_status_cannot_be_reopened(self):
+        product = self._input_product()
+        order = OrderService.place_input_order(
+            user=self.farmer,
+            listing_id=product.pk,
+            quantity=2,
+            payment_method="UPI",
+            delivery_address="Address",
+        )
+        OrderService.update_status(actor=self.seller, order_id=order.order_id, status="DELIVERED")
+        with self.assertRaises(ValueError):
+            OrderService.update_status(actor=self.seller, order_id=order.order_id, status="SHIPPED")
