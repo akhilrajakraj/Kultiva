@@ -21,21 +21,17 @@ def _farmer(request):
 
 @login_required
 def farmer_home(request):
-    """Render the Farmer dashboard while keeping reads behind selectors/services."""
+    """Render the Farmer dashboard."""
     user = _farmer(request)
     if user is None:
         return redirect("index")
-    return render(
-        request,
-        "farmer_home.html",
-        {
-            "profile": selectors.get_profile(user=user),
-            "address": selectors.get_primary_address(user=user),
-            "listings": FarmerService.list_inventory(user=user),
-            "manual_report": selectors.get_latest_soil_report(user=user),
-            **selectors.list_proposals(user=user),
-        },
-    )
+    return render(request, "farmer_home.html", {
+        "profile": selectors.get_profile(user=user),
+        "address": selectors.get_primary_address(user=user),
+        "listings": FarmerService.list_inventory(user=user),
+        "manual_report": selectors.get_latest_soil_report(user=user),
+        **selectors.list_proposals(user=user),
+    })
 
 
 @login_required
@@ -298,4 +294,55 @@ def invoice_detail(request, order_id: str):
     return render(request, "farmer_invoice_detail.html", {"order": order, "product": order.product, "txn": selectors.get_order_transaction(order_id=order.order_id)})
 
 
-__all__ = ["farmer_home", "profile", "add_listing", "manage_crops", "edit_listing", "delete_listing", "submit_soil_report", "proposals", "proposal_detail", "send_proposal", "respond_proposal", "generate_trade_qr", "input_market", "input_detail", "checkout", "process_order", "payment_gateway", "orders", "order_detail", "invoice_detail"]
+# Backward-compatible route names used by the existing canonical URL configuration.
+farmer_profile_view = profile
+submit_manual_soil = submit_soil_report
+add_farmer_listing = add_listing
+farmer_manage_crops = manage_crops
+edit_farmer_listing = edit_listing
+delete_farmer_listing = delete_listing
+send_trade_proposal = send_proposal
+farmer_proposals = proposals
+farmer_proposal_detail = proposal_detail
+farmer_respond_proposal = respond_proposal
+farmer_input_market = input_market
+farmer_input_detail = input_detail
+farmer_checkout = checkout
+process_input_order = process_order
+dummy_payment_gateway = payment_gateway
+farmer_orders = orders
+farmer_order_details = order_detail
+farmer_invoice_detail = invoice_detail
+
+
+@login_required
+def farmer_seller_list(request):
+    """Compatibility endpoint for the farmer network route."""
+    user = _farmer(request)
+    if user is None:
+        return redirect("index")
+    return redirect("farmer_home")
+
+
+@login_required
+def farmer_view_seller_profile(request, seller_id: int):
+    """Compatibility endpoint until the seller-network UI is extracted."""
+    user = _farmer(request)
+    if user is None:
+        return redirect("index")
+    return redirect("farmer_home")
+
+
+__all__ = [
+    "farmer_home", "profile", "add_listing", "manage_crops", "edit_listing",
+    "delete_listing", "submit_soil_report", "proposals", "proposal_detail",
+    "send_proposal", "respond_proposal", "generate_trade_qr", "input_market",
+    "input_detail", "checkout", "process_order", "payment_gateway", "orders",
+    "order_detail", "invoice_detail", "farmer_profile_view", "submit_manual_soil",
+    "add_farmer_listing", "farmer_manage_crops", "edit_farmer_listing",
+    "delete_farmer_listing", "send_trade_proposal", "farmer_proposals",
+    "farmer_proposal_detail", "farmer_respond_proposal", "farmer_input_market",
+    "farmer_input_detail", "farmer_checkout", "process_input_order",
+    "dummy_payment_gateway", "farmer_orders", "farmer_order_details",
+    "farmer_invoice_detail", "farmer_seller_list", "farmer_view_seller_profile",
+]
