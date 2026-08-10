@@ -1,0 +1,246 @@
+{% load static %}
+
+<style>
+  /* 1. Base Floating "Pill" Header (Visible State) */
+  .header-area,
+  .header-area.header-sticky {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(10px) !important;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+      position: fixed !important;
+      top: 25px !important; /* Floating gap */
+      left: 5% !important;  
+      width: 90% !important; 
+      border-radius: 50px !important; 
+      z-index: 1000 !important;
+      height: 80px !important;
+      padding-top: 0 !important;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important; /* Smooth sliding animation */
+  }
+
+  /* 2. THE NEW CUSTOM HIDDEN STATE */
+  /* This will be triggered perfectly by our JavaScript when scrolling */
+  .header-area.header-hidden {
+      top: -120px !important; /* Slides it up off-screen */
+      opacity: 0 !important;  /* Fades it out */
+      pointer-events: none !important; /* Prevents invisible button clicks */
+  }
+
+  .header-area .main-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 30px !important; 
+      height: 80px !important;
+  }
+
+  .header-area .logo h4 {
+      line-height: 80px !important;
+      margin: 0 !important;
+  }
+
+  /* General Nav Links */
+  .header-area .main-nav .nav li a {
+      font-weight: 600;
+      color: #333 !important;
+      transition: all 0.3s ease;
+  }
+  
+  .header-area .main-nav .nav li a:hover {
+      color: #1b5e20 !important; 
+  }
+
+  /* 3. The Oval Dropdown Menu */
+  .dropdown-menu-custom {
+      position: absolute;
+      top: 75px; 
+      right: 0; 
+      width: 200px; 
+      background-color: #fff;
+      border-radius: 25px !important; /* Perfect smooth oval shape */
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border: 2px solid #fbc02d; 
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      z-index: 999;
+      list-style: none;
+      padding: 10px 0;
+      text-align: left;
+      overflow: hidden; 
+  }
+
+  .dropdown-menu-custom.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+  }
+
+  .dropdown-menu-custom li a {
+      display: block;
+      padding: 12px 25px !important;
+      height: auto !important;
+      line-height: normal !important;
+  }
+
+  .dropdown-menu-custom li a:hover {
+      background-color: #f1f8e9 !important;
+      color: #1b5e20 !important;
+      padding-left: 30px !important; 
+  }
+
+  .dropdown-menu-custom li a::after {
+      display: none !important; 
+  }
+
+  /* 4. The Buttons Container */
+  .nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 15px; 
+      height: 80px; 
+  }
+
+  /* KILL UNDERLINES FOR OUR BUTTONS */
+  .header-area .main-nav .nav li a.register-btn::after,
+  .header-area .main-nav .nav li a.login-btn::after {
+      display: none !important;
+  }
+
+  /* Register Button */
+  .header-area .main-nav .nav li a.register-btn {
+      background-color: transparent !important;
+      color: #1b5e20 !important;
+      padding: 0 20px !important;
+      border-radius: 25px !important;
+      border: 2px solid #1b5e20 !important;
+      height: 40px !important;
+      line-height: 36px !important; 
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+  }
+  
+  .header-area .main-nav .nav li a.register-btn:hover {
+      background-color: #1b5e20 !important;
+      color: #ffffff !important; 
+      border: 2px solid #1b5e20 !important;
+      box-shadow: 0 5px 15px rgba(27, 94, 32, 0.3);
+  }
+
+  /* Login Button */
+  .header-area .main-nav .nav li a.login-btn {
+      background-color: #fbc02d !important; 
+      color: #1b5e20 !important; 
+      padding: 0 25px !important;
+      border-radius: 25px !important;
+      border: 2px solid #fbc02d !important;
+      height: 40px !important;
+      line-height: 36px !important; 
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+  }
+  
+  .header-area .main-nav .nav li a.login-btn:hover {
+      background-color: #1b5e20 !important; 
+      color: #ffffff !important; 
+      border: 2px solid #1b5e20 !important;
+      box-shadow: 0 5px 15px rgba(27, 94, 32, 0.3);
+  }
+</style>
+
+<header class="header-area header-sticky wow slideInDown" data-wow-duration="0.75s" data-wow-delay="0s">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <nav class="main-nav">
+          
+          <a href="{% url 'index' %}" class="logo">
+            <h4 style="color: #1b5e20;">Kult<span style="color: #fbc02d;">iva</span></h4>
+          </a>
+          
+          <ul class="nav">
+            <li class="scroll-to-section"><a href="{% url 'index' %}#top">Home</a></li>
+            <li class="scroll-to-section"><a href="{% url 'index' %}#analysis">AI Analysis</a></li>
+            <li class="scroll-to-section"><a href="{% url 'about' %}#marketplace">About Us</a></li>
+            <li class="scroll-to-section"><a href="{% url 'index' %}#export">Sell/Export</a></li>
+            
+            
+            
+            <div class="nav-buttons">
+                <li style="position: relative; display: inline-block;">
+                    <a href="javascript:void(0)" class="register-btn dropdown-trigger">Register <i class="fa fa-angle-down"></i></a>
+                    <ul class="dropdown-menu-custom">
+                        <li><a href="{% url 'register_role' 'farmer' %}">As Farmer</a></li>
+                        <li><a href="{% url 'register_role' 'buyer' %}">As Buyer</a></li>
+                        <li><a href="{% url 'register_role' 'seller' %}">As Seller</a></li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <a href="{% url 'login' %}" class="login-btn">Login</a>
+                </li>
+            </div>
+          </ul>        
+          
+          <a class='menu-trigger'>
+              <span>Menu</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- 1. Dropdown Logic ---
+        const triggers = document.querySelectorAll('.dropdown-trigger');
+
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const menu = this.nextElementSibling;
+                const arrow = this.querySelector('.fa-angle-down');
+                
+                if (menu.classList.contains('show')) {
+                    menu.classList.remove('show');
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    menu.classList.add('show');
+                    arrow.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        document.addEventListener('click', function() {
+            triggers.forEach(trigger => {
+                const nextEl = trigger.nextElementSibling;
+                if (nextEl) {
+                    nextEl.classList.remove('show');
+                }
+                const arrow = trigger.querySelector('.fa-angle-down');
+                if (arrow) {
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+
+        // --- 2. NEW: Header Hide/Show on Scroll Logic ---
+        const header = document.querySelector('.header-area');
+        
+        window.addEventListener('scroll', function() {
+            // If user scrolls down past 50 pixels from the top, hide it.
+            // If they scroll back up to the top, show it.
+            if (window.scrollY > 50) {
+                header.classList.add('header-hidden');
+            } else {
+                header.classList.remove('header-hidden');
+            }
+        });
+    });
+</script>
