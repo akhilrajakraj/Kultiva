@@ -1,9 +1,4 @@
-"""Marketplace-domain business services.
-
-MarketplaceListing remains physically owned by the legacy migration app during
-this extraction phase. This service is the application-layer owner of generic
-listing lifecycle and discovery rules.
-"""
+"""Marketplace-domain business services."""
 from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
@@ -67,15 +62,10 @@ class MarketplaceService:
         wing = str(wing).strip().upper()
         if wing not in cls.VALID_WINGS:
             raise ValueError("Unsupported marketplace wing.")
-        listings = MarketplaceListing.objects.filter(
-            wing=wing, status=cls.ACTIVE, available_stock__gt=0,
-        ).select_related("listed_by")
+        listings = MarketplaceListing.objects.filter(wing=wing, status=cls.ACTIVE, available_stock__gt=0).select_related("listed_by")
         if query and str(query).strip():
             query = str(query).strip()
-            listings = listings.filter(
-                Q(title__icontains=query) | Q(variety_or_brand__icontains=query)
-                | Q(description__icontains=query)
-            )
+            listings = listings.filter(Q(title__icontains=query) | Q(variety_or_brand__icontains=query) | Q(description__icontains=query))
         if categories:
             categories = [str(value).strip().upper() for value in categories if str(value).strip()]
             if categories:
@@ -96,13 +86,11 @@ class MarketplaceService:
 
     @classmethod
     @transaction.atomic
-    def create_listing(
-        cls, *, user: User, wing: str, category: str, title: str,
-        price: Decimal | float | str, unit_of_measure: str, available_stock: float,
-        description: str, variety_or_brand: str | None = None, min_order_quantity: float = 1,
-        harvest_date=None, is_organic: bool = False, grade: str | None = None,
-        specifications: Mapping[str, Any] | None = None, image=None,
-    ) -> MarketplaceListing:
+    def create_listing(cls, *, user: User, wing: str, category: str, title: str, price: Decimal | float | str,
+                       unit_of_measure: str, available_stock: float, description: str,
+                       variety_or_brand: str | None = None, min_order_quantity: float = 1,
+                       harvest_date=None, is_organic: bool = False, grade: str | None = None,
+                       specifications: Mapping[str, Any] | None = None, image=None) -> MarketplaceListing:
         cls._ensure_active_user(user)
         wing = str(wing).strip().upper()
         if wing not in cls.VALID_WINGS:
@@ -111,89 +99,52 @@ class MarketplaceService:
         title = str(title or "").strip()
         unit = str(unit_of_measure or "").strip()
         description = str(description or "").strip()
-        if not category:
-            raise ValueError("Category is required.")
-        if not title:
-            raise ValueError("Title is required.")
-        if not unit:
-            raise ValueError("Unit of measure is required.")
-        if not description:
-            raise ValueError("Description is required.")
+        if not category or not title or not unit or not description:
+            raise ValueError("Category, title, unit of measure, and description are required.")
         normalized_price = cls._positive_decimal(price, "price")
         stock = cls._positive_float(available_stock, "available stock")
         minimum = cls._positive_float(min_order_quantity, "minimum order quantity")
         if minimum > stock:
             raise ValueError("Minimum order quantity cannot exceed available stock.")
-        return MarketplaceListing.objects.create(
-            listed_by=user, wing=wing, category=category, title=title,
-            variety_or_brand=variety_or_brand.strip() if variety_or_brand else None,
-            description=description, price=normalized_price, unit_of_measure=unit,
-            available_stock=stock, min_order_quantity=minimum, harvest_date=harvest_date,
-            is_organic=is_organic, grade=grade.strip() if grade else None,
-            specifications=dict(specifications or {}), image=image, status=cls.ACTIVE,
-        )
+        return MarketplaceListing.objects.create(listed_by=user, wing=wing, category=category, title=title,
+            variety_or_brand=variety_or_brand.strip() if variety_or_brand else None, description=description,
+            price=normalized_price, unit_of_measure=unit, available_stock=stock, min_order_quantity=minimum,
+            harvest_date=harvest_date, is_organic=is_organic, grade=grade.strip() if grade else None,
+            specifications=dict(specifications or {}), image=image, status=cls.ACTIVE)
 
     @classmethod
     @transaction.atomic
     def update_listing(cls, *, user: User, listing_id: int, changes: Mapping[str, Any]) -> MarketplaceListing:
         cls._ensure_active_user(user)
         listing = MarketplaceListing.objects.select_for_update().get(pk=listing_id, listed_by=user)
-        allowed = {
-            "category", "title", "variety_or_brand", "description", "price", "unit_of_measure",
-            "available_stock", "min_order_quantity", "harvest_date", "is_organic", "grade",
-            "specifications", "status", "image",
-        }
+        allowed = {"category", "title", "variety_or_brand", "description", "price", "unit_of_measure", "available_stock", "min_order_quantity", "harvest_date", "is_organic", "grade", "specifications", "status", "image"}
         unknown = set(changes) - allowed
         if unknown:
             raise ValueError(f"Unsupported listing fields: {', '.join(sorted(unknown))}")
         changes = dict(changes)
-        if "category" in changes:
-            changes["category"] = str(changes["category"]).strip().upper()
-            if not changes["category"]:
-                raise ValueError("Category is required.")
-        if "title" in changes:
-            changes["title"] = str(changes["title"]).strip()
-            if not changes["title"]:
-                raise ValueError("Title is required.")
-        if "price" in changes:
-            changes["price"] = cls._positive_decimal(changes["price"], "price")
-        if "available_stock" in changes:
-            changes["available_stock"] = cls._non_negative_float(changes["available_stock"], "available stock")
-        if "min_order_quantity" in changes:
-            changes["min_order_quantity"] = cls._positive_float(changes["min_order_quantity"], "minimum order quantity")
-        if "unit_of_measure" in changes:
-            changes["unit_of_measure"] = str(changes["unit_of_measure"]).strip()
-            if not changes["unit_of_measure"]:
-                raise ValueError("Unit of measure is required.")
-        if "description" in changes:
-            changes["description"] = str(changes["description"]).strip()
-            if not changes["description"]:
-                raise ValueError("Description is required.")
+        if "category" in changes: changes["category"] = str(changes["category"]).strip().upper()
+        if "title" in changes: changes["title"] = str(changes["title"]).strip()
+        if "price" in changes: changes["price"] = cls._positive_decimal(changes["price"], "price")
+        if "available_stock" in changes: changes["available_stock"] = cls._non_negative_float(changes["available_stock"], "available stock")
+        if "min_order_quantity" in changes: changes["min_order_quantity"] = cls._positive_float(changes["min_order_quantity"], "minimum order quantity")
         if "status" in changes:
             status = str(changes["status"]).strip().upper()
-            if status not in cls.VALID_STATUSES:
-                raise ValueError("Unsupported listing status.")
+            if status not in cls.VALID_STATUSES: raise ValueError("Unsupported listing status.")
             changes["status"] = status
         projected_stock = float(changes.get("available_stock", listing.available_stock))
         projected_minimum = float(changes.get("min_order_quantity", listing.min_order_quantity))
-        if projected_stock > 0 and projected_minimum > projected_stock:
-            raise ValueError("Minimum order quantity cannot exceed available stock.")
-        if projected_stock == 0:
-            changes["status"] = cls.OUT_OF_STOCK
-        elif "status" not in changes and listing.status == cls.OUT_OF_STOCK:
-            changes["status"] = cls.ACTIVE
-        for field, value in changes.items():
-            setattr(listing, field, value)
-        if changes:
-            listing.save(update_fields=list(changes.keys()))
+        if projected_stock > 0 and projected_minimum > projected_stock: raise ValueError("Minimum order quantity cannot exceed available stock.")
+        if projected_stock == 0: changes["status"] = cls.OUT_OF_STOCK
+        elif "status" not in changes and listing.status == cls.OUT_OF_STOCK: changes["status"] = cls.ACTIVE
+        for field, value in changes.items(): setattr(listing, field, value)
+        if changes: listing.save(update_fields=list(changes.keys()))
         return listing
 
     @classmethod
     @transaction.atomic
     def delete_listing(cls, *, user: User, listing_id: int) -> None:
         cls._ensure_active_user(user)
-        listing = MarketplaceListing.objects.get(pk=listing_id, listed_by=user)
-        listing.delete()
+        MarketplaceListing.objects.get(pk=listing_id, listed_by=user).delete()
 
 
 __all__ = ["MarketplaceService"]
