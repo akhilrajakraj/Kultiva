@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from backend.apps.farmers import selectors
 from backend.apps.farmers.services import FarmerService
-from backend.core.legacy.models import ManualSoilReport, MarketplaceListing
+from backend.core.legacy.models import MarketplaceListing
 
 def _farmer(request):
     if not request.user.is_authenticated or request.user.role != request.user.Role.FARMER:
@@ -22,12 +22,10 @@ def profile(request):
     profile_obj = selectors.get_profile(user=user); address = selectors.get_primary_address(user=user)
     if request.method == "POST":
         changes = {f: request.POST.get(f) for f in ("aadhar_no", "land_area", "soil_type", "irrigation", "kissan_id") if f in request.POST}
+        address_changes = {f: request.POST.get(f) for f in ("village", "district", "state", "pincode", "latitude", "longitude") if f in request.POST}
         try:
             if changes: FarmerService.update_profile(user=user, changes=changes)
-            if address:
-                for f in ("village", "district", "state", "pincode", "latitude", "longitude"):
-                    if f in request.POST: setattr(address, f, request.POST.get(f) or None)
-                address.save()
+            if address_changes: address = FarmerService.update_address(user=user, changes=address_changes)
             messages.success(request, "Farmer profile updated successfully.")
         except (ValueError, TypeError) as exc: messages.error(request, str(exc))
         return redirect("farmer_profile")
@@ -89,7 +87,7 @@ def submit_soil_report(request):
             FarmerService.request_manual_soil_report(user=user, farm_address_id=address_id, previous_crop=request.POST.get("previous_crop") or None); messages.success(request, "Manual soil report request submitted.")
         except (ValueError, TypeError) as exc: messages.error(request, str(exc))
         return redirect("farmer_home")
-    return render(request, "farmer_home.html", {"manual_report": ManualSoilReport.objects.filter(farmer=user).select_related("farm_address").order_by("-request_date").first()})
+    return render(request, "farmer_home.html", {"manual_report": selectors.get_latest_soil_report(user=user)})
 
 @login_required
 def proposals(request):
