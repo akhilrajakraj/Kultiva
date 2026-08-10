@@ -9,6 +9,9 @@ class FarmerSelectorBoundaryTests(TestCase):
     def test_selector_module_exposes_farmer_read_contract(self):
         self.assertTrue(callable(selectors.get_profile))
         self.assertTrue(callable(selectors.get_primary_address))
+        self.assertTrue(callable(selectors.get_latest_soil_report))
+        self.assertTrue(callable(selectors.is_farmer_address))
+        self.assertTrue(callable(selectors.get_produce_listing))
         self.assertTrue(callable(selectors.list_proposals))
         self.assertTrue(callable(selectors.get_proposal))
         self.assertTrue(callable(selectors.list_input_products))
