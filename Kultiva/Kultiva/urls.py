@@ -2,27 +2,21 @@
 from django.contrib import admin
 from django.urls import path, re_path
 from . import views
+from backend.apps.farmers import views as farmer_views
 from backend.apps.escrow import legacy_views as escrow_views
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    # 1. Public Pages
     path('', views.first, name='first'),
     path('index', views.index, name='index'),
     path('about/', views.about, name='about'),
-
-    # --- DECOUPLED API ENDPOINTS ---
     path('api/pincode/<str:pincode>/', views.pincode_lookup_api, name='pincode_lookup_api'),
-
-    # 2. Authentication (Login/Logout)
     path('login', views.login_view, name='login'),
     path('logout', views.logout_view, name='logout'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('set-new-password/', views.set_new_password, name='set_new_password'),
-
-    # 3. Registration
     path('register/<str:role_type>/', views.register, name='register_role'),
     path('farmer', views.farmer, name='farmer'),
     path('addfarmer', views.addfarmer, name='addfarmer'),
@@ -40,12 +34,10 @@ urlpatterns = [
     path('api/check-aadhar/', views.check_aadhar_availability, name='check_aadhar_availability'),
     path('api/check-apeda/', views.check_apeda_availability, name='check_apeda_availability'),
 
-    # 4. Dashboards
-    path('farmer/home', views.farmer_home, name='farmer_home'),
+    path('farmer/home', farmer_views.farmer_home, name='farmer_home'),
     path('buyer/dashboard', views.buyer_dashboard, name='buyer_dashboard'),
     path('seller/dashboard', views.seller_dashboard, name='seller_dashboard'),
 
-    # Buyer marketplace and negotiation routes
     path('buyer/marketplace/', views.buyer_marketplace, name='buyer_marketplace'),
     path('buyer/product/<int:listing_id>/', views.buyer_product_detail, name='buyer_product_detail'),
     path('buyer/product/<int:listing_id>/proposal/', views.submit_buyer_proposal, name='submit_buyer_proposal'),
@@ -58,7 +50,6 @@ urlpatterns = [
     path('buyer/invoice/<str:transaction_id>/', views.buyer_invoice_detail, name='buyer_invoice_detail'),
     path('buyer/profile/', views.buyer_profile, name='buyer_profile'),
 
-    # Buyer escrow routes. Business rules are delegated to EscrowService.
     path('buyer/escrow-checkout/<int:proposal_id>/', escrow_views.buyer_escrow_checkout, name='buyer_escrow_checkout'),
     path('buyer/process-payment/<int:proposal_id>/', escrow_views.process_payment, name='process_payment'),
     path('buyer/escrow/', escrow_views.buyer_escrow_list, name='buyer_escrow_list'),
@@ -66,7 +57,6 @@ urlpatterns = [
     path('buyer/escrow/<int:proposal_id>/fund/', escrow_views.fund_escrow, name='fund_escrow'),
     path('buyer/escrow/<int:proposal_id>/refund/', escrow_views.request_refund, name='request_refund'),
 
-    # Seller Stock Management
     path('seller/add-item/', views.add_seller_listing, name='add_seller_listing'),
     path('seller/manage-stock/', views.manage_stock, name='manage_stock'),
     path('seller/remove-listing/', views.remove_listing, name='remove_listing'),
@@ -79,33 +69,31 @@ urlpatterns = [
     path('seller/orders/update/<str:order_id>/', views.update_order_status, name='update_order_status'),
     path('seller/orders/<str:order_id>/', views.seller_order_detail, name='seller_order_detail'),
 
-    # Farmer routes
-    path('farmer/profile/', views.farmer_profile_view, name='farmer_profile'),
-    path('farmer/submit-soil-report/', views.submit_manual_soil, name='submit_manual_soil'),
-    path('farmer/add-listing/', views.add_farmer_listing, name='add_farmer_listing'),
-    path('farmer/my-crops/', views.farmer_manage_crops, name='farmer_manage_crops'),
-    path('farmer/edit-listing/', views.edit_farmer_listing, name='edit_farmer_listing'),
-    path('farmer/delete-listing/<int:listing_id>/', views.delete_farmer_listing, name='delete_farmer_listing'),
-    path('farmer/send-proposal/', views.send_trade_proposal, name='send_trade_proposal'),
-    path('farmer/trade-contracts/', views.farmer_proposals, name='farmer_proposals'),
-    path('farmer/contract/<int:proposal_id>/', views.farmer_proposal_detail, name='farmer_proposal_detail'),
-    path('farmer/generate-qr/<int:proposal_id>/', views.generate_trade_qr, name='generate_trade_qr'),
-    path('farmer/proposal/<int:proposal_id>/respond/', views.farmer_respond_proposal, name='farmer_respond_proposal'),
-    path('farmer/input-market/', views.farmer_input_market, name='farmer_input_market'),
-    path('farmer/input-market/product/<int:listing_id>/', views.farmer_input_detail, name='farmer_input_detail'),
-    path('farmer/checkout/<int:listing_id>/', views.farmer_checkout, name='farmer_checkout'),
-    path('farmer/process-order/<int:listing_id>/', views.process_input_order, name='process_input_order'),
-    path('farmer/payment-gateway/<int:listing_id>/', views.dummy_payment_gateway, name='dummy_payment_gateway'),
-    path('farmer/my-orders/', views.farmer_orders, name='farmer_orders'),
-    path('farmer/invoice/<str:order_id>/', views.farmer_invoice_detail, name='farmer_invoice_detail'),
-    path('farmer/orders/<str:order_id>/', views.farmer_order_details, name='farmer_order_details'),
-    path('farmer/network/sellers/', views.farmer_seller_list, name='farmer_seller_list'),
-    path('farmer/network/seller/<int:seller_id>/', views.farmer_view_seller_profile, name='farmer_view_seller_profile'),
+    # Farmer routes now enter through the extracted Farmer HTTP boundary.
+    path('farmer/profile/', farmer_views.farmer_profile_view, name='farmer_profile'),
+    path('farmer/submit-soil-report/', farmer_views.submit_manual_soil, name='submit_manual_soil'),
+    path('farmer/add-listing/', farmer_views.add_farmer_listing, name='add_farmer_listing'),
+    path('farmer/my-crops/', farmer_views.farmer_manage_crops, name='farmer_manage_crops'),
+    path('farmer/edit-listing/', farmer_views.edit_farmer_listing, name='edit_farmer_listing'),
+    path('farmer/delete-listing/<int:listing_id>/', farmer_views.delete_farmer_listing, name='delete_farmer_listing'),
+    path('farmer/send-proposal/', farmer_views.send_trade_proposal, name='send_trade_proposal'),
+    path('farmer/trade-contracts/', farmer_views.farmer_proposals, name='farmer_proposals'),
+    path('farmer/contract/<int:proposal_id>/', farmer_views.farmer_proposal_detail, name='farmer_proposal_detail'),
+    path('farmer/generate-qr/<int:proposal_id>/', farmer_views.generate_trade_qr, name='generate_trade_qr'),
+    path('farmer/proposal/<int:proposal_id>/respond/', farmer_views.farmer_respond_proposal, name='farmer_respond_proposal'),
+    path('farmer/input-market/', farmer_views.farmer_input_market, name='farmer_input_market'),
+    path('farmer/input-market/product/<int:listing_id>/', farmer_views.farmer_input_detail, name='farmer_input_detail'),
+    path('farmer/checkout/<int:listing_id>/', farmer_views.farmer_checkout, name='farmer_checkout'),
+    path('farmer/process-order/<int:listing_id>/', farmer_views.process_input_order, name='process_input_order'),
+    path('farmer/payment-gateway/<int:listing_id>/', farmer_views.dummy_payment_gateway, name='dummy_payment_gateway'),
+    path('farmer/my-orders/', farmer_views.farmer_orders, name='farmer_orders'),
+    path('farmer/invoice/<str:order_id>/', farmer_views.farmer_invoice_detail, name='farmer_invoice_detail'),
+    path('farmer/orders/<str:order_id>/', farmer_views.farmer_order_details, name='farmer_order_details'),
+    path('farmer/network/sellers/', farmer_views.farmer_seller_list, name='farmer_seller_list'),
+    path('farmer/network/seller/<int:seller_id>/', farmer_views.farmer_view_seller_profile, name='farmer_view_seller_profile'),
 
-    # Trust & feedback
     path('network/submit-review/', views.submit_unified_review, name='submit_unified_review'),
 
-    # Admin portal
     path('custom-admin/', views.admin_dashboard, name='admin_dashboard'),
     path('custom-admin/manage-farmers/', views.manage_farmers, name='manage_farmers'),
     path('approve/<int:user_id>/', views.approve_user, name='approve_user'),
@@ -120,32 +108,23 @@ urlpatterns = [
     path('admin/seller-action/', views.seller_action, name='seller_action'),
     path('custom-admin/seller/<int:user_id>/', views.view_seller_profile, name='view_seller_profile'),
     path('custom-admin/send-seller-email/', views.send_seller_email, name='send_seller_email'),
-
-    # Admin refunds
     path('custom-admin/refunds/b2b/', views.manage_b2b_refunds, name='manage_b2b_refunds'),
     path('custom-admin/refunds/b2b/case/<str:transaction_id>/', views.admin_b2b_refund_detail, name='admin_b2b_refund_detail'),
     path('custom-admin/refunds/b2b/process/<str:transaction_id>/', views.process_b2b_refund, name='process_b2b_refund'),
     path('custom-admin/refunds/b2c/', views.manage_b2c_refunds, name='manage_b2c_refunds'),
     path('custom-admin/refunds/b2c/case/<str:order_id>/', views.admin_b2c_refund_detail, name='admin_b2c_refund_detail'),
     path('custom-admin/refunds/b2c/process/<str:order_id>/', views.process_b2c_refund, name='process_b2c_refund'),
-
-    # Admin marketplace moderation
     path('custom-admin/products/farmer/', views.manage_farmer_products, name='manage_farmer_products'),
     path('custom-admin/products/seller/', views.manage_seller_products, name='manage_seller_products'),
     path('custom-admin/products/detail/<int:product_id>/', views.admin_product_detail, name='admin_product_detail'),
     path('custom-admin/products/takedown/<int:product_id>/', views.takedown_product, name='takedown_product'),
-
-    # Admin order ledgers
     path('custom-admin/orders/seller/', views.manage_seller_orders, name='manage_seller_orders'),
     path('custom-admin/orders/seller/<str:order_id>/', views.admin_seller_order_detail, name='admin_seller_order_detail'),
     path('custom-admin/orders/buyer/', views.manage_buyer_orders, name='manage_buyer_orders'),
     path('custom-admin/orders/buyer/<int:proposal_id>/', views.admin_buyer_order_detail, name='admin_buyer_order_detail'),
-
-    # Admin analytics
     path('custom-admin/reports/farmer/', views.admin_farmer_report, name='admin_farmer_report'),
     path('custom-admin/reports/seller/', views.admin_seller_report, name='admin_seller_report'),
     path('custom-admin/reports/buyer/', views.admin_buyer_report, name='admin_buyer_report'),
-
     path('admin/', admin.site.urls),
     path('custom-admin/manage-soil-reports/', views.manage_soil_reports, name='manage_soil_reports'),
     path('custom-admin/update-soil-report/', views.update_soil_report, name='update_soil_report'),
