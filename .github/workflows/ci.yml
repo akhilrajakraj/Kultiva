@@ -20,6 +20,7 @@ jobs:
         working-directory: Kultiva
         env:
           DJANGO_SETTINGS_MODULE: Kultiva.settings
+          PYTHONPATH: ${{ github.workspace }}
         run: python manage.py check
       - name: Restructured backend system check
         working-directory: backend
