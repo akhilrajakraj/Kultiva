@@ -1,15 +1,10 @@
-"""Read-only queries for the Farmer domain.
-
-Selectors keep database reads out of the HTTP boundary. During migration the
-legacy models remain the persistence authority; this module provides a stable
-Farmer-owned read API over them.
-"""
+"""Read-only queries for the Farmer domain."""
 from __future__ import annotations
 
 from django.db.models import QuerySet
 
 from backend.apps.accounts.models import User
-from backend.core.legacy.models import DirectTradeProposal, EscrowTransaction, MarketplaceListing
+from backend.core.legacy.models import DirectTradeProposal, EscrowTransaction, MarketplaceListing, ManualSoilReport
 
 
 def get_profile(*, user: User):
@@ -19,6 +14,11 @@ def get_profile(*, user: User):
 
 def get_primary_address(*, user: User):
     return user.addresses.first()
+
+
+def get_latest_soil_report(*, user: User):
+    """Return the farmer's most recent manual soil report request."""
+    return ManualSoilReport.objects.filter(farmer=user).select_related("farm_address").order_by("-request_date").first()
 
 
 def list_proposals(*, user: User) -> dict[str, QuerySet]:
@@ -61,6 +61,8 @@ def get_order_transaction(*, order_id: str):
 
 __all__ = [
     "get_profile",
+    "get_primary_address",
+    "get_latest_soil_report",
     "get_primary_address",
     "list_proposals",
     "get_proposal",
