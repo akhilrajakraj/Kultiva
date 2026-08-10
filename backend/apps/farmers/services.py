@@ -53,6 +53,25 @@ class FarmerService:
         return profile
 
     @classmethod
+    @transaction.atomic
+    def update_address(cls, *, user: User, changes: Mapping[str, Any]):
+        """Update the farmer's primary address through the domain service."""
+        cls._ensure_farmer(user)
+        address = user.addresses.first()
+        if address is None:
+            raise ValueError("A primary address is required before it can be updated.")
+        allowed = {"village", "district", "state", "pincode", "latitude", "longitude"}
+        unknown = set(changes) - allowed
+        if unknown:
+            raise ValueError(f"Unsupported address fields: {', '.join(sorted(unknown))}")
+        changes = dict(changes)
+        for field, value in changes.items():
+            setattr(address, field, value or None)
+        if changes:
+            address.save(update_fields=list(changes.keys()))
+        return address
+
+    @classmethod
     def get_profile(cls, *, user: User) -> FarmerProfile:
         cls._ensure_farmer(user)
         return FarmerProfile.objects.get(user=user)
