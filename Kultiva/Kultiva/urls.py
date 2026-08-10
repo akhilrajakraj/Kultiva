@@ -6,7 +6,6 @@ from backend.apps.escrow import legacy_views as escrow_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-
 urlpatterns = [
     # 1. Public Pages
     path('', views.first, name='first'),
@@ -19,8 +18,6 @@ urlpatterns = [
     # 2. Authentication (Login/Logout)
     path('login', views.login_view, name='login'),
     path('logout', views.logout_view, name='logout'),
-
-    # --- PASSWORD RECOVERY ROUTES ---
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('set-new-password/', views.set_new_password, name='set_new_password'),
@@ -31,12 +28,9 @@ urlpatterns = [
     path('addfarmer', views.addfarmer, name='addfarmer'),
     path('addbuyer', views.addbuyer, name='addbuyer'),
     path('addseller', views.addseller, name='addseller'),
-
-    # Terms and Conditions Page
     path('terms/seller/', views.seller_terms, name='seller_terms'),
     path('terms/farmer/', views.farmer_terms, name='farmer_terms'),
     path('terms/buyer/', views.buyer_terms, name='buyer_terms'),
-
     path('check-email/', views.check_email_availability, name='check_email_availability'),
     path('check-aadhar/', views.check_aadhar_availability, name='check_aadhar_availability'),
     path('check-gst/', views.check_gst_availability, name='check_gst_availability'),
@@ -85,6 +79,7 @@ urlpatterns = [
     path('seller/orders/update/<str:order_id>/', views.update_order_status, name='update_order_status'),
     path('seller/orders/<str:order_id>/', views.seller_order_detail, name='seller_order_detail'),
 
+    # Farmer routes
     path('farmer/profile/', views.farmer_profile_view, name='farmer_profile'),
     path('farmer/submit-soil-report/', views.submit_manual_soil, name='submit_manual_soil'),
     path('farmer/add-listing/', views.add_farmer_listing, name='add_farmer_listing'),
