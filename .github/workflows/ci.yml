@@ -2,32 +2,43 @@ name: CI
 
 on:
   push:
+    branches: [main, develop]
   pull_request:
+    branches: [main, develop]
 
 jobs:
   backend:
+    name: backend
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    env:
+      PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/backend
+      DJANGO_SETTINGS_MODULE: backend.config.settings.test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install backend dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r backend/requirements/base.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements/base.txt
       - name: Validate Python syntax
         run: python -m compileall backend Kultiva
-      - name: Canonical Django system check
-        working-directory: Kultiva
+      - name: Legacy Django system check
         env:
           DJANGO_SETTINGS_MODULE: Kultiva.settings
-        run: python manage.py check
+          PYTHONPATH: ${{ github.workspace }}
+        run: python Kultiva/manage.py check
       - name: Restructured backend system check
-        working-directory: backend
         env:
           DJANGO_SETTINGS_MODULE: config.settings.development
-        run: python manage.py check
-      - name: Professional runtime compatibility tests
-        working-directory: backend
+        run: python backend/manage.py check
+      - name: Professional runtime tests
         env:
           DJANGO_SETTINGS_MODULE: config.settings.development
-        run: python -m unittest discover -s tests -p 'test_*.py' -v
+        run: python backend/manage.py test --verbosity=2

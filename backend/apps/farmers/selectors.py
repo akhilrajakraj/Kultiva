@@ -1,15 +1,15 @@
-"""Read-only queries for the Farmer domain.
-
-Selectors keep database reads out of the HTTP boundary. During migration the
-legacy models remain the persistence authority; this module provides a stable
-Farmer-owned read API over them.
-"""
+"""Read-only queries for the Farmer domain."""
 from __future__ import annotations
 
 from django.db.models import QuerySet
 
 from backend.apps.accounts.models import User
-from backend.core.legacy.models import DirectTradeProposal, EscrowTransaction, MarketplaceListing
+from backend.core.legacy.models import (
+    DirectTradeProposal,
+    EscrowTransaction,
+    ManualSoilReport,
+    MarketplaceListing,
+)
 
 
 def get_profile(*, user: User):
@@ -19,6 +19,30 @@ def get_profile(*, user: User):
 
 def get_primary_address(*, user: User):
     return user.addresses.first()
+
+
+def get_latest_soil_report(*, user: User):
+    """Return the farmer's most recent manual soil report request."""
+    return (
+        ManualSoilReport.objects.filter(farmer=user)
+        .select_related("farm_address")
+        .order_by("-request_date")
+        .first()
+    )
+
+
+def is_farmer_address(*, user: User, address_id: int) -> bool:
+    """Return whether an address belongs to the authenticated farmer."""
+    return user.addresses.filter(pk=address_id).exists()
+
+
+def get_produce_listing(*, user: User, listing_id: int) -> MarketplaceListing:
+    """Return a produce listing owned by the farmer."""
+    return MarketplaceListing.objects.get(
+        pk=listing_id,
+        listed_by=user,
+        wing="PRODUCE",
+    )
 
 
 def list_proposals(*, user: User) -> dict[str, QuerySet]:
@@ -62,6 +86,9 @@ def get_order_transaction(*, order_id: str):
 __all__ = [
     "get_profile",
     "get_primary_address",
+    "get_latest_soil_report",
+    "is_farmer_address",
+    "get_produce_listing",
     "list_proposals",
     "get_proposal",
     "list_input_products",
