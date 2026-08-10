@@ -1,0 +1,22 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}Kultiva — Farmer{% endblock %}</title>
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-space-dynamic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animated.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% include 'farmer_header.html' %}
+    <main>{% block content %}{% endblock %}</main>
+    {% block footer %}{% include 'footer.html' %}{% endblock %}
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
